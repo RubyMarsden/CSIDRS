@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton
 from PyQt5.QtCore import Qt, QSize
 
-from view.isotope_button_widget import IsotopeButtonWidget
-from view.file_entry_widget import FileEntryWidget
+from src.view.isotope_button_widget import IsotopeButtonWidget
+from src.view.file_entry_widget import FileEntryWidget
+
 
 class SidrsWindow(QMainWindow):
     def __init__(self):
