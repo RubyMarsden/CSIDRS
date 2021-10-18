@@ -1,5 +1,5 @@
-# Dialog for selecting isotopes and material type for sulphur method
-from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget
+# Dialog for selecting isotopes and material type for method
+from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox
 
 
 class MethodSelectionDialog(QDialog):
@@ -13,6 +13,10 @@ class MethodSelectionDialog(QDialog):
         rhs_title = QLabel("Material")
         self.lhs_box_list = QWidget()
         self.rhs_box_list = QWidget()
+
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
         if self.isotope == "o":
             lhs_box_layout = QVBoxLayout()
@@ -61,4 +65,6 @@ class MethodSelectionDialog(QDialog):
         layout.addWidget(self.lhs_box_list, 1, 0)
         layout.addWidget(rhs_title, 0, 1)
         layout.addWidget(self.rhs_box_list, 1, 1)
+        layout.addWidget(self.buttonBox, 2, 1)
+
         self.setLayout(layout)
