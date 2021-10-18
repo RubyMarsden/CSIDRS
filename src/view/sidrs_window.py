@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, QSize
 
 from src.view.isotope_button_widget import IsotopeButtonWidget
 from src.view.file_entry_widget import FileEntryWidget
+from src.view.reference_material_dialog import ReferenceMaterialSelectionDialog
 
 
 class SidrsWindow(QMainWindow):
@@ -19,6 +20,7 @@ class SidrsWindow(QMainWindow):
         title = QLabel("Stable Isotope Data Reduction for CAMECA data")
         title.setAlignment(Qt.AlignCenter)
         next_button = QPushButton("Next")
+        next_button.clicked.connect(self.next_button_clicked)
         main_layout = QVBoxLayout()
         main_widget.setLayout(main_layout)
 
@@ -28,3 +30,8 @@ class SidrsWindow(QMainWindow):
         main_layout.addWidget(next_button, alignment=Qt.AlignRight)
 
         return main_widget
+
+    def next_button_clicked(self):
+        isotope = "s"
+        dialog = ReferenceMaterialSelectionDialog(isotope)
+        result = dialog.exec()
