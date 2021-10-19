@@ -8,6 +8,5 @@ class NewReferenceMaterialDialog(QDialog):
         self.setWindowTitle("Add new reference material")
         self.setMinimumWidth(450)
 
-
     def add_reference_material(self):
         return
