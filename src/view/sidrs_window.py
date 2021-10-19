@@ -7,11 +7,13 @@ from src.view.reference_material_dialog import ReferenceMaterialSelectionDialog
 
 
 class SidrsWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, model):
         QMainWindow.__init__(self)
 
         self.setMinimumSize(QSize(640, 480))
         self.setWindowTitle("SIDRS v-0.0")
+
+        self.file_entry_widget = FileEntryWidget(model)
 
         self.setCentralWidget(self.create_main_widget())
 
@@ -26,7 +28,7 @@ class SidrsWindow(QMainWindow):
 
         main_layout.addWidget(title)
         main_layout.addWidget(IsotopeButtonWidget())
-        main_layout.addWidget(FileEntryWidget())
+        main_layout.addWidget(self.file_entry_widget)
         main_layout.addWidget(next_button, alignment=Qt.AlignRight)
 
         return main_widget

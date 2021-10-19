@@ -2,6 +2,7 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
+from model.sidrs_model import SidrsModel
 from view.sidrs_window import SidrsWindow
 
 def set_except_hook(window):
@@ -14,7 +15,9 @@ def set_except_hook(window):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = SidrsWindow()
+
+    model = SidrsModel()
+    window = SidrsWindow(model)
 
     set_except_hook(window)
     window.show()
