@@ -37,4 +37,6 @@ class ReferenceMaterialSelectionDialog(QDialog):
         layout.addWidget(self.buttonBox)
         self.setLayout(layout)
 
-
+    def get_selected_reference_material(self):
+        # TODO: Add functionality
+        return

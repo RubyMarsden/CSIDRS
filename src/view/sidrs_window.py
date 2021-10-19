@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QDialog
 from PyQt5.QtCore import Qt, QSize
 
 from src.view.isotope_button_widget import IsotopeButtonWidget
@@ -35,3 +35,8 @@ class SidrsWindow(QMainWindow):
         isotope = "s"
         dialog = ReferenceMaterialSelectionDialog(isotope)
         result = dialog.exec()
+        if result == QDialog.Accepted:
+            return dialog.get_selected_reference_material()
+        return None
+        # TODO: Make it go back if no reference material selected and forward to next screen if there is.
+
