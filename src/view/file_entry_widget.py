@@ -20,7 +20,7 @@ class FileEntryWidget(QWidget):
         #############
 
     def on_file_entry_button_clicked(self):
-        filenames, _ = QFileDialog.getOpenFileNames()
+        filenames, _ = QFileDialog.getOpenFileNames(None, "Window name", "", "ASCII files (*.asc)")
         # model needs to do the importing
         self.model.import_all_files(filenames)
         if filenames:
