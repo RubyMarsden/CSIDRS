@@ -1,5 +1,6 @@
 # Dialog for selecting isotopes and material type for method
-from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox
+from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox, \
+    QRadioButton
 
 
 class MethodSelectionDialog(QDialog):
@@ -29,9 +30,9 @@ class MethodSelectionDialog(QDialog):
             self.lhs_box_list.setLayout(lhs_box_layout)
 
             rhs_box_layout = QVBoxLayout()
-            box1 = QCheckBox("Zircon")
-            box2 = QCheckBox("Zircon")
-            box3 = QCheckBox("Zircon")
+            box1 = QRadioButton("Zircon")
+            box2 = QRadioButton("Zircon")
+            box3 = QRadioButton("Zircon")
             rhs_box_layout.addWidget(box1)
             rhs_box_layout.addWidget(box2)
             rhs_box_layout.addWidget(box3)
@@ -50,9 +51,9 @@ class MethodSelectionDialog(QDialog):
             self.lhs_box_list.setLayout(lhs_box_layout)
 
             rhs_box_layout = QVBoxLayout()
-            box1 = QCheckBox("Zircon")
-            box2 = QCheckBox("Zircon")
-            box3 = QCheckBox("Zircon")
+            box1 = QRadioButton("Zircon")
+            box2 = QRadioButton("Zircon")
+            box3 = QRadioButton("Zircon")
             rhs_box_layout.addWidget(box1)
             rhs_box_layout.addWidget(box2)
             rhs_box_layout.addWidget(box3)
