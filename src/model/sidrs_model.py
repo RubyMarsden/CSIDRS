@@ -23,12 +23,19 @@ class SidrsModel:
     def _parse_asc_file_into_data(self, filename):
         with open(filename) as file:
             csv_data = csv.reader(file, delimiter='\t')
+            count = 0
+            data_for_spot = []
             for line in csv_data:
+                print(count)
+                count += 1
                 for i in line:
                     line[line.index(i)] = str.strip(i)
                 print(line)
+                data_for_spot.append(line)
+            print(data_for_spot)
 
-        spot = Spot(filename, csv_data)
-        print("name = ", spot.sample_name, "id = ", spot.id)
+
+        spot = Spot(filename, data_for_spot)
+        print("name = ", spot.sample_name, "id = ", spot.id, "date = ", spot.date)
 
         return spot
