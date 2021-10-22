@@ -2,6 +2,8 @@
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox, \
     QRadioButton
 
+from src.model.settings.isotope_lists import *
+from src.model.settings.material_lists import *
 
 class MethodSelectionDialog(QDialog):
     def __init__(self, isotope):
@@ -19,48 +21,34 @@ class MethodSelectionDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        if self.isotope == "o":
-            lhs_box_layout = QVBoxLayout()
-            box1 = QCheckBox("16O")
-            box2 = QCheckBox("18O")
-            box3 = QCheckBox("OH")
-            lhs_box_layout.addWidget(box1)
-            lhs_box_layout.addWidget(box2)
-            lhs_box_layout.addWidget(box3)
-            self.lhs_box_list.setLayout(lhs_box_layout)
+        lhs_box_layout = QVBoxLayout()
+        rhs_box_layout = QVBoxLayout()
 
-            rhs_box_layout = QVBoxLayout()
-            box1 = QRadioButton("Zircon")
-            box2 = QRadioButton("Zircon")
-            box3 = QRadioButton("Zircon")
-            rhs_box_layout.addWidget(box1)
-            rhs_box_layout.addWidget(box2)
-            rhs_box_layout.addWidget(box3)
-            self.rhs_box_list.setLayout(rhs_box_layout)
+        if self.isotope == "o":
+
+            for isotope in oxygen_isotope_list:
+                box = QCheckBox(isotope)
+                lhs_box_layout.addWidget(box)
+
+            for material in oxygen_material_list:
+                box = QRadioButton(material)
+                rhs_box_layout.addWidget(box)
 
         elif self.isotope == "s":
-            lhs_box_layout = QVBoxLayout()
-            box1 = QCheckBox("32S")
-            box2 = QCheckBox("33S")
-            box3 = QCheckBox("34S")
-            box4 = QCheckBox("36S")
-            lhs_box_layout.addWidget(box1)
-            lhs_box_layout.addWidget(box2)
-            lhs_box_layout.addWidget(box3)
-            lhs_box_layout.addWidget(box4)
-            self.lhs_box_list.setLayout(lhs_box_layout)
 
-            rhs_box_layout = QVBoxLayout()
-            box1 = QRadioButton("Zircon")
-            box2 = QRadioButton("Zircon")
-            box3 = QRadioButton("Zircon")
-            rhs_box_layout.addWidget(box1)
-            rhs_box_layout.addWidget(box2)
-            rhs_box_layout.addWidget(box3)
-            self.rhs_box_list.setLayout(rhs_box_layout)
+            for isotope in sulphur_isotope_list:
+                box = QCheckBox(isotope)
+                lhs_box_layout.addWidget(box)
+
+            for material in sulphur_material_list:
+                box = QRadioButton(material)
+                rhs_box_layout.addWidget(box)
 
         else:
             raise Exception
+
+        self.lhs_box_list.setLayout(lhs_box_layout)
+        self.rhs_box_list.setLayout(rhs_box_layout)
 
         layout.addWidget(lhs_title, 0, 0)
         layout.addWidget(self.lhs_box_list, 1, 0)
