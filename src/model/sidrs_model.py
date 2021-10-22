@@ -1,3 +1,5 @@
+from src.model.spot import Spot
+import csv
 
 class SidrsModel:
     def __init__(self):
@@ -9,17 +11,22 @@ class SidrsModel:
     #################
 
     def import_all_files(self, filenames):
+        spots = []
         for filename in filenames:
-            self.import_run_asc_file(filename)
-
-    def import_run_asc_file(self, filename):
-        if filename in self.imported_files:
-            raise Exception("The file: " + filename + " has already been imported")
-        self._parse_asc_file_into_data(filename)
-        self.imported_files.append(filename)
+            if filename in self.imported_files:
+                raise Exception("The file: " + filename + " has already been imported")
+            spot = self._parse_asc_file_into_data(filename)
+            spots.append(spot)
+            self.imported_files.append(filename)
 
     def _parse_asc_file_into_data(self, filename):
-        file = open(filename, "rt")
-        asc_file_data = file.readlines()
-        print(asc_file_data)
-        return
+        with open(filename) as file:
+            csv_data = csv.reader(file, delimiter='\t')
+            for line in csv_data:
+                for i in line:
+                    line[line.index(i)] = str.strip(i)
+                print(line)
+
+        spot = Spot(filename, csv_data)
+
+        return spot
