@@ -20,9 +20,13 @@ class FileEntryWidget(QWidget):
         #############
 
     def on_file_entry_button_clicked(self):
-        filenames, _ = QFileDialog.getOpenFileNames(None, "Window name", "", "ASCII files (*.asc)")
+        filenames, _ = QFileDialog.getOpenFileNames(self,
+                                                    "Select files",
+                                                    "home/ruby/Documents/Programming/UWA/SIDRS/data",
+                                                    "ASCII files (*.asc)"
+                                                    )
         # model needs to do the importing
         self.model.import_all_files(filenames)
         if filenames:
             for filename in filenames:
-                print(filename)
+                return

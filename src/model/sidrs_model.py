@@ -1,6 +1,7 @@
 from src.model.spot import Spot
 import csv
 
+
 class SidrsModel:
     def __init__(self):
         self.data = {}
@@ -28,5 +29,6 @@ class SidrsModel:
                 print(line)
 
         spot = Spot(filename, csv_data)
+        print("name = ", spot.sample_name, "id = ", spot.id)
 
         return spot
