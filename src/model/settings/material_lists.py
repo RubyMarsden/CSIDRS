@@ -1,2 +1,2 @@
-oxygen_material_list = ['zircon','quartz']
-sulphur_material_list = ['pyrite','pyrrhotite','chalcopyrite','pentlandite']
+oxygen_material_list = ['Zircon', 'Quartz']
+sulphur_material_list = ['Pyrite', 'Pyrrhotite', 'Chalcopyrite', 'Pentlandite']
