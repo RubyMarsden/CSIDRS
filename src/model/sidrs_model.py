@@ -26,16 +26,14 @@ class SidrsModel:
             count = 0
             data_for_spot = []
             for line in csv_data:
-                print(count)
                 count += 1
                 for i in line:
                     line[line.index(i)] = str.strip(i)
-                print(line)
                 data_for_spot.append(line)
             print(data_for_spot)
 
 
         spot = Spot(filename, data_for_spot)
-        print("name = ", spot.sample_name, "id = ", spot.id, "date = ", spot.date)
+        print("name = ", spot.sample_name, "id = ", spot.id, "datetime = ", spot.datetime)
 
         return spot

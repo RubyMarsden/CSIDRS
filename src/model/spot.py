@@ -1,8 +1,10 @@
 import re
+from datetime import datetime
 
 from src.model.mass_peak import MassPeak
 from src.model.settings.asc_file_settings_general import *
 from src.model.get_data_from_import import get_data_from_old_asc
+from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time
 
 
 class Spot:
@@ -12,10 +14,16 @@ class Spot:
         self.sample_name, self.id = parts[-3], parts[-2]
         self.spot_data = spot_data
         self.date = self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]]
+        self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
+        if self.twelve_hr_data == "AM":
+            self.twenty_four_hour_time = self.time
+        elif self.twelve_hr_data == "PM":
+            self.twenty_four_hour_time = convert_to_twenty_four_hour_time(self.time)
+        self.datetime = datetime.strptime(self.date + " " + self.time, "%d/%m/%Y %H:%M")
 
 
 
-        # TODO this should come from the view
+        # TODO this should come from the model having been input from the view
         self.mass_peak_names = ["32S", "33S", "34S"]
 
         self.mass_peaks = {}

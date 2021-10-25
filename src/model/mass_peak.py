@@ -1,5 +1,6 @@
 from src.model.maths import calculate_outlier_resistant_mean_and_st_dev
 
+
 class MassPeak:
     def __init__(self,
                  sample_name,

@@ -26,6 +26,9 @@ class SidrsWindow(QMainWindow):
         main_layout = QVBoxLayout()
         main_widget.setLayout(main_layout)
 
+        # self.file_entry_widget.setDisabled(True)
+        # next_button.setDisabled(True)
+
         main_layout.addWidget(title)
         main_layout.addWidget(IsotopeButtonWidget())
         main_layout.addWidget(self.file_entry_widget)

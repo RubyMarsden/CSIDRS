@@ -27,6 +27,9 @@ class IsotopeButtonWidget(QWidget):
         isotope = "o"
         dialog = MethodSelectionDialog(isotope)
         result = dialog.exec()
+        if result is not None:
+            # TODO make a signal
+            return
         return
 
     def on_S_button_pushed(self):
