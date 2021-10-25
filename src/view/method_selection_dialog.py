@@ -19,6 +19,12 @@ class MethodSelectionDialog(QDialog):
         self.lhs_box_list = QWidget()
         self.rhs_box_list = QWidget()
 
+        self.isotope_box_list = []
+        self.material_box_list = []
+
+        self.isotopes = []
+        self.material = None
+
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
@@ -30,21 +36,37 @@ class MethodSelectionDialog(QDialog):
 
             for isotope in oxygen_isotope_list:
                 box = QCheckBox(isotope)
+                box.isotope = isotope
+                box.stateChanged.connect(self.on_isotopes_changed)
+
                 lhs_box_layout.addWidget(box)
+                self.isotope_box_list.append(box)
 
             for material in oxygen_material_list:
                 box = QRadioButton(material)
+                box.material = material
+                box.toggled.connect(self.on_material_changed)
+
                 rhs_box_layout.addWidget(box)
+                self.material_box_list.append(box)
 
         elif self.isotope == Isotope.SUL:
 
             for isotope in sulphur_isotope_list:
                 box = QCheckBox(isotope)
+                box.isotope = isotope
+                box.stateChanged.connect(self.on_isotopes_changed)
+
                 lhs_box_layout.addWidget(box)
+                self.isotope_box_list.append(box)
 
             for material in sulphur_material_list:
                 box = QRadioButton(material)
+                box.material = material
+                box.toggled.connect(self.on_material_changed)
+
                 rhs_box_layout.addWidget(box)
+                self.material_box_list.append(box)
 
         else:
             raise Exception
@@ -59,4 +81,19 @@ class MethodSelectionDialog(QDialog):
         layout.addWidget(self.buttonBox, 2, 1)
 
         self.setLayout(layout)
+
+    def on_isotopes_changed(self):
+        self.isotopes.clear()
+        for box in self.isotope_box_list:
+            if box.isChecked():
+                self.isotopes.append(box.isotope)
+
+    def on_material_changed(self):
+        self.material = None
+        for box in self.material_box_list:
+            if box.isChecked():
+                self.material = box.material
+
+
+
 

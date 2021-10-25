@@ -2,11 +2,14 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
 
 from src.model.isotopes import Isotope
 from src.view.method_selection_dialog import MethodSelectionDialog
+from src.controllers.signals import Signals
 
 
 class IsotopeButtonWidget(QWidget):
-    def __init__(self):
+    def __init__(self, model):
         QWidget.__init__(self)
+
+        self.model = model
 
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -29,10 +32,24 @@ class IsotopeButtonWidget(QWidget):
         isotope = Isotope.OXY
         dialog = MethodSelectionDialog(isotope)
         result = dialog.exec()
+        # TODO fix this
+        dialog.accepted.connect(lambda: dialog, self.emit_methods_signal(dialog))
         return
 
     def on_S_button_pushed(self):
         isotope = Isotope.SUL
         dialog = MethodSelectionDialog(isotope)
         result = dialog.exec()
+        if dialog.isotopes and dialog.material is not None and dialog.accepted:
+            print(dialog.isotopes)
+            print(dialog.material)
+            self.model.signals.isotopesInput.emit(dialog.isotopes)
+            self.model.signals.materialInput.emit(dialog.material)
         return
+
+    def emit_methods_signal(self, dialog):
+        if dialog.isotopes and dialog.material is not None:
+            print(dialog.isotopes)
+            print(dialog.material)
+            self.model.signals.isotopesInput.emit(dialog.isotopes)
+            self.model.signals.materialInput.emit(dialog.material)

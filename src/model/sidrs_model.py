@@ -3,8 +3,9 @@ import csv
 
 
 class SidrsModel:
-    def __init__(self):
+    def __init__(self, signals):
         self.data = {}
+        self.signals = signals
         self.imported_files = []
 
     #################

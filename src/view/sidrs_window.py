@@ -10,6 +10,8 @@ class SidrsWindow(QMainWindow):
     def __init__(self, model):
         QMainWindow.__init__(self)
 
+        self.model = model
+
         self.setMinimumSize(QSize(640, 480))
         self.setWindowTitle("SIDRS v-0.0")
 
@@ -30,7 +32,7 @@ class SidrsWindow(QMainWindow):
         # next_button.setDisabled(True)
 
         main_layout.addWidget(title)
-        main_layout.addWidget(IsotopeButtonWidget())
+        main_layout.addWidget(IsotopeButtonWidget(self.model))
         main_layout.addWidget(self.file_entry_widget)
         main_layout.addWidget(next_button, alignment=Qt.AlignRight)
 
