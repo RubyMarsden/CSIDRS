@@ -2,8 +2,10 @@
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox, \
     QRadioButton
 
+from src.model.isotopes import Isotope
 from src.model.settings.isotope_lists import *
 from src.model.settings.material_lists import *
+
 
 class MethodSelectionDialog(QDialog):
     def __init__(self, isotope):
@@ -24,7 +26,7 @@ class MethodSelectionDialog(QDialog):
         lhs_box_layout = QVBoxLayout()
         rhs_box_layout = QVBoxLayout()
 
-        if self.isotope == "o":
+        if self.isotope == Isotope.OXY:
 
             for isotope in oxygen_isotope_list:
                 box = QCheckBox(isotope)
@@ -34,7 +36,7 @@ class MethodSelectionDialog(QDialog):
                 box = QRadioButton(material)
                 rhs_box_layout.addWidget(box)
 
-        elif self.isotope == "s":
+        elif self.isotope == Isotope.SUL:
 
             for isotope in sulphur_isotope_list:
                 box = QCheckBox(isotope)
@@ -57,3 +59,4 @@ class MethodSelectionDialog(QDialog):
         layout.addWidget(self.buttonBox, 2, 1)
 
         self.setLayout(layout)
+

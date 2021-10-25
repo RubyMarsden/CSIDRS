@@ -1,4 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
+
+from src.model.isotopes import Isotope
 from src.view.method_selection_dialog import MethodSelectionDialog
 
 
@@ -24,16 +26,13 @@ class IsotopeButtonWidget(QWidget):
         return self.s_button
 
     def on_O_button_pushed(self):
-        isotope = "o"
+        isotope = Isotope.OXY
         dialog = MethodSelectionDialog(isotope)
         result = dialog.exec()
-        if result is not None:
-            # TODO make a signal
-            return
         return
 
     def on_S_button_pushed(self):
-        isotope = "s"
+        isotope = Isotope.SUL
         dialog = MethodSelectionDialog(isotope)
         result = dialog.exec()
         return
