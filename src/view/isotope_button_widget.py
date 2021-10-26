@@ -32,19 +32,16 @@ class IsotopeButtonWidget(QWidget):
         isotope = Isotope.OXY
         dialog = MethodSelectionDialog(isotope)
         result = dialog.exec()
-        # TODO fix this
-        dialog.accepted.connect(lambda: dialog, self.emit_methods_signal(dialog))
+        if result:
+            self.emit_methods_signal(dialog)
         return
 
     def on_S_button_pushed(self):
         isotope = Isotope.SUL
         dialog = MethodSelectionDialog(isotope)
         result = dialog.exec()
-        if dialog.isotopes and dialog.material is not None and dialog.accepted:
-            print(dialog.isotopes)
-            print(dialog.material)
-            self.model.signals.isotopesInput.emit(dialog.isotopes)
-            self.model.signals.materialInput.emit(dialog.material)
+        if result:
+            self.emit_methods_signal(dialog)
         return
 
     def emit_methods_signal(self, dialog):
