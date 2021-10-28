@@ -8,10 +8,13 @@ from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_
 
 
 class Spot:
-    def __init__(self, filename, spot_data):
+    def __init__(self, filename, spot_data, mass_peak_names):
         self.filename = filename
         parts = re.split('@|\\.|/', self.filename)
         self.sample_name, self.id = parts[-3], parts[-2]
+        # TODO change how this works
+        self.mass_peak_names = mass_peak_names
+
         self.spot_data = spot_data
         self.date = self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]]
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
@@ -20,11 +23,6 @@ class Spot:
         elif self.twelve_hr_data == "PM":
             self.twenty_four_hour_time = convert_to_twenty_four_hour_time(self.time)
         self.datetime = datetime.strptime(self.date + " " + self.time, "%d/%m/%Y %H:%M")
-
-
-
-        # TODO this should come from the model having been input from the view
-        self.mass_peak_names = ["32S", "33S", "34S"]
 
         self.mass_peaks = {}
 
