@@ -12,7 +12,7 @@ class Spot:
         self.filename = filename
         parts = re.split('@|\\.|/', self.filename)
         self.sample_name, self.id = parts[-3], parts[-2]
-        # TODO change how this works
+        # TODO change how this works - currently doesn't update
         self.mass_peak_names = mass_peak_names
 
         self.spot_data = spot_data

@@ -29,6 +29,8 @@ class MethodSelectionDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
+        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+
         lhs_box_layout = QVBoxLayout()
         rhs_box_layout = QVBoxLayout()
 
@@ -87,13 +89,16 @@ class MethodSelectionDialog(QDialog):
         for box in self.isotope_box_list:
             if box.isChecked():
                 self.isotopes.append(box.isotope)
+        if self.isotopes and self.material:
+            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
     def on_material_changed(self):
         self.material = None
         for box in self.material_box_list:
             if box.isChecked():
                 self.material = box.material
-
+        if self.isotopes and self.material:
+            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
 
 
