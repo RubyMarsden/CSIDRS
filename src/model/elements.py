@@ -1,6 +1,6 @@
 from enum import Enum
 
 
-class Isotope(Enum):
+class Element(Enum):
     OXY = "Oxygen"
     SUL = "Sulphur"

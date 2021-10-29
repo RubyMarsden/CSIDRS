@@ -45,8 +45,9 @@ class SidrsWindow(QMainWindow):
         self.next_button.setEnabled(True)
 
     def next_button_clicked(self):
-        isotope = "s"
-        dialog = ReferenceMaterialSelectionDialog(isotope)
+        element = self.model.element
+        material = self.model.material
+        dialog = ReferenceMaterialSelectionDialog(element, material)
         result = dialog.exec()
         if result == QDialog.Accepted:
             return dialog.get_selected_reference_material()

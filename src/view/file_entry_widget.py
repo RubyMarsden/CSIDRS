@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QFileDialog, QTreeWidget, QTreeWidgetItem
+
 
 class FileEntryWidget(QWidget):
     def __init__(self, model):
@@ -7,12 +8,15 @@ class FileEntryWidget(QWidget):
         layout = QHBoxLayout()
         self.setLayout(layout)
 
-        label = QLabel("File entry goes here")
+        filename_list = QTreeWidget()
+
+        for filename in self.model.imported_files:
+            filename_item = QTreeWidgetItem(filename_list, filename)
 
         self.file_entry_button = QPushButton("Select data files")
         self.file_entry_button.clicked.connect(self.on_file_entry_button_clicked)
 
-        layout.addWidget(label)
+        layout.addWidget(filename_list)
         layout.addWidget(self.file_entry_button)
 
         #############
@@ -27,6 +31,3 @@ class FileEntryWidget(QWidget):
                                                     )
         # model needs to do the importing
         self.model.import_all_files(filenames)
-        if filenames:
-            for filename in filenames:
-                return

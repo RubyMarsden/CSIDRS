@@ -42,7 +42,6 @@ def get_data_from_old_asc(spot_data, mass_peak_name):
         contains_blocks = "Blocks" in line
     block_index = spot_data[line_number].index("Blocks")
     block_number = spot_data[line_number][block_index - 1]
-    print(block_number)
 
     # Finding the start of the raw data
     line_number = 160

@@ -1,13 +1,16 @@
 # Popup for reference selection
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QCheckBox, QPushButton
+
+from src.model.elements import Element
 from src.model.settings.isotope_reference_materials import *
 from src.view.new_reference_material_dialog import NewReferenceMaterialDialog
 
 
 class ReferenceMaterialSelectionDialog(QDialog):
-    def __init__(self, isotope):
+    def __init__(self, element, material):
         QDialog.__init__(self)
-        self.isotope = isotope
+        self.element = element
+        self.material = material
         self.setWindowTitle("Reference material selection")
         self.setMinimumWidth(450)
         layout = QVBoxLayout()
@@ -23,10 +26,10 @@ class ReferenceMaterialSelectionDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        if self.isotope == "o":
+        if self.element == Element.OXY:
             reference_materials = [*oxygen_reference_material_dict]
 
-        elif self.isotope == "s":
+        elif self.element == Element.SUL:
             reference_materials = [*sulphur_reference_material_dict]
 
         else:
@@ -48,9 +51,9 @@ class ReferenceMaterialSelectionDialog(QDialog):
         return
 
     def new_reference_material_button_clicked(self):
-        # TODO: make isotope come from the model
-        isotope = "s"
-        dialog = NewReferenceMaterialDialog(isotope)
+        # TODO: make element come from the model
+        element = self.element
+        dialog = NewReferenceMaterialDialog(element)
         result = dialog.exec()
         if result == QDialog.Accepted:
             return dialog.add_reference_material()

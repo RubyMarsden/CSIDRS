@@ -1,6 +1,9 @@
 from PyQt5.QtCore import pyqtSignal, QObject
 
+from src.model.elements import Element
+
 
 class Signals(QObject):
-    isotopesInput = pyqtSignal(list)
+    isotopesInput = pyqtSignal(list, Element)
     materialInput = pyqtSignal(str)
+    filenamesUpdated = pyqtSignal(list)
