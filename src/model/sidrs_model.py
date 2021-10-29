@@ -1,4 +1,3 @@
-import difflib
 import re
 
 from src.model.spot import Spot
@@ -30,8 +29,6 @@ class SidrsModel:
             spot = self._parse_asc_file_into_data(filename)
             spots.append(spot)
             self.imported_files.append(filename)
-
-
 
     def _parse_asc_file_into_data(self, filename):
         with open(filename) as file:

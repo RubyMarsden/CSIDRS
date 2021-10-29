@@ -1,5 +1,6 @@
 # Popup for reference selection
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QCheckBox, QPushButton
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QCheckBox, QPushButton, QRadioButton, \
+    QGridLayout
 
 from src.model.elements import Element
 from src.model.settings.isotope_reference_materials import *
@@ -13,11 +14,13 @@ class ReferenceMaterialSelectionDialog(QDialog):
         self.material = material
         self.setWindowTitle("Reference material selection")
         self.setMinimumWidth(450)
-        layout = QVBoxLayout()
+        layout = QGridLayout()
 
         title = QLabel("Select a primary reference material")
+        secondary_title = QLabel("Select a secondary reference material")
 
         self.reference_list = QVBoxLayout()
+        self.secondary_reference_list = QVBoxLayout()
         self.new_reference_material_button = QPushButton("New reference")
         self.new_reference_material_button.setFixedWidth(150)
         self.new_reference_material_button.clicked.connect(self.new_reference_material_button_clicked)
@@ -43,14 +46,17 @@ class ReferenceMaterialSelectionDialog(QDialog):
             raise Exception
 
         for i in range(0, len(reference_materials)):
-            box = QCheckBox(reference_materials[i])
-            self.reference_list.addWidget(box)
+            box1 = QRadioButton(reference_materials[i])
+            box2 = QRadioButton(reference_materials[i])
+            self.reference_list.addWidget(box1)
+            self.secondary_reference_list.addWidget(box2)
 
-        self.reference_list.addWidget(self.new_reference_material_button)
-
-        layout.addWidget(title)
-        layout.addLayout(self.reference_list)
-        layout.addWidget(self.buttonBox)
+        layout.addWidget(title, 0, 0)
+        layout.addWidget(secondary_title, 0, 1)
+        layout.addLayout(self.reference_list, 1, 0)
+        layout.addLayout(self.secondary_reference_list, 1, 1)
+        layout.addWidget(self.new_reference_material_button, 2, 0)
+        layout.addWidget(self.buttonBox, 2, 1)
         self.setLayout(layout)
 
     def get_selected_reference_material(self):
@@ -65,4 +71,3 @@ class ReferenceMaterialSelectionDialog(QDialog):
         if result == QDialog.Accepted:
             return dialog.add_reference_material()
         return None
-
