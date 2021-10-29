@@ -27,10 +27,17 @@ class ReferenceMaterialSelectionDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
         if self.element == Element.OXY:
-            reference_materials = [*oxygen_reference_material_dict]
+            if self.material == "Zircon":
+                reference_materials = [*oxygen_zircon_reference_material_dict]
+            elif self.material == "Quartz":
+                # TODO make quartz reference material dictionary
+                reference_materials = []
+            else:
+                raise Exception
 
         elif self.element == Element.SUL:
-            reference_materials = [*sulphur_reference_material_dict]
+            if self.material == "Pyrite":
+                reference_materials = [*sulphur_pyrite_reference_material_dict]
 
         else:
             raise Exception

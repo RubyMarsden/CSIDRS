@@ -13,7 +13,6 @@ class MassPeak:
         self.spot_id = spot_id
         self.name = mass_peak_name
         self.raw_cps_data = raw_cps_data
-        # TODO add detector data
         self.detector_yield = detector_data[0]
         self.detector_background = detector_data[1]
         self.dead_time = detector_data[2]
