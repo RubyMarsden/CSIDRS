@@ -32,6 +32,7 @@ def get_detector_data(spot_data, column_number):
     print(detector_data)
     return detector_data
 
+
 def get_data_from_old_asc(spot_data, mass_peak_name):
     # Finding the number of blocks
     line_number = 113
@@ -62,4 +63,3 @@ def get_data_from_old_asc(spot_data, mass_peak_name):
     detector_data = get_detector_data(spot_data, column_number)
 
     return raw_cps_data, detector_data
-

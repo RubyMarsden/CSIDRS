@@ -8,15 +8,14 @@ class FileEntryWidget(QWidget):
         layout = QHBoxLayout()
         self.setLayout(layout)
 
-        filename_list = QTreeWidget()
+        self.filename_list = QTreeWidget()
 
-        for filename in self.model.imported_files:
-            filename_item = QTreeWidgetItem(filename_list, filename)
+        self.filename_list.setHeaderLabel("Imported files")
 
         self.file_entry_button = QPushButton("Select data files")
         self.file_entry_button.clicked.connect(self.on_file_entry_button_clicked)
 
-        layout.addWidget(filename_list)
+        layout.addWidget(self.filename_list)
         layout.addWidget(self.file_entry_button)
 
         #############
@@ -31,3 +30,10 @@ class FileEntryWidget(QWidget):
                                                     )
         # model needs to do the importing
         self.model.import_all_files(filenames)
+        self.on_filenames_updated()
+
+    def on_filenames_updated(self):
+        for filename in self.model.imported_files:
+            filename_item = QTreeWidgetItem(self.filename_list)
+            filename_item.setText(0,filename)
+            #self.filename_list.setItemWidget(filename_item)

@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
 
 from src.model.elements import Element
 from src.view.method_selection_dialog import MethodSelectionDialog
-from src.controllers.signals import Signals
 
 
 class IsotopeButtonWidget(QWidget):
