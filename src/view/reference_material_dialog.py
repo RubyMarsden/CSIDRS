@@ -1,5 +1,4 @@
-# Popup for reference selection
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QCheckBox, QPushButton, QRadioButton, \
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QPushButton, QRadioButton, \
     QGridLayout
 
 from src.model.elements import Element

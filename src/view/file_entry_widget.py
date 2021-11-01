@@ -1,3 +1,5 @@
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QFileDialog, QTreeWidget, QTreeWidgetItem, \
     QVBoxLayout
 
@@ -48,4 +50,9 @@ class FileEntryWidget(QWidget):
         for sample_name in self.model.list_of_sample_names:
             sample_name_item = QTreeWidgetItem(self.sample_name_list)
             sample_name_item.setText(0, sample_name)
+
+        self.filename_list.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        self.filename_list.horizontalScrollBar().setEnabled(True)
+        self.filename_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.filename_list.header().setStretchLastSection(False)
 
