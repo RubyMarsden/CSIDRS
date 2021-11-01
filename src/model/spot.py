@@ -37,6 +37,7 @@ class Spot:
             )
 
             self.mass_peaks[mass_peak_name] = [mass_peak]
+            mass_peak.correct_cps_data_for_detector_parameters()
 
 
 
