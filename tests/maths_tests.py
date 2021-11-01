@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 
 from src.model.maths import calculate_outlier_resistant_mean_and_st_dev
+from src.model.mass_peak import MassPeak
 
 
 class MathsTests(unittest.TestCase):
@@ -45,6 +46,22 @@ class MathsTests(unittest.TestCase):
         self.assertEqual(np.std(test_data), st_dev)
         self.assertEqual(40, mean_2)
         self.assertEqual(0, st_dev_2)
+
+    def test_background_correction(self):
+        test_data = ["10E+0"]
+        test_detector_data = [1,10,0]
+        mass_peak = MassPeak(
+            sample_name="Test",
+            spot_id=1,
+            mass_peak_name="test",
+            raw_cps_data=test_data,
+            detector_data=test_detector_data
+
+        )
+        mass_peak.correct_cps_data_for_detector_parameters()
+        data = mass_peak.detector_corrected_cps_data
+
+        self.assertEqual(data[0], 0)
 
 
 if __name__ == '__main__':
