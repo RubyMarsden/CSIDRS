@@ -3,6 +3,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QFileDialog, QTreeWidget, QTreeWidgetItem, \
     QVBoxLayout
 
+from src.view.change_sample_names_dialog import ChangeSampleNamesDialog
+
 
 class FileEntryWidget(QWidget):
     def __init__(self, model):
@@ -14,18 +16,23 @@ class FileEntryWidget(QWidget):
         self.filename_list = QTreeWidget()
         self.filename_list.setHeaderLabel("Imported files")
 
+        self.file_entry_button = QPushButton("Select data files")
+        self.file_entry_button.clicked.connect(self.on_file_entry_button_clicked)
+
         self.sample_name_list = QTreeWidget()
         self.sample_name_list.setHeaderLabel("Sample names")
 
-        self.file_entry_button = QPushButton("Select data files")
-        self.file_entry_button.clicked.connect(self.on_file_entry_button_clicked)
+        self.manual_sample_names_button = QPushButton("Change sample names")
+        self.manual_sample_names_button.clicked.connect(self.on_change_sample_names_button_clicked)
+
+        layout.addWidget(self.filename_list)
 
         rhs_layout = QVBoxLayout()
 
         rhs_layout.addWidget(self.file_entry_button)
         rhs_layout.addWidget(self.sample_name_list)
+        rhs_layout.addWidget(self.manual_sample_names_button)
 
-        layout.addWidget(self.filename_list)
         layout.addLayout(rhs_layout)
 
         #############
@@ -38,7 +45,6 @@ class FileEntryWidget(QWidget):
                                                     "home/ruby/Documents/Programming/UWA/SIDRS/data",
                                                     "ASCII files (*.asc)"
                                                     )
-        # model needs to do the importing
         self.model.import_all_files(filenames)
         self.on_filenames_updated()
 
@@ -56,3 +62,6 @@ class FileEntryWidget(QWidget):
         self.filename_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.filename_list.header().setStretchLastSection(False)
 
+    def on_change_sample_names_button_clicked(self):
+        dialog = ChangeSampleNamesDialog()
+        result = dialog.exec()
