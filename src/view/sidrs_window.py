@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QDialog
 from PyQt5.QtCore import Qt, QSize
 
+from src.view.data_processing_dialog import DataProcessingDialog
 from src.view.isotope_button_widget import IsotopeButtonWidget
 from src.view.file_entry_widget import FileEntryWidget
 from src.view.reference_material_dialog import ReferenceMaterialSelectionDialog
@@ -50,7 +51,11 @@ class SidrsWindow(QMainWindow):
         dialog = ReferenceMaterialSelectionDialog(element, material)
         result = dialog.exec()
         if result:
+            self.on_reference_material_selected()
             return dialog.get_selected_reference_material()
         return None
         # TODO: Make it go back if no reference material selected and forward to next screen if there is.
 
+    def on_reference_material_selected(self):
+        dialog = DataProcessingDialog()
+        result = dialog.exec()
