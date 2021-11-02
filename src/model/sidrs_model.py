@@ -1,5 +1,6 @@
 import re
 
+from src.model.sample import Sample
 from src.model.spot import Spot
 import csv
 
@@ -7,6 +8,7 @@ import csv
 class SidrsModel:
     def __init__(self, signals):
         self.data = {}
+        self.samples_by_name = {}
         self.signals = signals
         self.list_of_sample_names = []
         self.imported_files = []
@@ -62,11 +64,18 @@ class SidrsModel:
 
         for j in range(len(split_names[0])):
             for i in range(len(split_names)):
-                if split_names[i-1][j] != split_names[i][j]:
+                if split_names[i - 1][j] != split_names[i][j]:
                     self.list_of_sample_names.append(split_names[i][j])
 
         print(self.list_of_sample_names)
         return self.list_of_sample_names
+
+    def _create_samples_from_sample_names(self, spots):
+        for sample_name in self.list_of_sample_names:
+            self.samples_by_name[sample_name] = Sample(sample_name)
+            for spot in spots:
+                if spot.sample_name == sample_name:
+                    self.samples_by_name[sample_name].spots.append(spot)
 
     ###############
     ### Signals ###
