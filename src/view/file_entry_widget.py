@@ -66,4 +66,6 @@ class FileEntryWidget(QWidget):
         dialog = ChangeSampleNamesDialog(self.model.list_of_sample_names)
         result = dialog.exec()
         if result:
-            print("hi")
+            sample_names = dialog.sample_names
+            print(sample_names)
+        return sample_names
