@@ -63,5 +63,7 @@ class FileEntryWidget(QWidget):
         self.filename_list.header().setStretchLastSection(False)
 
     def on_change_sample_names_button_clicked(self):
-        dialog = ChangeSampleNamesDialog()
+        dialog = ChangeSampleNamesDialog(self.model.list_of_sample_names)
         result = dialog.exec()
+        if result:
+            print("hi")
