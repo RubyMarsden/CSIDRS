@@ -7,6 +7,7 @@ import csv
 
 class SidrsModel:
     def __init__(self, signals):
+        self.spots = []
         self.data = {}
         self.samples_by_name = {}
         self.signals = signals
@@ -24,13 +25,12 @@ class SidrsModel:
     #################
 
     def import_all_files(self, filenames):
-        spots = []
         self.sample_names_from_filenames(filenames)
         for filename in filenames:
             if filename in self.imported_files:
                 raise Exception("The file: " + filename + " has already been imported")
             spot = self._parse_asc_file_into_data(filename)
-            spots.append(spot)
+            self.spots.append(spot)
             self.imported_files.append(filename)
 
     def _parse_asc_file_into_data(self, filename):
@@ -69,10 +69,23 @@ class SidrsModel:
 
     def _create_samples_from_sample_names(self, spots):
         for sample_name in self.list_of_sample_names:
+            print(sample_name)
             self.samples_by_name[sample_name] = Sample(sample_name)
             for spot in spots:
-                if spot.sample_name == sample_name:
+                if sample_name in spot.full_sample_name:
+                    print(spot.full_sample_name)
                     self.samples_by_name[sample_name].spots.append(spot)
+
+    ##################
+    ### Processing ###
+    ##################
+
+    def process_data(self):
+        print("Processing...")
+        self._create_samples_from_sample_names(self.spots)
+        for sample in self.samples_by_name.values():
+            for spot in sample.spots:
+                print(spot.filename)
 
     ###############
     ### Signals ###

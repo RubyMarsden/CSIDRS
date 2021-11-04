@@ -11,7 +11,7 @@ class Spot:
     def __init__(self, filename, spot_data, mass_peak_names):
         self.filename = filename
         parts = re.split('@|\\.|/', self.filename)
-        self.sample_name, self.id = parts[-3], parts[-2]
+        self.full_sample_name, self.id = parts[-3], parts[-2]
         # TODO change how this works - currently doesn't update
         self.mass_peak_names = mass_peak_names
 
@@ -29,7 +29,7 @@ class Spot:
         for mass_peak_name in self.mass_peak_names:
             raw_cps_data, detector_data = get_data_from_old_asc(self.spot_data, mass_peak_name)
             mass_peak = MassPeak(
-                self.sample_name,
+                self.full_sample_name,
                 self.id,
                 mass_peak_name,
                 raw_cps_data,
