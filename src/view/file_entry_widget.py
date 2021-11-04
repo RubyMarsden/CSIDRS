@@ -67,5 +67,5 @@ class FileEntryWidget(QWidget):
         result = dialog.exec()
         if result:
             sample_names = dialog.sample_names
-            print(sample_names)
+            self.model.signals.sampleNamesUpdated.emit(sample_names)
         return sample_names

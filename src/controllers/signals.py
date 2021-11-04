@@ -7,3 +7,4 @@ class Signals(QObject):
     isotopesInput = pyqtSignal(list, Element)
     materialInput = pyqtSignal(str)
     filenamesUpdated = pyqtSignal(list)
+    sampleNamesUpdated = pyqtSignal(list)

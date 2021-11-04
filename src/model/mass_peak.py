@@ -27,7 +27,6 @@ class MassPeak:
             yield_corrected_data = background_corrected_data/float(self.detector_yield)
             # TODO deadtime corrected data
             self.detector_corrected_cps_data.append(yield_corrected_data)
-        print(self.detector_corrected_cps_data)
 
     def outlier_resistant_mean_and_st_error(self):
         mean, st_dev = calculate_outlier_resistant_mean_and_st_dev(self.detector_corrected_cps_data, 1)

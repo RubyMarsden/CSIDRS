@@ -17,6 +17,7 @@ class SidrsModel:
 
         self.signals.isotopesInput.connect(self._isotopes_input)
         self.signals.materialInput.connect(self._material_input)
+        self.signals.sampleNamesUpdated.connect(self._sample_names_updated)
 
     #################
     ### Importing ###
@@ -24,7 +25,7 @@ class SidrsModel:
 
     def import_all_files(self, filenames):
         spots = []
-        self.list_of_sample_names = self.sample_names_from_filenames(filenames)
+        self.sample_names_from_filenames(filenames)
         for filename in filenames:
             if filename in self.imported_files:
                 raise Exception("The file: " + filename + " has already been imported")
@@ -44,8 +45,6 @@ class SidrsModel:
                 data_for_spot.append(line)
 
         spot = Spot(filename, data_for_spot, self.isotopes)
-        print("name = ", spot.sample_name, "id = ", spot.id, "datetime = ", spot.datetime)
-
         return spot
 
     def sample_names_from_filenames(self, filenames):
@@ -56,19 +55,17 @@ class SidrsModel:
             if full_sample_name not in full_sample_names:
                 full_sample_names.append(full_sample_name)
 
-        print(full_sample_names)
         split_names = []
         for full_sample_name in full_sample_names:
             name_parts = re.split('-|_', full_sample_name)
             split_names.append(name_parts)
 
+        sample_names = []
         for j in range(len(split_names[0])):
             for i in range(len(split_names)):
                 if split_names[i - 1][j] != split_names[i][j]:
-                    self.list_of_sample_names.append(split_names[i][j])
-
-        print(self.list_of_sample_names)
-        return self.list_of_sample_names
+                    sample_names.append(split_names[i][j])
+        self.signals.sampleNamesUpdated.emit(sample_names)
 
     def _create_samples_from_sample_names(self, spots):
         for sample_name in self.list_of_sample_names:
@@ -87,3 +84,7 @@ class SidrsModel:
 
     def _material_input(self, material):
         self.material = material
+
+    def _sample_names_updated(self, sample_names):
+        self.list_of_sample_names = sample_names
+        print(self.list_of_sample_names)

@@ -12,7 +12,6 @@ def get_raw_cps_data(raw_data_line_start, column_number, spot_data, block_number
     for line in line_range:
         raw_cps_data.append(spot_data[line][column_number])
 
-    print(raw_cps_data)
     return raw_cps_data
 
 
@@ -29,7 +28,6 @@ def get_detector_data(spot_data, column_number):
     detector_data.append(spot_data[line][2])
     detector_data.append(spot_data[line][3])
 
-    print(detector_data)
     return detector_data
 
 
