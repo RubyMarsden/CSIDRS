@@ -28,5 +28,6 @@ class ChangeSampleNamesDialog(QDialog):
         self.setLayout(layout)
 
     def on_input_box_text_changed(self):
+        self.sample_names.clear()
         for input_box in self.input_box_list:
             self.sample_names.append(input_box.text())
