@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QDialog, QLayout, QVBoxLayout, QPushButton, QHBoxLayout, QTreeWidget
+from PyQt5.QtWidgets import QDialog, QLayout, QVBoxLayout, QPushButton, QHBoxLayout, QTreeWidget, QTabWidget
 
+from src.view.basic_data_check_widget import BasicDataCheckWidget
 from src.view.cycle_data_dialog import CycleDataDialog
 
 
@@ -8,7 +9,7 @@ class DataProcessingDialog(QDialog):
         QDialog.__init__(self)
 
         self.setWindowTitle("Data processing")
-        self.setMinimumWidth(450)
+        self.setMinimumWidth(500)
 
         right_layout = self._create_right_layout()
         left_layout = self._create_left_layout()
@@ -35,24 +36,13 @@ class DataProcessingDialog(QDialog):
         return layout
 
     def _create_left_layout(self):
+        self.tabs = QTabWidget()
+        self.tabs.addTab(BasicDataCheckWidget(self), "1. Basic data check")
+
         layout = QVBoxLayout()
-        button_layout = QHBoxLayout()
 
-        cycle_data_button = QPushButton("Operators only")
-        cycle_data_button.clicked.connect(self.on_cycle_data_button_pushed)
-        button_layout.addWidget(cycle_data_button)
+        layout.addWidget(self.tabs)
 
-        data_output_button = QPushButton("Extract data")
-        data_output_button.clicked.connect(self.on_data_output_button_pushed)
-        button_layout.addWidget(data_output_button)
-
-        layout.addLayout(button_layout)
         return layout
 
-    def on_cycle_data_button_pushed(self):
-        dialog = CycleDataDialog()
-        result = dialog.exec()
 
-    def on_data_output_button_pushed(self):
-        print("Create a csv")
-        return
