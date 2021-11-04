@@ -58,5 +58,5 @@ class SidrsWindow(QMainWindow):
 
     def on_reference_material_selected(self):
         self.model.process_data()
-        dialog = DataProcessingDialog()
+        dialog = DataProcessingDialog(self.model.samples_by_name.values())
         result = dialog.exec()

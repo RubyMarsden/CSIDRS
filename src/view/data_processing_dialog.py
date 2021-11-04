@@ -6,8 +6,10 @@ from src.view.drift_correction_widget import DriftCorrectionWidget
 
 
 class DataProcessingDialog(QDialog):
-    def __init__(self):
+    def __init__(self, samples):
         QDialog.__init__(self)
+
+        self.samples = samples
 
         self.setWindowTitle("Data processing")
         self.setMinimumWidth(500)
