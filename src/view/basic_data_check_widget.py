@@ -46,8 +46,9 @@ class BasicDataCheckWidget(QWidget):
 
         return layout
 
-
-
+    ###############
+    ### Actions ###
+    ###############
 
     def on_cycle_data_button_pushed(self):
         dialog = CycleDataDialog()

@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QDialog, QLayout, QVBoxLayout, QPushButton, QHBoxLay
 
 from src.view.basic_data_check_widget import BasicDataCheckWidget
 from src.view.cycle_data_dialog import CycleDataDialog
+from src.view.drift_correction_widget import DriftCorrectionWidget
 
 
 class DataProcessingDialog(QDialog):
@@ -38,6 +39,7 @@ class DataProcessingDialog(QDialog):
     def _create_left_layout(self):
         self.tabs = QTabWidget()
         self.tabs.addTab(BasicDataCheckWidget(self), "1. Basic data check")
+        self.tabs.addTab(DriftCorrectionWidget(self), "2. Drift correction")
 
         layout = QVBoxLayout()
 
