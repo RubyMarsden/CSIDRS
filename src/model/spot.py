@@ -19,6 +19,7 @@ class Spot:
         self.spot_data = spot_data
         self.date = self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]]
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
+        #TODO - what happens at midnight?
         if self.twelve_hr_data == "AM":
             self.twenty_four_hour_time = self.time
         elif self.twelve_hr_data == "PM":

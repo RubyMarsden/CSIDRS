@@ -102,7 +102,7 @@ class BasicDataCheckWidget(QWidget):
 
         axis.plot(xs, ys, marker="o", ls="")
         axis.set_xlabel("Time")
-        axis.set_ylabel("Relative secondary ion yield")
+        axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
 
     def create_ion_distance_data_plot(self, samples, axis):
@@ -118,7 +118,7 @@ class BasicDataCheckWidget(QWidget):
 
         axis.plot(xs, ys, marker="o", ls="")
         axis.set_xlabel("Distance from centre of mount")
-        axis.set_ylabel("Relative secondary ion yield")
+        axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
 
     def create_all_samples_x_y_positions_plot(self, samples, axis):
@@ -145,5 +145,5 @@ class BasicDataCheckWidget(QWidget):
         axis.set_xlabel("X position")
         axis.set_ylabel("Y position")
         axis.set(xlim=(-9000, 9000), ylim=(-9000, 9000))
-        plt.axis('equal')
+        plt.axis('scaled')
         plt.tight_layout()
