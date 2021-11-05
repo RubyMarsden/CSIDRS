@@ -1,7 +1,9 @@
 import matplotlib
+import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QLabel, QCheckBox
 from matplotlib.gridspec import GridSpec
+from matplotlib.patches import Circle
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
@@ -36,7 +38,7 @@ class BasicDataCheckWidget(QWidget):
         cycle_data_button.clicked.connect(self.on_cycle_data_button_pushed)
         button_layout.addWidget(cycle_data_button)
 
-        data_output_button = QPushButton("Extract data")
+        data_output_button = QPushButton("Extract raw data")
         data_output_button.clicked.connect(self.on_data_output_button_pushed)
         button_layout.addWidget(data_output_button)
 
@@ -73,17 +75,35 @@ class BasicDataCheckWidget(QWidget):
     def _create_graphs_to_check_data(self):
         self.fig = plt.figure()
 
-        self.spot_visible_grid_spec = GridSpec(2, 1)
-        self.spot_invisible_grid_spec = GridSpec(1, 1)
-        self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
-        self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
+        self.spot_visible_grid_spec = GridSpec(3, 1)
+        # self.spot_invisible_grid_spec = GridSpec(1, 1)
+        self.ion_yield_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
+        self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
+        self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[2])
 
+        self.create_ion_yield_time_plot(self.data_processing_dialog.samples, self.ion_yield_time_axis)
         self.create_ion_distance_data_plot(self.data_processing_dialog.samples, self.ion_yield_distance_axis)
         self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
 
         widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
         return widget
+
+    def create_ion_yield_time_plot(self, samples, axis):
+        axis.clear()
+        xs = []
+        ys = []
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+        for sample in samples:
+            for spot in sample.spots:
+                xs.append(spot.datetime)
+                ys.append(spot.secondary_ion_yield)
+
+        axis.plot(xs, ys, marker="o", ls="")
+        axis.set_xlabel("Time")
+        axis.set_ylabel("Relative secondary ion yield")
+        plt.tight_layout()
 
     def create_ion_distance_data_plot(self, samples, axis):
         axis.clear()
@@ -103,18 +123,26 @@ class BasicDataCheckWidget(QWidget):
 
     def create_all_samples_x_y_positions_plot(self, samples, axis):
         axis.clear()
-        xs = []
-        ys = []
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
+
+        xs = []
+        ys = []
         for sample in samples:
             for spot in sample.spots:
                 xs.append(int(spot.x_position))
                 ys.append(int(spot.y_position))
 
+        circle = Circle((0, 0), 9000)
 
+        range_of_radians = np.linspace(0, 2 * np.pi, 100)
+        axis.plot(7000 * np.cos(range_of_radians), 7000 * np.sin(range_of_radians), marker="", ls="-", color="r")
+        axis.plot(5000 * np.cos(range_of_radians), 5000 * np.sin(range_of_radians), marker="", ls="--", color="r")
         axis.plot(xs, ys, marker="o", ls="")
+        axis.add_patch(circle)
+
         axis.set_xlabel("X position")
         axis.set_ylabel("Y position")
-        plt.axis('scaled')
+        axis.set(xlim=(-9000, 9000), ylim=(-9000, 9000))
+        plt.axis('equal')
         plt.tight_layout()
