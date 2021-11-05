@@ -17,9 +17,9 @@ sulphur_pyrite_reference_material_dict = {
     "Isua248474": [(4.33,0.38),(1.09,0.30),"Whitehouse2013, Baublys et al. 2004"],
     # SIMS data and rock source described in Whitehouse, bulk from Baublys, large d34S variability reported
     # by Whitehouse2013 (0.86 2SD)
-    "Ruttan": [(1.2,0.2), "Crowe & Vaughan 1996","comment: only 34/32 values"]
+    "Ruttan": [(1.2,0.2), "Crowe & Vaughan 1996","comment: only 34/32 values"],
     # Only 34/32 reported in Crowe & Vaughan 1996
-    "UWPy-1": [8.4,(16.39,0.4),"Williford et al., 2011", ""]
+    "UWPy-1": [8.4,(16.39,0.4),"Williford et al., 2011"]
     # This is also from Balmat locality. 34/32 defined in Kozdon et al. 2010 and no-MIF in Williford et al. 2011
 }
 
