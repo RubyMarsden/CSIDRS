@@ -75,16 +75,33 @@ class BasicDataCheckWidget(QWidget):
 
         self.spot_visible_grid_spec = GridSpec(2, 1)
         self.spot_invisible_grid_spec = GridSpec(1, 1)
-        self.spot_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
+        self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
-        self.create_all_samples_basic_data_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
+        self.create_ion_distance_data_plot(self.data_processing_dialog.samples, self.ion_yield_distance_axis)
+        self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
 
         widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
         return widget
 
-    def create_all_samples_basic_data_plot(self, samples, axis):
+    def create_ion_distance_data_plot(self, samples, axis):
+        axis.clear()
+        xs = []
+        ys = []
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+        for sample in samples:
+            for spot in sample.spots:
+                xs.append(spot.distance_from_mount_centre)
+                ys.append(spot.secondary_ion_yield)
+
+        axis.plot(xs, ys, marker="o", ls="")
+        axis.set_xlabel("Distance from centre of mount")
+        axis.set_ylabel("Relative secondary ion yield")
+        plt.tight_layout()
+
+    def create_all_samples_x_y_positions_plot(self, samples, axis):
         axis.clear()
         xs = []
         ys = []
@@ -94,7 +111,7 @@ class BasicDataCheckWidget(QWidget):
             for spot in sample.spots:
                 xs.append(int(spot.x_position))
                 ys.append(int(spot.y_position))
-        print(xs, ys)
+
 
         axis.plot(xs, ys, marker="o", ls="")
         axis.set_xlabel("X position")

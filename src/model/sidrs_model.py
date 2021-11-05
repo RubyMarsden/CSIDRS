@@ -69,11 +69,9 @@ class SidrsModel:
 
     def _create_samples_from_sample_names(self, spots):
         for sample_name in self.list_of_sample_names:
-            print(sample_name)
             self.samples_by_name[sample_name] = Sample(sample_name)
             for spot in spots:
                 if sample_name in spot.full_sample_name:
-                    print(spot.full_sample_name)
                     self.samples_by_name[sample_name].spots.append(spot)
 
     ##################
@@ -85,7 +83,7 @@ class SidrsModel:
         self._create_samples_from_sample_names(self.spots)
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
-                print(spot.filename)
+                spot.calculate_relative_secondary_ion_yield()
 
     ###############
     ### Signals ###
@@ -100,4 +98,3 @@ class SidrsModel:
 
     def _sample_names_updated(self, sample_names):
         self.list_of_sample_names = sample_names
-        print(self.list_of_sample_names)
