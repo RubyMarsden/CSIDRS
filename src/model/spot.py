@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 from src.model.mass_peak import MassPeak
+from src.model.maths import vector_length_from_origin
 from src.model.settings.asc_file_settings_general import *
 from src.model.get_data_from_import import get_data_from_old_asc
 from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time
@@ -26,6 +27,7 @@ class Spot:
 
         self.x_position = spot_data[X_POSITION_INDEX[0]][X_POSITION_INDEX[1]]
         self.y_position = spot_data[Y_POSITION_INDEX[0]][Y_POSITION_INDEX[1]]
+        self.distance_from_mount_centre = vector_length_from_origin(self.x_position, self.y_position)
 
         self.mass_peaks = {}
 
