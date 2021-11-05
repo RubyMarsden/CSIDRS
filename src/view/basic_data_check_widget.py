@@ -134,11 +134,12 @@ class BasicDataCheckWidget(QWidget):
                 ys.append(int(spot.y_position))
 
         circle = Circle((0, 0), 9000)
+        circle.set_color("lightgoldenrodyellow")
 
         range_of_radians = np.linspace(0, 2 * np.pi, 100)
         axis.plot(7000 * np.cos(range_of_radians), 7000 * np.sin(range_of_radians), marker="", ls="-", color="r")
         axis.plot(5000 * np.cos(range_of_radians), 5000 * np.sin(range_of_radians), marker="", ls="--", color="r")
-        axis.plot(xs, ys, marker="o", ls="")
+        axis.plot(xs, ys, marker="o", ls="", markersize=2)
         axis.add_patch(circle)
 
         axis.set_xlabel("X position")

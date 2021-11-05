@@ -23,7 +23,7 @@ class Spot:
             self.twenty_four_hour_time = self.time
         elif self.twelve_hr_data == "PM":
             self.twenty_four_hour_time = convert_to_twenty_four_hour_time(self.time)
-        self.datetime = datetime.strptime(self.date + " " + self.time, "%d/%m/%Y %H:%M")
+        self.datetime = datetime.strptime(self.date + " " + self.twenty_four_hour_time, "%d/%m/%Y %H:%M")
 
         self.x_position = int(spot_data[X_POSITION_INDEX[0]][X_POSITION_INDEX[1]])
         self.y_position = int(spot_data[Y_POSITION_INDEX[0]][Y_POSITION_INDEX[1]])
