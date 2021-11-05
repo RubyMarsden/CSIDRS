@@ -54,6 +54,6 @@ class Spot:
         total_cps = sum(cps_values)
         # TODO - why 10^9?
 
-        self.secondary_ion_yield = total_cps/(self.primary_beam_current * 10**9)
+        self.secondary_ion_yield = total_cps/(self.primary_beam_current * (10 ** 9))
 
 
