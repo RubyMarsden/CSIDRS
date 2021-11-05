@@ -52,8 +52,6 @@ class Spot:
     def calculate_relative_secondary_ion_yield(self):
         cps_values = [mass_peak[0].mean_cps for mass_peak in self.mass_peaks.values()]
         total_cps = sum(cps_values)
-        # TODO - why 10^9?
-
-        self.secondary_ion_yield = total_cps/(self.primary_beam_current * (10 ** 9))
+        self.secondary_ion_yield = total_cps/(self.primary_beam_current * (10 ** 18))
 
 

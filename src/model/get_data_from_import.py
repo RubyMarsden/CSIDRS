@@ -77,6 +77,6 @@ def get_primary_beam_current_data_old_asc(spot_data):
     primary_start_value = float(data) * 10 ** int(magnitude)
     primary_end_data = spot_data[line_number + 1][-1]
     data, magnitude = primary_end_data.split("E")
-    primary_end_value = float(data) * 10 ** (-1 * int(magnitude))
+    primary_end_value = float(data) * 10 ** int(magnitude)
     primary_beam_current = (primary_start_value + primary_end_value)/2
     return primary_beam_current
