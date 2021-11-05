@@ -94,7 +94,7 @@ class BasicDataCheckWidget(QWidget):
             for spot in sample.spots:
                 xs.append(int(spot.x_position))
                 ys.append(int(spot.y_position))
-        print(xs, ys)
+
 
         axis.plot(xs, ys, marker="o", ls="")
         axis.set_xlabel("X position")

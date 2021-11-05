@@ -29,7 +29,7 @@ def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed
     else:
         clean_data = data_without_outliers
 
-    return np.mean(clean_data), np.std(clean_data)
+    return np.mean(clean_data), np.std(clean_data), len(clean_data)
 
 
 def vector_length_from_origin(x: int, y: int):

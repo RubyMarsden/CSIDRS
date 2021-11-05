@@ -1,3 +1,5 @@
+import math
+
 from src.model.maths import calculate_outlier_resistant_mean_and_st_dev
 
 
@@ -18,16 +20,19 @@ class MassPeak:
         self.dead_time = detector_data[2]
 
         self.detector_corrected_cps_data = []
+        self.mean_cps = None
+        self.st_error_cps = None
 
     def correct_cps_data_for_detector_parameters(self):
         for data in self.raw_cps_data:
             data, magnitude = data.split("E+")
             value = float(data) * 10 ** int(magnitude)
             background_corrected_data = value - int(self.detector_background)
-            yield_corrected_data = background_corrected_data/float(self.detector_yield)
+            yield_corrected_data = background_corrected_data / float(self.detector_yield)
             # TODO deadtime corrected data
             self.detector_corrected_cps_data.append(yield_corrected_data)
 
     def outlier_resistant_mean_and_st_error(self):
-        mean, st_dev = calculate_outlier_resistant_mean_and_st_dev(self.detector_corrected_cps_data, 1)
-        return mean, st_dev
+        mean, st_dev, n = calculate_outlier_resistant_mean_and_st_dev(self.detector_corrected_cps_data, 1)
+        self.mean_cps = mean
+        self.st_error_cps = st_dev / math.sqrt(n)

@@ -1,6 +1,7 @@
 ######################################
 ### Getting data from old asc file ###
 ######################################
+import numpy as np
 
 DETECTOR_LINE = 25
 DETECTOR_PARAMETERS_LINE = 62
@@ -61,3 +62,21 @@ def get_data_from_old_asc(spot_data, mass_peak_name):
     detector_data = get_detector_data(spot_data, column_number)
 
     return raw_cps_data, detector_data
+
+
+def get_primary_beam_current_data_old_asc(spot_data):
+    # Finding the primary ion beam current at the beginning and end of the spot measurement
+    line_number = 131
+    contains_primary = False
+    while not contains_primary:
+        line_number += 1
+        line = spot_data[line_number]
+        contains_primary = "Primary Current START (A):" in line
+    primary_start_data = spot_data[line_number][-1]
+    data, magnitude = primary_start_data.split("E")
+    primary_start_value = float(data) * 10 ** int(magnitude)
+    primary_end_data = spot_data[line_number + 1][-1]
+    data, magnitude = primary_end_data.split("E")
+    primary_end_value = float(data) * 10 ** int(magnitude)
+    primary_beam_current = (primary_start_value + primary_end_value)/2
+    return primary_beam_current
