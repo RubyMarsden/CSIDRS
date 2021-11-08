@@ -61,7 +61,7 @@ class BasicDataCheckWidget(QWidget):
     ###############
 
     def on_cycle_data_button_pushed(self):
-        dialog = CycleDataDialog()
+        dialog = CycleDataDialog(self.data_processing_dialog.samples)
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
