@@ -1,5 +1,6 @@
 import matplotlib
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget
+from matplotlib.gridspec import GridSpec
 
 from src.utils import gui_utils
 from src.view.sample_tree import SampleTreeWidget
@@ -18,12 +19,14 @@ class CycleDataDialog(QDialog):
         self.sample_tree = SampleTreeWidget()
 
         layout = QHBoxLayout()
+        right_widget = self._create_right_widget()
         layout.addLayout(self._create_left_widget())
-        layout.addLayout(self._create_right_widget())
+        layout.addLayout(right_widget)
 
-        self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.plot_spot_graph(
-                                                            self.sample_tree.tree.currentItem().spot,
-                                                            self.axes
+        self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.update_graphs(
+                                                            self.sample_tree.current_spot(),
+                                                            self.counts_axis,
+                                                            self.ratios_axis
                                                             )
                                                          )
 
@@ -40,6 +43,7 @@ class CycleDataDialog(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(self.sample_tree)
         self.sample_tree.set_samples(self.samples)
+        self.sample_tree.select_first_spot()
 
         return layout
 
@@ -49,14 +53,39 @@ class CycleDataDialog(QDialog):
         layout.addWidget(title)
         return layout
 
+    ###############
+    ### Actions ###
+    ###############
+
+    def update_graphs(self, spot, counts_axis, ratios_axis):
+        if spot is None:
+            self.counts_axis.clear()
+            self.ratios_axis.clear()
+        else:
+            self.create_counts_plot(spot, counts_axis)
+            self.create_ratio_plot(spot, ratios_axis)
+            self.canvas.draw()
+
+
+    ################
+    ### Plotting ###
+    ################
+
     def _create_cycle_data_graphs(self):
         graph = QWidget()
         layout = QVBoxLayout()
 
-        fig = plt.figure()
-        self.axes = plt.axes()
+        self.fig = plt.figure()
 
-        graph_widget, self.canvas = gui_utils.create_figure_widget(fig, self)
+        self.spot_visible_grid_spec = GridSpec(2, 1)
+        # self.spot_invisible_grid_spec = GridSpec(1, 1)
+        self.counts_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
+        self.ratios_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
+
+        self.create_counts_plot(self.sample_tree.current_spot(), self.counts_axis)
+        self.create_ratio_plot(self.sample_tree.current_spot(), self.ratios_axis)
+
+        graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
         layout.addWidget(graph_widget)
 
@@ -64,21 +93,41 @@ class CycleDataDialog(QDialog):
 
         return graph
 
-
-    def plot_spot_graph(self, spot, axis):
+    def create_counts_plot(self, spot, axis):
         axis.clear()
+        xs = []
+        ys = []
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
-        print("hi")
 
         for mass_peak in spot.mass_peaks.values():
             xs = range(0, len(mass_peak[0].detector_corrected_cps_data))
             ys = mass_peak[0].detector_corrected_cps_data
-            print(xs, ys)
 
-        axis.plot(xs, ys)
-        axis.set_xlabel("Relative spot time (s)")
-        axis.set_ylabel("SBM (cps)")
+            axis.plot(xs, ys, ls="", marker="x")
+        axis.set_xlabel("Cycle")
+        axis.set_ylabel("Counts per second")
         plt.tight_layout()
-        plt.show()
 
+
+    def create_ratio_plot(self, spot, axis):
+        axis.clear()
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+        print("ratios")
+
+        y1s = spot.mass_peaks["18O"][0].detector_corrected_cps_data
+        y2s = spot.mass_peaks["16O"][0].detector_corrected_cps_data
+
+        ys = []
+        for y1 in y1s:
+            y = y1/y2s[y1s.index(y1)]
+            ys.append(y)
+
+        xs = range(0, len(ys))
+        print(xs, ys)
+
+        axis.plot(xs, ys, ls="", marker="o")
+        axis.set_xlabel("Cycle")
+        axis.set_ylabel("Ratio")
+        plt.tight_layout()
