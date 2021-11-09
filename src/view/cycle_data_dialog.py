@@ -49,7 +49,7 @@ class CycleDataDialog(QDialog):
 
     def _create_title_bar(self):
         layout = QHBoxLayout()
-        title = QLabel("hi")
+        title = QLabel("Ratios and cps per cycle")
         layout.addWidget(title)
         return layout
 
@@ -111,10 +111,10 @@ class CycleDataDialog(QDialog):
 
 
     def create_ratio_plot(self, spot, axis):
+        # TODO - add method to this section
         axis.clear()
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
-        print("ratios")
 
         y1s = spot.mass_peaks["18O"][0].detector_corrected_cps_data
         y2s = spot.mass_peaks["16O"][0].detector_corrected_cps_data
@@ -125,7 +125,6 @@ class CycleDataDialog(QDialog):
             ys.append(y)
 
         xs = range(0, len(ys))
-        print(xs, ys)
 
         axis.plot(xs, ys, ls="", marker="o")
         axis.set_xlabel("Cycle")
