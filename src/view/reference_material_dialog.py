@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QPushButton, QRadioButton, \
-    QGridLayout
+    QGridLayout, QWidget
 
 from src.model.elements import Element
 from src.model.settings.isotope_reference_materials import *
@@ -18,8 +18,8 @@ class ReferenceMaterialSelectionDialog(QDialog):
         title = QLabel("Select a primary reference material")
         secondary_title = QLabel("Select a secondary reference material")
 
-        self.reference_list = QVBoxLayout()
-        self.secondary_reference_list = QVBoxLayout()
+        self.reference_list = QWidget()
+        self.secondary_reference_list = QWidget()
         self.new_reference_material_button = QPushButton("New reference")
         self.new_reference_material_button.setFixedWidth(150)
         self.new_reference_material_button.clicked.connect(self.new_reference_material_button_clicked)
@@ -44,16 +44,20 @@ class ReferenceMaterialSelectionDialog(QDialog):
         else:
             raise Exception
 
+        layout_one = QVBoxLayout()
+        layout_two = QVBoxLayout()
         for i in range(0, len(reference_materials)):
             box1 = QRadioButton(reference_materials[i])
             box2 = QRadioButton(reference_materials[i])
-            self.reference_list.addWidget(box1)
-            self.secondary_reference_list.addWidget(box2)
+            layout_one.addWidget(box1)
+            layout_two.addWidget(box2)
+        self.reference_list.setLayout(layout_one)
+        self.secondary_reference_list.setLayout(layout_two)
 
         layout.addWidget(title, 0, 0)
         layout.addWidget(secondary_title, 0, 1)
-        layout.addLayout(self.reference_list, 1, 0)
-        layout.addLayout(self.secondary_reference_list, 1, 1)
+        layout.addWidget(self.reference_list, 1, 0)
+        layout.addWidget(self.secondary_reference_list, 1, 1)
         layout.addWidget(self.new_reference_material_button, 2, 0)
         layout.addWidget(self.buttonBox, 2, 1)
         self.setLayout(layout)
