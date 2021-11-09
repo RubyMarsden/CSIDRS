@@ -22,13 +22,13 @@ if __name__ == "__main__":
     model = SidrsModel(signals)
     window = SidrsWindow(model)
 
-    model.isotopes = ["16O", "18O"]
-    model.material = "Zircon"
-
-    filenames = os.listdir("data/ExampleOdata")
-    full_filenames = ["data/ExampleOdata/" + filename for filename in filenames]
-    model.import_all_files(full_filenames)
-    model.signals.sampleNamesUpdated.emit(model.sample_names)
+    # model.isotopes = ["16O", "18O"]
+    # model.material = "Zircon"
+    #
+    # filenames = os.listdir("data/ExampleOdata")
+    # full_filenames = ["data/ExampleOdata/" + filename for filename in filenames]
+    # model.import_all_files(full_filenames)
+    # model.signals.sampleNamesUpdated.emit(model.sample_names)
 
 
     set_except_hook(window)
