@@ -86,30 +86,24 @@ class SidrsModel:
     def process_data(self):
         print("Processing...")
         self._create_samples_from_sample_names(self.spots)
-        print([sample.name for sample in self.samples_by_name.values()])
-        # primary_reference_material_exists = []
-        # secondary_reference_material_exists = []
+        primary_reference_material_exists = False
+        secondary_reference_material_exists = False
         for sample in self.samples_by_name.values():
-            print(self.primary_reference_material)
-            print(sample.name)
             if sample.name == self.primary_reference_material:
                 sample.is_primary_reference_material = True
-                # primary_reference_material_exists.append(sample.name)
-                print(sample.name)
+                primary_reference_material_exists = True
             elif sample.name == self.secondary_reference_material:
                 sample.is_secondary_reference_material = True
-                # secondary_reference_material_exists.append(sample.name)
+                secondary_reference_material_exists = True
 
-        # if primary_reference_material_exists and secondary_reference_material_exists:
-        #     print(primary_reference_material_exists, secondary_reference_material_exists)
-        # else:
-        #     raise Exception("The reference materials selected does not match your sample data")
+        if primary_reference_material_exists and secondary_reference_material_exists:
+            print(primary_reference_material_exists, secondary_reference_material_exists)
+        else:
+            raise Exception("The reference materials selected does not match your sample data")
 
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 spot.calculate_relative_secondary_ion_yield()
-
-
 
     ###############
     ### Signals ###

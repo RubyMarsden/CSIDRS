@@ -79,7 +79,6 @@ class ReferenceMaterialSelectionDialog(QDialog):
         self.setLayout(layout)
 
     def get_selected_reference_material(self):
-        print(self.primary_reference_material_selection)
         self.signals.referenceMaterialsInput.emit(
             self.primary_reference_material_selection,
             self.secondary_reference_material_selection
