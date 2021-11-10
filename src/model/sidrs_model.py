@@ -15,10 +15,13 @@ class SidrsModel:
         self.imported_files = []
         self.isotopes = None
         self.material = None
+        self.primary_reference_material = None
+        self.secondary_reference_material = None
 
         self.signals.isotopesInput.connect(self._isotopes_input)
         self.signals.materialInput.connect(self._material_input)
         self.signals.sampleNamesUpdated.connect(self._sample_names_updated)
+        self.signals.referenceMaterialsInput.connect(self._reference_material_tag_samples)
 
     #################
     ### Importing ###
@@ -75,6 +78,7 @@ class SidrsModel:
                 if sample_name in spot.full_sample_name:
                     self.samples_by_name[sample_name].spots.append(spot)
 
+
     ##################
     ### Processing ###
     ##################
@@ -82,9 +86,30 @@ class SidrsModel:
     def process_data(self):
         print("Processing...")
         self._create_samples_from_sample_names(self.spots)
+        print([sample.name for sample in self.samples_by_name.values()])
+        # primary_reference_material_exists = []
+        # secondary_reference_material_exists = []
+        for sample in self.samples_by_name.values():
+            print(self.primary_reference_material)
+            print(sample.name)
+            if sample.name == self.primary_reference_material:
+                sample.is_primary_reference_material = True
+                # primary_reference_material_exists.append(sample.name)
+                print(sample.name)
+            elif sample.name == self.secondary_reference_material:
+                sample.is_secondary_reference_material = True
+                # secondary_reference_material_exists.append(sample.name)
+
+        # if primary_reference_material_exists and secondary_reference_material_exists:
+        #     print(primary_reference_material_exists, secondary_reference_material_exists)
+        # else:
+        #     raise Exception("The reference materials selected does not match your sample data")
+
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 spot.calculate_relative_secondary_ion_yield()
+
+
 
     ###############
     ### Signals ###
@@ -99,3 +124,9 @@ class SidrsModel:
 
     def _sample_names_updated(self, sample_names):
         self.list_of_sample_names = sample_names
+
+
+    def _reference_material_tag_samples(self, primary_reference_material, secondary_reference_material):
+        self.primary_reference_material = primary_reference_material
+        self.secondary_reference_material = secondary_reference_material
+

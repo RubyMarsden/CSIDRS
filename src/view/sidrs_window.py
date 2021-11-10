@@ -49,8 +49,9 @@ class SidrsWindow(QMainWindow):
         dialog = ReferenceMaterialSelectionDialog(self.model)
         result = dialog.exec()
         if result:
+            dialog.get_selected_reference_material()
             self.on_reference_material_selected()
-            return dialog.get_selected_reference_material()
+
         return None
         # TODO: Make it go back if no reference material selected and forward to next screen if there is.
 
