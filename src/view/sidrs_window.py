@@ -46,9 +46,7 @@ class SidrsWindow(QMainWindow):
         self.next_button.setEnabled(True)
 
     def next_button_clicked(self):
-        element = self.model.element
-        material = self.model.material
-        dialog = ReferenceMaterialSelectionDialog(element, material)
+        dialog = ReferenceMaterialSelectionDialog(self.model)
         result = dialog.exec()
         if result:
             self.on_reference_material_selected()

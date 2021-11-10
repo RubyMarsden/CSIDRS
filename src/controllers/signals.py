@@ -8,3 +8,4 @@ class Signals(QObject):
     materialInput = pyqtSignal(str)
     filenamesUpdated = pyqtSignal(list)
     sampleNamesUpdated = pyqtSignal(list)
+    standardsInput = pyqtSignal(str, str)
