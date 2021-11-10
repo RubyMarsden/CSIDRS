@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QDialog, QLayout, QVBoxLayout, QPushButton, QHBoxLay
 from src.view.basic_data_check_widget import BasicDataCheckWidget
 from src.view.cycle_data_dialog import CycleDataDialog
 from src.view.drift_correction_widget import DriftCorrectionWidget
+from src.view.sample_tree import SampleTreeWidget
 
 
 class DataProcessingDialog(QDialog):
@@ -10,6 +11,7 @@ class DataProcessingDialog(QDialog):
         QDialog.__init__(self)
 
         self.samples = samples
+        self.sample_tree = SampleTreeWidget()
 
         self.setWindowTitle("Data processing")
         self.setMinimumWidth(500)
@@ -25,8 +27,9 @@ class DataProcessingDialog(QDialog):
     def _create_right_layout(self):
         layout = QVBoxLayout()
         button_layout = QHBoxLayout()
-        #TODO deal with the sample tree
-        sample_tree = QTreeWidget()
+
+        self.sample_tree.set_samples(self.samples)
+        self.sample_tree.select_first_spot()
 
         next_button = QPushButton("Next")
         back_button = QPushButton("Back")
@@ -34,7 +37,7 @@ class DataProcessingDialog(QDialog):
         button_layout.addWidget(back_button)
         button_layout.addWidget(next_button)
 
-        layout.addWidget(sample_tree)
+        layout.addWidget(self.sample_tree)
         layout.addLayout(button_layout)
         return layout
 

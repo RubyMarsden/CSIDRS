@@ -5,5 +5,7 @@ class Sample:
         self.is_primary_reference_material = False
         self.is_secondary_reference_material = False
 
+        self.colour = None
+
     def __repr__(self):
         return self.name

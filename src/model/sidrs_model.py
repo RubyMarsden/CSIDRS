@@ -1,6 +1,7 @@
 import re
 
 from src.model.sample import Sample
+from src.model.settings.colours import colour_list
 from src.model.spot import Spot
 import csv
 
@@ -78,6 +79,8 @@ class SidrsModel:
                 if sample_name in spot.full_sample_name:
                     self.samples_by_name[sample_name].spots.append(spot)
 
+        for i, sample in enumerate(self.samples_by_name.values()):
+            sample.colour = colour_list[i]
 
     ##################
     ### Processing ###
@@ -118,7 +121,6 @@ class SidrsModel:
 
     def _sample_names_updated(self, sample_names):
         self.list_of_sample_names = sample_names
-
 
     def _reference_material_tag_samples(self, primary_reference_material, secondary_reference_material):
         self.primary_reference_material = primary_reference_material

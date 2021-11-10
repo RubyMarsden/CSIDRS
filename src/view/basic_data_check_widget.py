@@ -91,32 +91,37 @@ class BasicDataCheckWidget(QWidget):
 
     def create_ion_yield_time_plot(self, samples, axis):
         axis.clear()
-        xs = []
-        ys = []
+
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
         for sample in samples:
+            xs = []
+            ys = []
+            colour = sample.colour
+            print(colour)
             for spot in sample.spots:
                 xs.append(spot.datetime)
                 ys.append(spot.secondary_ion_yield)
 
-        axis.plot(xs, ys, marker="o", ls="")
+            axis.plot(xs, ys, marker="o", ls="", color=colour)
+
         axis.set_xlabel("Time")
         axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
 
     def create_ion_distance_data_plot(self, samples, axis):
         axis.clear()
-        xs = []
-        ys = []
+
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
         for sample in samples:
+            xs = []
+            ys = []
             for spot in sample.spots:
                 xs.append(spot.distance_from_mount_centre)
                 ys.append(spot.secondary_ion_yield)
 
-        axis.plot(xs, ys, marker="o", ls="")
+            axis.plot(xs, ys, marker="o", ls="", color=sample.colour)
         axis.set_xlabel("Distance from centre of mount")
         axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
@@ -126,12 +131,14 @@ class BasicDataCheckWidget(QWidget):
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        xs = []
-        ys = []
         for sample in samples:
+            xs = []
+            ys = []
             for spot in sample.spots:
                 xs.append(int(spot.x_position))
                 ys.append(int(spot.y_position))
+
+            axis.plot(xs, ys, marker="o", ls="", markersize=2, color=sample.colour)
 
         circle = Circle((0, 0), 9000)
         circle.set_color("lightgoldenrodyellow")
@@ -139,7 +146,7 @@ class BasicDataCheckWidget(QWidget):
         range_of_radians = np.linspace(0, 2 * np.pi, 100)
         axis.plot(7000 * np.cos(range_of_radians), 7000 * np.sin(range_of_radians), marker="", ls="-", color="r")
         axis.plot(5000 * np.cos(range_of_radians), 5000 * np.sin(range_of_radians), marker="", ls="--", color="r")
-        axis.plot(xs, ys, marker="o", ls="", markersize=2)
+
         axis.add_patch(circle)
 
         axis.set_xlabel("X position")
