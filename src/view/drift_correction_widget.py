@@ -1,4 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget, QTreeWidgetItemIterator
+from matplotlib import pyplot as plt
+from matplotlib.gridspec import GridSpec
+
+from src.utils import gui_utils
 
 
 class DriftCorrectionWidget(QWidget):
@@ -6,6 +10,13 @@ class DriftCorrectionWidget(QWidget):
         QWidget.__init__(self)
 
         layout = QHBoxLayout()
+
+        self.primary_sample = [
+            sample for sample in data_processing_dialog.samples if sample.is_primary_reference_material
+                                ]
+        self.secondary_sample = [
+            sample for sample in data_processing_dialog.samples if sample.is_secondary_reference_material
+                                ]
 
         lhs_layout = self._create_lhs_layout()
         rhs_layout = self._create_rhs_layout()
@@ -32,3 +43,38 @@ class DriftCorrectionWidget(QWidget):
         layout.addWidget(graph_secondary_standard)
 
         return layout
+
+
+    def _create_graph_widget(self):
+        graph = QWidget()
+        layout = QVBoxLayout()
+
+        self.fig = plt.figure()
+
+        self.spot_visible_grid_spec = GridSpec(2, 1)
+        # self.spot_invisible_grid_spec = GridSpec(1, 1)
+        self.primary_drift_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
+        self.secondary_check_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
+
+        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis)
+        self.create_secondary_reference_material_check_graph(self.secondary_sample, self.secondary_check_axis)
+
+        graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
+
+        layout.addWidget(graph_widget)
+
+        graph.setLayout(layout)
+
+        return graph
+
+
+    def _create_primary_drift_graph(self, sample, axis):
+        axis.clear()
+        xs = []
+        ys = []
+        yerrors = []
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+
+        for spot in sample.spots:
+            xs.append(spot.outlier)

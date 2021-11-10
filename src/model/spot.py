@@ -55,4 +55,7 @@ class Spot:
         total_cps = sum(cps_values)
         self.secondary_ion_yield = total_cps/(self.primary_beam_current * (10 ** 18))
 
-
+    def calculate_raw_isotope_ratios(self, methods):
+        for method in methods:
+            # TODO fix this - it's a problem :(
+        return
