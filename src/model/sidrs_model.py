@@ -1,7 +1,9 @@
 import re
 
+from src.model.elements import Element
 from src.model.sample import Sample
 from src.model.settings.colours import colour_list
+from src.model.settings.methods_from_isotopes import list_of_method_dictionaries
 from src.model.spot import Spot
 import csv
 
@@ -18,6 +20,8 @@ class SidrsModel:
         self.material = None
         self.primary_reference_material = None
         self.secondary_reference_material = None
+
+        self.method_dictionary = None
 
         self.signals.isotopesInput.connect(self._isotopes_input)
         self.signals.materialInput.connect(self._material_input)
@@ -107,7 +111,7 @@ class SidrsModel:
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 spot.calculate_relative_secondary_ion_yield()
-                spot.calculate_raw_isotope_ratios()
+                spot.calculate_raw_isotope_ratios(self.method_dictionary)
 
     ###############
     ### Signals ###
@@ -116,6 +120,7 @@ class SidrsModel:
     def _isotopes_input(self, isotopes, enum):
         self.isotopes = isotopes
         self.element = enum
+        self.method_dictionary = self.create_method_dictionary_from_isotopes(self.isotopes)
 
     def _material_input(self, material):
         self.material = material
@@ -127,3 +132,9 @@ class SidrsModel:
         self.primary_reference_material = primary_reference_material
         self.secondary_reference_material = secondary_reference_material
 
+    def create_method_dictionary_from_isotopes(self, isotopes):
+        for dictionary in list_of_method_dictionaries:
+            if set(isotopes) == set(dictionary["isotopes"]):
+                return dictionary
+
+        raise Exception("The isotopes selected are not currently part of a method. For instructions on how to add methods view the HACKING.md file.")

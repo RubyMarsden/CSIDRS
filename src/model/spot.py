@@ -50,15 +50,26 @@ class Spot:
 
             mass_peak.correct_cps_data_for_detector_parameters()
             mass_peak.outlier_resistant_mean_and_st_error()
-            self.mass_peaks[mass_peak_name] = [mass_peak]
+            self.mass_peaks[mass_peak_name] = mass_peak
 
     # TODO write a test for this function
     def calculate_relative_secondary_ion_yield(self):
-        cps_values = [mass_peak[0].mean_cps for mass_peak in self.mass_peaks.values()]
+        cps_values = [mass_peak.mean_cps for mass_peak in self.mass_peaks.values()]
         total_cps = sum(cps_values)
         self.secondary_ion_yield = total_cps/(self.primary_beam_current * (10 ** 18))
 
-    def calculate_raw_isotope_ratios(self, methods):
-        for method in methods:
-            # TODO fix this - it's a problem :(
-            return
+    def calculate_raw_isotope_ratios(self, method_dictionary):
+        self.raw_isotope_ratios = {}
+        print(method_dictionary.values())
+        for ratio_dictionary in method_dictionary["ratios"]:
+            numerator = ratio_dictionary["numerator"]
+            denominator = ratio_dictionary["denominator"]
+            mass_peak_numerator = self.mass_peaks[numerator]
+            mass_peak_denominator = self.mass_peaks[denominator]
+
+            ratios = []
+            for i, j in zip(mass_peak_numerator.detector_corrected_cps_data, mass_peak_denominator.detector_corrected_cps_data):
+                ratios.append(i/j)
+
+            self.raw_isotope_ratios[numerator + denominator] = ratios
+            print(ratios)

@@ -101,8 +101,8 @@ class CycleDataDialog(QDialog):
         axis.spines['right'].set_visible(False)
 
         for mass_peak in spot.mass_peaks.values():
-            xs = range(0, len(mass_peak[0].detector_corrected_cps_data))
-            ys = mass_peak[0].detector_corrected_cps_data
+            xs = range(0, len(mass_peak.detector_corrected_cps_data))
+            ys = mass_peak.detector_corrected_cps_data
 
             axis.plot(xs, ys, ls="", marker="x")
         axis.set_xlabel("Cycle")

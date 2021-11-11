@@ -1,7 +1,6 @@
 ######################################
 ### Getting data from old asc file ###
 ######################################
-import numpy as np
 
 DETECTOR_LINE = 25
 DETECTOR_PARAMETERS_LINE = 62
