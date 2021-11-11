@@ -104,7 +104,7 @@ class SidrsModel:
                 secondary_reference_material_exists = True
 
         if primary_reference_material_exists and secondary_reference_material_exists:
-            print(primary_reference_material_exists, secondary_reference_material_exists)
+            print("fix this")
         else:
             raise Exception("The reference materials selected does not match your sample data")
 

@@ -60,7 +60,6 @@ class Spot:
 
     def calculate_raw_isotope_ratios(self, method_dictionary):
         self.raw_isotope_ratios = {}
-        print(method_dictionary.values())
         for ratio_dictionary in method_dictionary["ratios"]:
             numerator = ratio_dictionary["numerator"]
             denominator = ratio_dictionary["denominator"]
@@ -72,4 +71,3 @@ class Spot:
                 ratios.append(i/j)
 
             self.raw_isotope_ratios[numerator + denominator] = ratios
-            print(ratios)

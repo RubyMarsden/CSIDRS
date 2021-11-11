@@ -116,8 +116,8 @@ class CycleDataDialog(QDialog):
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        y1s = spot.mass_peaks["18O"][0].detector_corrected_cps_data
-        y2s = spot.mass_peaks["16O"][0].detector_corrected_cps_data
+        y1s = spot.mass_peaks["18O"].detector_corrected_cps_data
+        y2s = spot.mass_peaks["16O"].detector_corrected_cps_data
 
         ys = []
         for y1 in y1s:

@@ -98,7 +98,6 @@ class BasicDataCheckWidget(QWidget):
             xs = []
             ys = []
             colour = sample.colour
-            print(colour)
             for spot in sample.spots:
                 xs.append(spot.datetime)
                 ys.append(spot.secondary_ion_yield)
