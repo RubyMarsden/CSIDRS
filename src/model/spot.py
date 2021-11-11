@@ -4,7 +4,8 @@ from datetime import datetime
 from src.model.mass_peak import MassPeak
 from src.model.maths import vector_length_from_origin
 from src.model.settings.asc_file_settings_general import *
-from src.model.get_data_from_import import get_data_from_old_asc, get_primary_beam_current_data_old_asc
+from src.model.get_data_from_import import get_data_from_old_asc, get_primary_beam_current_data_old_asc, \
+    get_dtfa_x_and_y_from_old_asc
 from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time
 
 
@@ -29,6 +30,8 @@ class Spot:
         self.x_position = int(spot_data[X_POSITION_INDEX[0]][X_POSITION_INDEX[1]])
         self.y_position = int(spot_data[Y_POSITION_INDEX[0]][Y_POSITION_INDEX[1]])
         self.distance_from_mount_centre = vector_length_from_origin(self.x_position, self.y_position)
+
+        self.dtfa_x, self.dtfa_y = get_dtfa_x_and_y_from_old_asc(self.spot_data)
 
         self.primary_beam_current = get_primary_beam_current_data_old_asc(self.spot_data)
         self.secondary_ion_yield = None
@@ -58,4 +61,4 @@ class Spot:
     def calculate_raw_isotope_ratios(self, methods):
         for method in methods:
             # TODO fix this - it's a problem :(
-        return
+            return

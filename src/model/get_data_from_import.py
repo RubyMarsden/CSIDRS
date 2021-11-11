@@ -78,5 +78,19 @@ def get_primary_beam_current_data_old_asc(spot_data):
     primary_end_data = spot_data[line_number + 1][-1]
     data, magnitude = primary_end_data.split("E")
     primary_end_value = float(data) * 10 ** int(magnitude)
-    primary_beam_current = (primary_start_value + primary_end_value)/2
+    primary_beam_current = (primary_start_value + primary_end_value) / 2
     return primary_beam_current
+
+
+def get_dtfa_x_and_y_from_old_asc(spot_data):
+    line_number = 138
+    contains_beam_centering = False
+    while not contains_beam_centering:
+        line_number += 1
+        line = spot_data[line_number]
+        contains_beam_centering = "Field App (DT1)" in line
+
+    dtfa_x = int(spot_data[line_number][3])
+    dtfa_y = int(spot_data[line_number][4])
+
+    return dtfa_x, dtfa_y
