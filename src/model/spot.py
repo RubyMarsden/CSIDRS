@@ -37,6 +37,7 @@ class Spot:
         self.secondary_ion_yield = None
 
         self.mass_peaks = {}
+        self.raw_isotope_ratios = {}
 
         for mass_peak_name in self.mass_peak_names:
             raw_cps_data, detector_data = get_data_from_old_asc(self.spot_data, mass_peak_name)
@@ -59,7 +60,7 @@ class Spot:
         self.secondary_ion_yield = total_cps/(self.primary_beam_current * (10 ** 18))
 
     def calculate_raw_isotope_ratios(self, method_dictionary):
-        self.raw_isotope_ratios = {}
+
         for ratio_dictionary in method_dictionary["ratios"]:
             numerator = ratio_dictionary["numerator"]
             denominator = ratio_dictionary["denominator"]
@@ -70,4 +71,4 @@ class Spot:
             for i, j in zip(mass_peak_numerator.detector_corrected_cps_data, mass_peak_denominator.detector_corrected_cps_data):
                 ratios.append(i/j)
 
-            self.raw_isotope_ratios[numerator + denominator] = ratios
+            self.raw_isotope_ratios[numerator + "/" + denominator] = ratios

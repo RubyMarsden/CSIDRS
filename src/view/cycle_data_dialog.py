@@ -116,17 +116,11 @@ class CycleDataDialog(QDialog):
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        y1s = spot.mass_peaks["18O"].detector_corrected_cps_data
-        y2s = spot.mass_peaks["16O"].detector_corrected_cps_data
-
-        ys = []
-        for y1 in y1s:
-            y = y1/y2s[y1s.index(y1)]
-            ys.append(y)
-
+        for key, value in spot.raw_isotope_ratios.items():
+            axis.set_ylabel(key)
+            ys = value
         xs = range(0, len(ys))
 
         axis.plot(xs, ys, ls="", marker="o")
         axis.set_xlabel("Cycle")
-        axis.set_ylabel("Ratio")
         plt.tight_layout()
