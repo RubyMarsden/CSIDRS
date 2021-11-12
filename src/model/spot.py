@@ -1,8 +1,9 @@
+import math
 import re
 from datetime import datetime
 
 from src.model.mass_peak import MassPeak
-from src.model.maths import vector_length_from_origin
+from src.model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev
 from src.model.settings.asc_file_settings_general import *
 from src.model.get_data_from_import import get_data_from_old_asc, get_primary_beam_current_data_old_asc, \
     get_dtfa_x_and_y_from_old_asc
@@ -20,7 +21,7 @@ class Spot:
         self.spot_data = spot_data
         self.date = self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]]
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
-        #TODO - what happens at midnight?
+        # TODO - what happens at midnight?
         if self.twelve_hr_data == "AM":
             self.twenty_four_hour_time = self.time
         elif self.twelve_hr_data == "PM":
@@ -38,6 +39,7 @@ class Spot:
 
         self.mass_peaks = {}
         self.raw_isotope_ratios = {}
+        self.mean_st_error_isotope_ratios = {}
 
         for mass_peak_name in self.mass_peak_names:
             raw_cps_data, detector_data = get_data_from_old_asc(self.spot_data, mass_peak_name)
@@ -57,18 +59,26 @@ class Spot:
     def calculate_relative_secondary_ion_yield(self):
         cps_values = [mass_peak.mean_cps for mass_peak in self.mass_peaks.values()]
         total_cps = sum(cps_values)
-        self.secondary_ion_yield = total_cps/(self.primary_beam_current * (10 ** 18))
+        self.secondary_ion_yield = total_cps / (self.primary_beam_current * (10 ** 18))
 
     def calculate_raw_isotope_ratios(self, method_dictionary):
 
         for ratio_dictionary in method_dictionary["ratios"]:
             numerator = ratio_dictionary["numerator"]
             denominator = ratio_dictionary["denominator"]
-            mass_peak_numerator = self.mass_peaks[numerator]
-            mass_peak_denominator = self.mass_peaks[denominator]
 
             ratios = []
-            for i, j in zip(mass_peak_numerator.detector_corrected_cps_data, mass_peak_denominator.detector_corrected_cps_data):
-                ratios.append(i/j)
+            for i, j in zip(self.mass_peaks[numerator].detector_corrected_cps_data,
+                            self.mass_peaks[denominator].detector_corrected_cps_data):
+                ratios.append(i / j)
 
             self.raw_isotope_ratios[numerator + "/" + denominator] = ratios
+
+    def calculate_mean_st_error_for_isotope_ratios(self):
+        for ratio_name, raw_ratio_list in self.raw_isotope_ratios.items():
+            # TODO fix number of outliers allowed
+            mean, st_dev, n = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
+            st_error = st_dev / math.sqrt(n)
+            self.mean_st_error_isotope_ratios[ratio_name] = (mean, st_error)
+
+        print(self.mean_st_error_isotope_ratios)
