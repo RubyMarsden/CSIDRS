@@ -79,6 +79,5 @@ class Spot:
             # TODO fix number of outliers allowed
             mean, st_dev, n = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
             st_error = st_dev / math.sqrt(n)
-            self.mean_st_error_isotope_ratios[ratio_name] = (mean, st_error)
+            self.mean_st_error_isotope_ratios[ratio_name] = [mean, st_error]
 
-        print(self.mean_st_error_isotope_ratios)

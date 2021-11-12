@@ -13,10 +13,10 @@ class DriftCorrectionWidget(QWidget):
 
         self.primary_sample = [
             sample for sample in data_processing_dialog.samples if sample.is_primary_reference_material
-                                ]
+        ]
         self.secondary_sample = [
             sample for sample in data_processing_dialog.samples if sample.is_secondary_reference_material
-                                ]
+        ]
 
         lhs_layout = self._create_lhs_layout()
         rhs_layout = self._create_rhs_layout()
@@ -39,11 +39,13 @@ class DriftCorrectionWidget(QWidget):
         graph_primary_drift = QLabel("primary std graph")
         graph_secondary_standard = QLabel("Secondary std graph")
 
+        graph_widget = self._create_graph_widget()
+
         layout.addWidget(graph_primary_drift)
         layout.addWidget(graph_secondary_standard)
+        layout.addWidget(graph_widget)
 
         return layout
-
 
     def _create_graph_widget(self):
         graph = QWidget()
@@ -56,8 +58,8 @@ class DriftCorrectionWidget(QWidget):
         self.primary_drift_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.secondary_check_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
-        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis)
-        self.create_secondary_reference_material_check_graph(self.secondary_sample, self.secondary_check_axis)
+        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis, "18O/16O")
+        # self.create_secondary_reference_material_check_graph(self.secondary_sample, self.secondary_check_axis)
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
@@ -67,8 +69,7 @@ class DriftCorrectionWidget(QWidget):
 
         return graph
 
-
-    def _create_primary_drift_graph(self, sample, axis):
+    def _create_primary_drift_graph(self, sample, axis, ratio_name):
         axis.clear()
         xs = []
         ys = []
@@ -76,5 +77,13 @@ class DriftCorrectionWidget(QWidget):
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        for spot in sample.spots:
-            xs.append(spot.outlier)
+        for spot in sample[0].spots:
+            ys.append(spot.mean_st_error_isotope_ratios[ratio_name][0])
+            yerrors.append(spot.mean_st_error_isotope_ratios[ratio_name][1])
+            xs.append(spot.datetime)
+
+        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o")
+        axis.set_xlabel("Time")
+        axis.set_ylabel(ratio_name)
+        plt.tight_layout()
+
