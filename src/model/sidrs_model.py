@@ -2,7 +2,7 @@ import re
 
 from src.model.elements import Element
 from src.model.sample import Sample
-from src.model.settings.colours import colour_list
+from src.model.settings.colours import colour_list, q_colour_list
 from src.model.settings.methods_from_isotopes import list_of_method_dictionaries
 from src.model.spot import Spot
 import csv
@@ -85,6 +85,7 @@ class SidrsModel:
 
         for i, sample in enumerate(self.samples_by_name.values()):
             sample.colour = colour_list[i]
+            sample.q_colour = q_colour_list[i]
 
     ##################
     ### Processing ###

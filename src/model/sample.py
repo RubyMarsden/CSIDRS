@@ -6,6 +6,7 @@ class Sample:
         self.is_secondary_reference_material = False
 
         self.colour = None
+        self.q_colour = None
 
     def __repr__(self):
         return self.name
