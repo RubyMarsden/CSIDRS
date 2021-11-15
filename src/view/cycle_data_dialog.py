@@ -1,6 +1,7 @@
 import matplotlib
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget
 from matplotlib.gridspec import GridSpec
+from matplotlib.ticker import MaxNLocator
 
 from src.utils import gui_utils
 from src.view.sample_tree import SampleTreeWidget
@@ -24,10 +25,10 @@ class CycleDataDialog(QDialog):
         layout.addLayout(right_widget)
 
         self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.update_graphs(
-                                                            self.sample_tree.current_spot(),
-                                                            self.counts_axis,
-                                                            self.ratios_axis
-                                                            )
+            self.sample_tree.current_spot(),
+            self.counts_axis,
+            self.ratios_axis
+        )
                                                          )
 
         self.setLayout(layout)
@@ -66,7 +67,6 @@ class CycleDataDialog(QDialog):
             self.create_ratio_plot(spot, ratios_axis)
             self.canvas.draw()
 
-
     ################
     ### Plotting ###
     ################
@@ -95,20 +95,23 @@ class CycleDataDialog(QDialog):
 
     def create_counts_plot(self, spot, axis):
         axis.clear()
-        xs = []
-        ys = []
+
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
         for mass_peak in spot.mass_peaks.values():
-            xs = range(0, len(mass_peak.detector_corrected_cps_data))
             ys = mass_peak.detector_corrected_cps_data
-
+            xs = range(1, 1 + len(ys))
             axis.plot(xs, ys, ls="", marker="x")
-        axis.set_xlabel("Cycle")
-        axis.set_ylabel("Counts per second")
-        plt.tight_layout()
 
+
+        # TODO this makes no goddamn sense
+        print(xs)
+        axis.set_xlabel("Cycle")
+        #axis.xaxis.set_major_locator(MaxNLocator(integer=True))
+        axis.set_ylabel("Counts per second")
+        plt.xticks(xs, xs)
+        plt.tight_layout()
 
     def create_ratio_plot(self, spot, axis):
         # TODO - add method to this section
@@ -119,8 +122,10 @@ class CycleDataDialog(QDialog):
         for key, value in spot.raw_isotope_ratios.items():
             axis.set_ylabel(key)
             ys = value
-        xs = range(0, len(ys))
+        xs = range(1, 1 + len(ys))
 
         axis.plot(xs, ys, ls="", marker="o")
         axis.set_xlabel("Cycle")
+        print(xs)
+        plt.xticks(xs, xs)
         plt.tight_layout()
