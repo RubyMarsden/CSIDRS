@@ -114,6 +114,7 @@ class SidrsModel:
                 spot.calculate_relative_secondary_ion_yield()
                 spot.calculate_raw_isotope_ratios(self.method_dictionary)
                 spot.calculate_mean_st_error_for_isotope_ratios()
+                spot.calculate_raw_delta_for_isotope_ratio(self.element)
 
     ###############
     ### Signals ###

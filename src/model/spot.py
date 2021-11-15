@@ -2,11 +2,14 @@ import math
 import re
 from datetime import datetime
 
+from src.model.elements import Element
 from src.model.mass_peak import MassPeak
-from src.model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev
+from src.model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev, \
+    calculate_delta_from_ratio
 from src.model.settings.asc_file_settings_general import *
 from src.model.get_data_from_import import get_data_from_old_asc, get_primary_beam_current_data_old_asc, \
     get_dtfa_x_and_y_from_old_asc
+from src.model.settings.constants import oxygen_isotope_reference, sulphur_isotope_reference, carbon_isotope_reference
 from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time
 
 
@@ -40,6 +43,7 @@ class Spot:
         self.mass_peaks = {}
         self.raw_isotope_ratios = {}
         self.mean_st_error_isotope_ratios = {}
+        self.raw_deltas = {}
 
         for mass_peak_name in self.mass_peak_names:
             raw_cps_data, detector_data = get_data_from_old_asc(self.spot_data, mass_peak_name)
@@ -81,3 +85,20 @@ class Spot:
             st_error = st_dev / math.sqrt(n)
             self.mean_st_error_isotope_ratios[ratio_name] = [mean, st_error]
 
+    def calculate_raw_delta_for_isotope_ratio(self, element):
+        # TODO this is not quite right yet
+        if element == Element.OXY:
+            standard_ratios = oxygen_isotope_reference["VSMOW"]
+        elif element == Element.SUL:
+            standard_ratios = sulphur_isotope_reference["VCDT"]
+        elif element == Element.CAR:
+            standard_ratios = carbon_isotope_reference["VPDB"]
+        else:
+            raise Exception
+
+        for ratio_name, [mean, st_error] in self.mean_st_error_isotope_ratios.items():
+            standard_ratio = standard_ratios[ratio_name]
+            delta, delta_uncertainty = calculate_delta_from_ratio(mean, st_error, standard_ratio)
+            self.raw_deltas["delta "+ratio_name] = [delta, delta_uncertainty]
+
+        print(self.raw_deltas)

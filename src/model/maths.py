@@ -32,6 +32,13 @@ def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed
     return np.mean(clean_data), np.std(clean_data), len(clean_data)
 
 
+def calculate_delta_from_ratio(mean, st_error, standard_ratio):
+    print(mean, standard_ratio)
+    delta = ((mean / standard_ratio) - 1) * 1000
+    delta_uncertainty = delta * st_error / mean
+    return delta, delta_uncertainty
+
+
 def vector_length_from_origin(x: int, y: int):
     vector_length = math.sqrt(x ** 2 + y ** 2)
     return vector_length
