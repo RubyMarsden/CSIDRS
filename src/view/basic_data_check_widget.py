@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QLabel, QCheckBox
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
+import matplotlib.dates as mdates
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
@@ -105,6 +106,9 @@ class BasicDataCheckWidget(QWidget):
             axis.plot(xs, ys, marker="o", ls="", color=colour)
 
         axis.set_xlabel("Time")
+        plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
+        axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
         axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
 

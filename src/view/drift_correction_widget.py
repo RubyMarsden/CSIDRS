@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget, QTreeWidgetItemIterator
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
+import matplotlib.dates as mdates
 
 from src.utils import gui_utils
 
@@ -53,6 +54,7 @@ class DriftCorrectionWidget(QWidget):
 
         self.fig = plt.figure()
 
+
         self.spot_visible_grid_spec = GridSpec(2, 1)
         # self.spot_invisible_grid_spec = GridSpec(1, 1)
         self.primary_drift_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
@@ -85,5 +87,9 @@ class DriftCorrectionWidget(QWidget):
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o")
         axis.set_xlabel("Time")
         axis.set_ylabel(ratio_name)
+        plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+        axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
         plt.tight_layout()
 
