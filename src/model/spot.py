@@ -101,4 +101,3 @@ class Spot:
             delta, delta_uncertainty = calculate_delta_from_ratio(mean, st_error, standard_ratio)
             self.raw_deltas["delta "+ratio_name] = [delta, delta_uncertainty]
 
-        print(self.raw_deltas)

@@ -33,7 +33,6 @@ def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed
 
 
 def calculate_delta_from_ratio(mean, st_error, standard_ratio):
-    print(mean, standard_ratio)
     delta = ((mean / standard_ratio) - 1) * 1000
     delta_uncertainty = delta * st_error / mean
     return delta, delta_uncertainty

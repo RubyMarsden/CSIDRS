@@ -37,13 +37,8 @@ class DriftCorrectionWidget(QWidget):
     def _create_rhs_layout(self):
         layout = QVBoxLayout()
 
-        graph_primary_drift = QLabel("primary std graph")
-        graph_secondary_standard = QLabel("Secondary std graph")
-
         graph_widget = self._create_graph_widget()
 
-        layout.addWidget(graph_primary_drift)
-        layout.addWidget(graph_secondary_standard)
         layout.addWidget(graph_widget)
 
         return layout
@@ -61,7 +56,7 @@ class DriftCorrectionWidget(QWidget):
         self.secondary_check_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
         self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis, "18O/16O")
-        # self.create_secondary_reference_material_check_graph(self.secondary_sample, self.secondary_check_axis)
+        self._create_secondary_check_graph(self.secondary_sample, self.secondary_check_axis, "18O/16O")
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
@@ -80,16 +75,38 @@ class DriftCorrectionWidget(QWidget):
         axis.spines['right'].set_visible(False)
 
         for spot in sample[0].spots:
-            ys.append(spot.mean_st_error_isotope_ratios[ratio_name][0])
-            yerrors.append(spot.mean_st_error_isotope_ratios[ratio_name][1])
+            ys.append(spot.raw_deltas["delta "+ratio_name][0])
+            yerrors.append(spot.raw_deltas["delta "+ratio_name][1])
             xs.append(spot.datetime)
 
-        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o")
+        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample[0].colour)
         axis.set_xlabel("Time")
-        axis.set_ylabel(ratio_name)
+        axis.set_ylabel("delta "+ratio_name)
         plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
 
         axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         plt.tight_layout()
 
+    def _create_secondary_check_graph(self, sample, axis, ratio_name):
+
+        axis.clear()
+        xs = []
+        ys = []
+        yerrors = []
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+
+        for spot in sample[0].spots:
+            ys.append(spot.raw_deltas["delta " + ratio_name][0])
+            yerrors.append(spot.raw_deltas["delta " + ratio_name][1])
+            xs.append(spot.datetime)
+
+        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample[0].colour)
+        axis.set_xlabel("Time")
+        axis.set_ylabel("delta " + ratio_name)
+        plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+        axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+        plt.tight_layout()
