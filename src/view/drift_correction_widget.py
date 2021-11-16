@@ -75,8 +75,8 @@ class DriftCorrectionWidget(QWidget):
         axis.spines['right'].set_visible(False)
 
         for spot in sample[0].spots:
-            ys.append(spot.raw_deltas["delta "+ratio_name][0])
-            yerrors.append(spot.raw_deltas["delta "+ratio_name][1])
+            ys.append(spot.not_corrected_deltas["delta " + ratio_name][0])
+            yerrors.append(spot.not_corrected_deltas["delta " + ratio_name][1])
             xs.append(spot.datetime)
 
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample[0].colour)
@@ -98,8 +98,8 @@ class DriftCorrectionWidget(QWidget):
         axis.spines['right'].set_visible(False)
 
         for spot in sample[0].spots:
-            ys.append(spot.raw_deltas["delta " + ratio_name][0])
-            yerrors.append(spot.raw_deltas["delta " + ratio_name][1])
+            ys.append(spot.not_corrected_deltas["delta " + ratio_name][0])
+            yerrors.append(spot.not_corrected_deltas["delta " + ratio_name][1])
             xs.append(spot.datetime)
 
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample[0].colour)
