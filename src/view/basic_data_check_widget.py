@@ -1,7 +1,9 @@
 import matplotlib
 import numpy as np
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QLabel, QCheckBox
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QLabel, QCheckBox, \
+    QTableWidgetItem
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 import matplotlib.dates as mdates
@@ -24,6 +26,7 @@ class BasicDataCheckWidget(QWidget):
         lhs_layout = self._create_lhs_layout()
         rhs_layout = self._create_rhs_layout()
 
+
         layout.addLayout(lhs_layout)
         layout.addLayout(rhs_layout)
 
@@ -33,7 +36,7 @@ class BasicDataCheckWidget(QWidget):
         layout = QVBoxLayout()
         button_layout = QHBoxLayout()
 
-        table = QTableWidget()
+        table = self._create_basic_table()
 
         cycle_data_button = QPushButton("Operators only")
         cycle_data_button.clicked.connect(self.on_cycle_data_button_pushed)
@@ -68,6 +71,40 @@ class BasicDataCheckWidget(QWidget):
     def on_data_output_button_pushed(self):
         print("Create a csv")
         return
+
+    #############
+    ### Table ###
+    #############
+
+    def _create_basic_table(self):
+
+        method = self.data_processing_dialog.method_dictionary
+
+        number_of_columns = 5 + method["number_of_ratios"]
+        number_of_rows = 1
+
+        column_headers = ["Sample name"]
+        for ratio in method["ratios"]:
+            ratio_name = "delta " + ratio["numerator"] + "/" + ratio["denominator"]
+            column_headers.append(ratio_name)
+
+        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to mount centre"])
+
+        for sample in self.data_processing_dialog.samples:
+            for spot in sample.spots:
+                number_of_rows += 1
+
+        table = QTableWidget()
+        table.verticalHeader().setVisible(False)
+        table.setColumnCount(number_of_columns)
+        table.setRowCount(number_of_rows)
+
+        table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignHCenter | Qt.Alignment(QtCore.Qt.TextWordWrap))
+        table.horizontalHeader().setStyleSheet("QHeaderView { font-size: 9pt; }")
+        table.horizontalHeader().setMinimumHeight(40)
+        table.setHorizontalHeaderLabels(column_headers)
+
+        return table
 
     ################
     ### Plotting ###
