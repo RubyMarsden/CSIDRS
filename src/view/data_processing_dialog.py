@@ -7,11 +7,13 @@ from src.view.sample_tree import SampleTreeWidget
 
 
 class DataProcessingDialog(QDialog):
-    def __init__(self, samples):
+    def __init__(self, samples, method_dictionary):
         QDialog.__init__(self)
 
         self.samples = samples
         self.sample_tree = SampleTreeWidget()
+
+        self.method_dictionary = method_dictionary
 
         self.setWindowTitle("Data processing")
         self.setMinimumWidth(500)

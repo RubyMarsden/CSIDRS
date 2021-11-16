@@ -1,7 +1,6 @@
 import matplotlib
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget
 from matplotlib.gridspec import GridSpec
-from matplotlib.ticker import MaxNLocator
 
 from src.utils import gui_utils
 from src.view.sample_tree import SampleTreeWidget
@@ -103,10 +102,7 @@ class CycleDataDialog(QDialog):
             xs = range(1, 1 + len(ys))
             axis.plot(xs, ys, ls="", marker="x")
 
-
-        # TODO this makes no goddamn sense
         axis.set_xlabel("Cycle")
-        #axis.xaxis.set_major_locator(MaxNLocator(integer=True))
         axis.set_ylabel("Counts per second")
         plt.xticks(xs, xs)
         axis.set_xticks(xs)
