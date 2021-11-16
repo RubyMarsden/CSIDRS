@@ -29,7 +29,9 @@ def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed
     else:
         clean_data = data_without_outliers
 
-    return np.mean(clean_data), np.std(clean_data), len(clean_data)
+    removed_data = [item for item in data if item not in clean_data]
+
+    return np.mean(clean_data), np.std(clean_data), len(clean_data), removed_data
 
 
 def calculate_delta_from_ratio(mean, st_error, standard_ratio):

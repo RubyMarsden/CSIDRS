@@ -43,7 +43,8 @@ class Spot:
         self.mass_peaks = {}
         self.raw_isotope_ratios = {}
         self.mean_st_error_isotope_ratios = {}
-        self.raw_deltas = {}
+        self.outliers_removed_from_raw_data = {}
+        self.not_corrected_deltas = {}
 
         for mass_peak_name in self.mass_peak_names:
             raw_cps_data, detector_data = get_data_from_old_asc(self.spot_data, mass_peak_name)
@@ -81,9 +82,10 @@ class Spot:
     def calculate_mean_st_error_for_isotope_ratios(self):
         for ratio_name, raw_ratio_list in self.raw_isotope_ratios.items():
             # TODO fix number of outliers allowed
-            mean, st_dev, n = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
+            mean, st_dev, n, removed_data = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
             st_error = st_dev / math.sqrt(n)
             self.mean_st_error_isotope_ratios[ratio_name] = [mean, st_error]
+            self.outliers_removed_from_raw_data[ratio_name] = removed_data
 
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet
@@ -99,5 +101,5 @@ class Spot:
         for ratio_name, [mean, st_error] in self.mean_st_error_isotope_ratios.items():
             standard_ratio = standard_ratios[ratio_name]
             delta, delta_uncertainty = calculate_delta_from_ratio(mean, st_error, standard_ratio)
-            self.raw_deltas["delta "+ratio_name] = [delta, delta_uncertainty]
+            self.not_corrected_deltas["delta " + ratio_name] = [delta, delta_uncertainty]
 

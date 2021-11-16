@@ -33,6 +33,6 @@ class MassPeak:
             self.detector_corrected_cps_data.append(yield_corrected_data)
 
     def outlier_resistant_mean_and_st_error(self):
-        mean, st_dev, n = calculate_outlier_resistant_mean_and_st_dev(self.detector_corrected_cps_data, 1)
+        mean, st_dev, n, removed_data = calculate_outlier_resistant_mean_and_st_dev(self.detector_corrected_cps_data, 1)
         self.mean_cps = mean
         self.st_error_cps = st_dev / math.sqrt(n)
