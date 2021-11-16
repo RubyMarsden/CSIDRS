@@ -59,13 +59,13 @@ class CycleDataDialog(QDialog):
     ###############
 
     def update_graphs(self, spot, counts_axis, ratios_axis):
-        if spot is None:
-            self.counts_axis.clear()
-            self.ratios_axis.clear()
-        else:
+        self.counts_axis.clear()
+        self.ratios_axis.clear()
+        if spot is not None:
             self.create_counts_plot(spot, counts_axis)
             self.create_ratio_plot(spot, ratios_axis)
-            self.canvas.draw()
+
+        self.canvas.draw()
 
     ################
     ### Plotting ###
@@ -105,7 +105,6 @@ class CycleDataDialog(QDialog):
 
 
         # TODO this makes no goddamn sense
-        print(xs)
         axis.set_xlabel("Cycle")
         #axis.xaxis.set_major_locator(MaxNLocator(integer=True))
         axis.set_ylabel("Counts per second")
@@ -120,13 +119,19 @@ class CycleDataDialog(QDialog):
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        for key, value in spot.raw_isotope_ratios.items():
-            axis.set_ylabel(key)
-            ys = value
-        xs = range(1, 1 + len(ys))
+        axis.set_ylabel(spot.raw_isotope_ratios.keys())
+        ys = list(spot.raw_isotope_ratios.values())[0]
+        xs = list(range(1, 1 + len(ys)))
 
-        axis.plot(xs, ys, ls="", marker="o")
+        removed_xs = []
+        removed_ys = []
+
+        for x, y in zip(xs, ys):
+            if y in spot.outliers_removed_from_raw_data[list(spot.raw_isotope_ratios.keys())[0]]:
+                axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="b")
+            else:
+                axis.plot(x, y, ls="", marker="o", color="b")
         axis.set_xlabel("Cycle")
-        print(xs)
+
         plt.xticks(xs, xs)
         plt.tight_layout()
