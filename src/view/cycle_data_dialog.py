@@ -78,7 +78,6 @@ class CycleDataDialog(QDialog):
         self.fig = plt.figure()
 
         self.spot_visible_grid_spec = GridSpec(2, 1)
-        # self.spot_invisible_grid_spec = GridSpec(1, 1)
         self.counts_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.ratios_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
@@ -111,6 +110,8 @@ class CycleDataDialog(QDialog):
         #axis.xaxis.set_major_locator(MaxNLocator(integer=True))
         axis.set_ylabel("Counts per second")
         plt.xticks(xs, xs)
+        axis.set_xticks(xs)
+        plt.setp(axis.get_xticklabels(), visible=True)
         plt.tight_layout()
 
     def create_ratio_plot(self, spot, axis):
