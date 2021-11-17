@@ -108,17 +108,17 @@ class BasicDataCheckWidget(QWidget):
         return table
 
     def _populate_basic_table(self):
-
+        i = 0
         for sample in self.data_processing_dialog.samples:
             background_colour = sample.q_colour
-            i = 1
             for spot in sample.spots:
-                i += 1
+                print(sample.name + spot.id)
                 name_item = QTableWidgetItem(str(sample.name + " " + spot.id))
                 name_item.setBackground(background_colour)
                 dtfa_x_item = QTableWidgetItem(spot.dtfa_x)
                 self.basic_data_table.setItem(i, 0, name_item)
                 self.basic_data_table.setItem(i, 3, dtfa_x_item)
+                i += 1
 
         return
 
