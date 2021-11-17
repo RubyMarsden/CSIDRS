@@ -3,7 +3,7 @@ import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QLabel, QCheckBox, \
-    QTableWidgetItem
+    QTableWidgetItem, QHeaderView
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 import matplotlib.dates as mdates
@@ -26,7 +26,6 @@ class BasicDataCheckWidget(QWidget):
         lhs_layout = self._create_lhs_layout()
         rhs_layout = self._create_rhs_layout()
 
-
         layout.addLayout(lhs_layout)
         layout.addLayout(rhs_layout)
 
@@ -36,7 +35,8 @@ class BasicDataCheckWidget(QWidget):
         layout = QVBoxLayout()
         button_layout = QHBoxLayout()
 
-        table = self._create_basic_table()
+        self.basic_data_table = self._create_basic_table()
+        self._populate_basic_table()
 
         cycle_data_button = QPushButton("Operators only")
         cycle_data_button.clicked.connect(self.on_cycle_data_button_pushed)
@@ -46,7 +46,7 @@ class BasicDataCheckWidget(QWidget):
         data_output_button.clicked.connect(self.on_data_output_button_pushed)
         button_layout.addWidget(data_output_button)
 
-        layout.addWidget(table)
+        layout.addWidget(self.basic_data_table)
         layout.addLayout(button_layout)
 
         return layout
@@ -101,10 +101,24 @@ class BasicDataCheckWidget(QWidget):
 
         table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignHCenter | Qt.Alignment(QtCore.Qt.TextWordWrap))
         table.horizontalHeader().setStyleSheet("QHeaderView { font-size: 9pt; }")
+        # table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         table.horizontalHeader().setMinimumHeight(40)
         table.setHorizontalHeaderLabels(column_headers)
 
         return table
+
+    def _populate_basic_table(self):
+
+        for sample in self.data_processing_dialog.samples:
+            background_colour = sample.q_colour
+            for spot in sample.spots:
+                name_item = QTableWidgetItem(str(sample.name + " " + spot.id))
+                name_item.setBackground(background_colour)
+                dtfa_x_item = QTableWidgetItem(spot.dtfa_x)
+                self.basic_data_table.setItem(0,0, name_item)
+                self.basic_data_table.setItem(0, 3, dtfa_x_item)
+
+        return
 
     ################
     ### Plotting ###

@@ -25,8 +25,7 @@ class SampleTreeWidget(QWidget):
             sample_tree_item = QTreeWidgetItem(self.tree, [sample.name])
             sample_tree_item.sample = sample
             sample_tree_item.is_sample = True
-            colour = QColor(sample_tree_item.sample.q_colour[0], sample_tree_item.sample.q_colour[1],
-                            sample_tree_item.sample.q_colour[2], sample_tree_item.sample.q_colour[3])
+            colour = sample_tree_item.sample.q_colour
             sample_tree_item.setBackground(0, colour)
             for spot in sample.spots:
                 spot_tree_item = QTreeWidgetItem(sample_tree_item, [spot.id])
