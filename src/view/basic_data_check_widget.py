@@ -111,12 +111,14 @@ class BasicDataCheckWidget(QWidget):
 
         for sample in self.data_processing_dialog.samples:
             background_colour = sample.q_colour
+            i = 1
             for spot in sample.spots:
+                i += 1
                 name_item = QTableWidgetItem(str(sample.name + " " + spot.id))
                 name_item.setBackground(background_colour)
                 dtfa_x_item = QTableWidgetItem(spot.dtfa_x)
-                self.basic_data_table.setItem(0,0, name_item)
-                self.basic_data_table.setItem(0, 3, dtfa_x_item)
+                self.basic_data_table.setItem(i, 0, name_item)
+                self.basic_data_table.setItem(i, 3, dtfa_x_item)
 
         return
 
