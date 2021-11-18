@@ -102,8 +102,8 @@ class BasicDataCheckWidget(QWidget):
 
         table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignHCenter | Qt.Alignment(QtCore.Qt.TextWordWrap))
         table.horizontalHeader().setStyleSheet("QHeaderView { font-size: 9pt; }")
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        table.horizontalHeader().setMinimumHeight(70)
+        # table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # table.horizontalHeader().setMinimumHeight(40)
         table.setHorizontalHeaderLabels(column_headers)
 
         table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -146,7 +146,7 @@ class BasicDataCheckWidget(QWidget):
                 self.basic_data_table.setItem(i, j+3, relative_ion_yield_item)
                 self.basic_data_table.setItem(i, j+4, distance_to_mount_centre_item)
                 i += 1
-
+        self.basic_data_table.resizeColumnsToContents()
         return
 
     ################
