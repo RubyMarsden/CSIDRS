@@ -49,9 +49,7 @@ class DriftCorrectionWidget(QWidget):
 
         self.fig = plt.figure()
 
-
         self.spot_visible_grid_spec = GridSpec(2, 1)
-        # self.spot_invisible_grid_spec = GridSpec(1, 1)
         self.primary_drift_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.secondary_check_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 

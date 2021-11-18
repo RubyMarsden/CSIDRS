@@ -88,6 +88,8 @@ class BasicDataCheckWidget(QWidget):
         for ratio in method["ratios"]:
             ratio_name = "delta " + ratio["numerator"] + "/" + ratio["denominator"]
             column_headers.append(ratio_name)
+            ratio_uncertainty_name = "uncertainty"
+            column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
@@ -132,6 +134,10 @@ class BasicDataCheckWidget(QWidget):
                     delta_item = QTableWidgetItem(format(delta, ".3f"))
                     delta_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_item)
+                    j+= 1
+                    delta_uncertainty_item = QTableWidgetItem(format(delta_uncertainty, ".4f"))
+                    delta_uncertainty_item.setFont(font)
+                    self.basic_data_table.setItem(i, j, delta_uncertainty_item)
 
                 dtfa_x_item = QTableWidgetItem(str(spot.dtfa_x))
                 dtfa_y_item = QTableWidgetItem(str(spot.dtfa_y))
