@@ -1,12 +1,13 @@
 import matplotlib
+import matplotlib.dates as mdates
 import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QLabel, QCheckBox, \
-    QTableWidgetItem, QHeaderView
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QCheckBox, \
+    QTableWidgetItem
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
-import matplotlib.dates as mdates
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
@@ -108,16 +109,36 @@ class BasicDataCheckWidget(QWidget):
         return table
 
     def _populate_basic_table(self):
+        method = self.data_processing_dialog.method_dictionary
+
+        font_family = self.basic_data_table.font().family()
+        font = QFont(font_family, 9)
         i = 0
         for sample in self.data_processing_dialog.samples:
             background_colour = sample.q_colour
             for spot in sample.spots:
-                print(sample.name + spot.id)
+                j = 0
                 name_item = QTableWidgetItem(str(sample.name + " " + spot.id))
                 name_item.setBackground(background_colour)
-                dtfa_x_item = QTableWidgetItem(spot.dtfa_x)
-                self.basic_data_table.setItem(i, 0, name_item)
-                self.basic_data_table.setItem(i, 3, dtfa_x_item)
+                name_item.setFont(font)
+                self.basic_data_table.setItem(i, j, name_item)
+
+                for ratio in method["ratios"]:
+                    j += 1
+                    ratio_name = "delta " + ratio["numerator"] + "/" + ratio["denominator"]
+                    [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio_name]
+                    delta_item = QTableWidgetItem(format(delta, ".3f"))
+                    self.basic_data_table.setItem(i, j, delta_item)
+
+                dtfa_x_item = QTableWidgetItem(str(spot.dtfa_x))
+                dtfa_y_item = QTableWidgetItem(str(spot.dtfa_y))
+                relative_ion_yield_item = QTableWidgetItem(format(spot.secondary_ion_yield, ".3f"))
+                distance_to_mount_centre_item = QTableWidgetItem(str(round(spot.distance_from_mount_centre)))
+
+                self.basic_data_table.setItem(i, j+1, dtfa_x_item)
+                self.basic_data_table.setItem(i, j+2, dtfa_y_item)
+                self.basic_data_table.setItem(i, j+3, relative_ion_yield_item)
+                self.basic_data_table.setItem(i, j+4, distance_to_mount_centre_item)
                 i += 1
 
         return
@@ -129,8 +150,7 @@ class BasicDataCheckWidget(QWidget):
     def _create_graphs_to_check_data(self):
         self.fig = plt.figure()
 
-        self.spot_visible_grid_spec = GridSpec(3, 1)
-        # self.spot_invisible_grid_spec = GridSpec(1, 1)
+        self.spot_visible_grid_spec = GridSpec(3, 1, height_ratios=[1, 1, 2])
         self.ion_yield_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[2])
@@ -156,7 +176,7 @@ class BasicDataCheckWidget(QWidget):
                 xs.append(spot.datetime)
                 ys.append(spot.secondary_ion_yield)
 
-            axis.plot(xs, ys, marker="o", ls="", color=colour)
+            axis.plot(xs, ys, marker="o", ls="", markersize=4, color=colour)
 
         axis.set_xlabel("Time")
         plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
@@ -177,7 +197,7 @@ class BasicDataCheckWidget(QWidget):
                 xs.append(spot.distance_from_mount_centre)
                 ys.append(spot.secondary_ion_yield)
 
-            axis.plot(xs, ys, marker="o", ls="", color=sample.colour)
+            axis.plot(xs, ys, marker="o", ls="", markersize=4, color=sample.colour)
         axis.set_xlabel("Distance from centre of mount")
         axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
@@ -194,7 +214,7 @@ class BasicDataCheckWidget(QWidget):
                 xs.append(int(spot.x_position))
                 ys.append(int(spot.y_position))
 
-            axis.plot(xs, ys, marker="o", ls="", markersize=2, color=sample.colour)
+            axis.plot(xs, ys, marker="o", ls="", markersize=1, color=sample.colour)
 
         circle = Circle((0, 0), 9000)
         circle.set_color("lightgoldenrodyellow")
