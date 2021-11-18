@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QCheckBox, \
-    QTableWidgetItem
+    QTableWidgetItem, QHeaderView
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
@@ -82,14 +82,14 @@ class BasicDataCheckWidget(QWidget):
         method = self.data_processing_dialog.method_dictionary
 
         number_of_columns = 5 + method["number_of_ratios"]
-        number_of_rows = 1
+        number_of_rows = 0
 
         column_headers = ["Sample name"]
         for ratio in method["ratios"]:
             ratio_name = "delta " + ratio["numerator"] + "/" + ratio["denominator"]
             column_headers.append(ratio_name)
 
-        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to mount centre"])
+        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
         for sample in self.data_processing_dialog.samples:
             for spot in sample.spots:
@@ -102,9 +102,11 @@ class BasicDataCheckWidget(QWidget):
 
         table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignHCenter | Qt.Alignment(QtCore.Qt.TextWordWrap))
         table.horizontalHeader().setStyleSheet("QHeaderView { font-size: 9pt; }")
-        # table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        table.horizontalHeader().setMinimumHeight(40)
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        table.horizontalHeader().setMinimumHeight(70)
         table.setHorizontalHeaderLabels(column_headers)
+
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
 
         return table
 
@@ -128,12 +130,16 @@ class BasicDataCheckWidget(QWidget):
                     ratio_name = "delta " + ratio["numerator"] + "/" + ratio["denominator"]
                     [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio_name]
                     delta_item = QTableWidgetItem(format(delta, ".3f"))
+                    delta_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_item)
 
                 dtfa_x_item = QTableWidgetItem(str(spot.dtfa_x))
                 dtfa_y_item = QTableWidgetItem(str(spot.dtfa_y))
                 relative_ion_yield_item = QTableWidgetItem(format(spot.secondary_ion_yield, ".3f"))
                 distance_to_mount_centre_item = QTableWidgetItem(str(round(spot.distance_from_mount_centre)))
+
+                for item in [dtfa_x_item, dtfa_y_item, relative_ion_yield_item, distance_to_mount_centre_item]:
+                    item.setFont(font)
 
                 self.basic_data_table.setItem(i, j+1, dtfa_x_item)
                 self.basic_data_table.setItem(i, j+2, dtfa_y_item)
@@ -150,7 +156,7 @@ class BasicDataCheckWidget(QWidget):
     def _create_graphs_to_check_data(self):
         self.fig = plt.figure()
 
-        self.spot_visible_grid_spec = GridSpec(3, 1, height_ratios=[1, 1, 2])
+        self.spot_visible_grid_spec = GridSpec(3, 1, height_ratios=[2, 2, 3])
         self.ion_yield_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[2])

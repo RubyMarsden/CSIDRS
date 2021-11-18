@@ -68,6 +68,7 @@ class DriftCorrectionWidget(QWidget):
 
     def _create_primary_drift_graph(self, sample, axis, ratio_name):
         axis.clear()
+        axis.set_title("Primary standard raw data for drift correction")
         xs = []
         ys = []
         yerrors = []
@@ -91,6 +92,7 @@ class DriftCorrectionWidget(QWidget):
     def _create_secondary_check_graph(self, sample, axis, ratio_name):
 
         axis.clear()
+        axis.set_title("Secondary reference material with drift correction")
         xs = []
         ys = []
         yerrors = []
