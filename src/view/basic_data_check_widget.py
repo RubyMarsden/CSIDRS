@@ -81,7 +81,7 @@ class BasicDataCheckWidget(QWidget):
 
         method = self.data_processing_dialog.method_dictionary
 
-        number_of_columns = 5 + method["number_of_ratios"]
+        number_of_columns = 5 + (2 * method["number_of_ratios"])
         number_of_rows = 0
 
         column_headers = ["Sample name"]
@@ -134,7 +134,7 @@ class BasicDataCheckWidget(QWidget):
                     delta_item = QTableWidgetItem(format(delta, ".3f"))
                     delta_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_item)
-                    j+= 1
+                    j += 1
                     delta_uncertainty_item = QTableWidgetItem(format(delta_uncertainty, ".4f"))
                     delta_uncertainty_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_uncertainty_item)
@@ -147,10 +147,10 @@ class BasicDataCheckWidget(QWidget):
                 for item in [dtfa_x_item, dtfa_y_item, relative_ion_yield_item, distance_to_mount_centre_item]:
                     item.setFont(font)
 
-                self.basic_data_table.setItem(i, j+1, dtfa_x_item)
-                self.basic_data_table.setItem(i, j+2, dtfa_y_item)
-                self.basic_data_table.setItem(i, j+3, relative_ion_yield_item)
-                self.basic_data_table.setItem(i, j+4, distance_to_mount_centre_item)
+                self.basic_data_table.setItem(i, j + 1, dtfa_x_item)
+                self.basic_data_table.setItem(i, j + 2, dtfa_y_item)
+                self.basic_data_table.setItem(i, j + 3, relative_ion_yield_item)
+                self.basic_data_table.setItem(i, j + 4, distance_to_mount_centre_item)
                 i += 1
         self.basic_data_table.resizeColumnsToContents()
         return
@@ -162,7 +162,7 @@ class BasicDataCheckWidget(QWidget):
     def _create_graphs_to_check_data(self):
         self.fig = plt.figure()
 
-        self.spot_visible_grid_spec = GridSpec(3, 1, height_ratios=[2, 2, 3])
+        self.spot_visible_grid_spec = GridSpec(3, 1, height_ratios=[1, 1, 2])
         self.ion_yield_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[2])

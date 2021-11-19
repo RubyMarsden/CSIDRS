@@ -80,7 +80,7 @@ class DriftCorrectionWidget(QWidget):
 
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample[0].colour)
         axis.set_xlabel("Time")
-        axis.set_ylabel("delta "+ratio_name)
+        axis.set_ylabel("delta " + ratio_name)
         plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
 
         axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))

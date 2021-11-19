@@ -1,6 +1,7 @@
 import matplotlib
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget
 from matplotlib.gridspec import GridSpec
+from matplotlib.patches import Rectangle
 
 from src.utils import gui_utils
 from src.view.sample_tree import SampleTreeWidget
@@ -124,10 +125,25 @@ class CycleDataDialog(QDialog):
 
         for x, y in zip(xs, ys):
             if y in spot.outliers_removed_from_raw_data[list(spot.raw_isotope_ratios.keys())[0]]:
-                axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="b")
+                axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
             else:
-                axis.plot(x, y, ls="", marker="o", color="b")
+                axis.plot(x, y, ls="", marker="o", color="navy")
         axis.set_xlabel("Cycle")
+
+        mean, st_error = spot.mean_st_error_isotope_ratios[list(spot.raw_isotope_ratios.keys())[0]]
+        plt.axhline(y=mean)
+
+        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[list(spot.raw_isotope_ratios.keys())[0]]
+        outlier_rectangle = Rectangle((0, outlier_minimum), len(xs)+1, outlier_maximum - outlier_minimum)
+
+        outlier_rectangle.set_color("lightblue")
+
+        axis.add_patch(outlier_rectangle)
+
+        st_error_rectangle = Rectangle((0, mean - 2* st_error), len(xs) + 1, 4*st_error)
+        st_error_rectangle.set_color("cornflowerblue")
+
+        axis.add_patch(st_error_rectangle)
 
         plt.xticks(xs, xs)
         plt.tight_layout()

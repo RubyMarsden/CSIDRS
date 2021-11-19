@@ -44,6 +44,7 @@ class Spot:
         self.raw_isotope_ratios = {}
         self.mean_st_error_isotope_ratios = {}
         self.outliers_removed_from_raw_data = {}
+        self.outlier_bounds = {}
         self.not_corrected_deltas = {}
 
         for mass_peak_name in self.mass_peak_names:
@@ -82,10 +83,11 @@ class Spot:
     def calculate_mean_st_error_for_isotope_ratios(self):
         for ratio_name, raw_ratio_list in self.raw_isotope_ratios.items():
             # TODO fix number of outliers allowed
-            mean, st_dev, n, removed_data = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
+            mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
             st_error = st_dev / math.sqrt(n)
             self.mean_st_error_isotope_ratios[ratio_name] = [mean, st_error]
             self.outliers_removed_from_raw_data[ratio_name] = removed_data
+            self.outlier_bounds[ratio_name] = outlier_bounds
 
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet
