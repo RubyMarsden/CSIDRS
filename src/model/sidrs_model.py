@@ -166,6 +166,9 @@ class SidrsModel:
 
                 print(p.ab)
 
+            else:
+                print("no fit")
+
     ###############
     ### Signals ###
     ###############
