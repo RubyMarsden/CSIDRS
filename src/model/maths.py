@@ -35,9 +35,9 @@ def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed
     return np.mean(clean_data), np.std(clean_data), len(clean_data), removed_data, outlier_bounds
 
 
-def calculate_delta_from_ratio(mean, st_error, standard_ratio):
+def calculate_delta_from_ratio(mean, two_st_error, standard_ratio):
     delta = ((mean / standard_ratio) - 1) * 1000
-    delta_uncertainty = delta * st_error / mean
+    delta_uncertainty = delta * two_st_error / mean
     return delta, delta_uncertainty
 
 

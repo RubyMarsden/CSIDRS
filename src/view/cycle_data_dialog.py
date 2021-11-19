@@ -130,7 +130,7 @@ class CycleDataDialog(QDialog):
                 axis.plot(x, y, ls="", marker="o", color="navy")
         axis.set_xlabel("Cycle")
 
-        mean, st_error = spot.mean_st_error_isotope_ratios[list(spot.raw_isotope_ratios.keys())[0]]
+        mean, two_st_error = spot.mean_two_st_error_isotope_ratios[list(spot.raw_isotope_ratios.keys())[0]]
         plt.axhline(y=mean)
 
         (outlier_minimum, outlier_maximum) = spot.outlier_bounds[list(spot.raw_isotope_ratios.keys())[0]]
@@ -140,7 +140,7 @@ class CycleDataDialog(QDialog):
 
         axis.add_patch(outlier_rectangle)
 
-        st_error_rectangle = Rectangle((0, mean - 2* st_error), len(xs) + 1, 4*st_error)
+        st_error_rectangle = Rectangle((0, mean - two_st_error), len(xs) + 1, 2 * two_st_error)
         st_error_rectangle.set_color("cornflowerblue")
 
         axis.add_patch(st_error_rectangle)

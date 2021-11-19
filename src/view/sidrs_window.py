@@ -57,5 +57,6 @@ class SidrsWindow(QMainWindow):
 
     def on_reference_material_selected(self):
         self.model.process_data()
+        self.model.drift_correction_process()
         dialog = DataProcessingDialog(self.model.samples_by_name.values(), self.model.method_dictionary)
         result = dialog.exec()

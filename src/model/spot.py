@@ -38,11 +38,12 @@ class Spot:
         self.dtfa_x, self.dtfa_y = get_dtfa_x_and_y_from_old_asc(self.spot_data)
 
         self.primary_beam_current = get_primary_beam_current_data_old_asc(self.spot_data)
-        self.secondary_ion_yield = None
 
+        self.is_flagged = False
+        self.secondary_ion_yield = None
         self.mass_peaks = {}
         self.raw_isotope_ratios = {}
-        self.mean_st_error_isotope_ratios = {}
+        self.mean_two_st_error_isotope_ratios = {}
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
         self.not_corrected_deltas = {}
@@ -84,8 +85,8 @@ class Spot:
         for ratio_name, raw_ratio_list in self.raw_isotope_ratios.items():
             # TODO fix number of outliers allowed
             mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
-            st_error = st_dev / math.sqrt(n)
-            self.mean_st_error_isotope_ratios[ratio_name] = [mean, st_error]
+            two_st_error = 2 * st_dev / math.sqrt(n)
+            self.mean_two_st_error_isotope_ratios[ratio_name] = [mean, two_st_error]
             self.outliers_removed_from_raw_data[ratio_name] = removed_data
             self.outlier_bounds[ratio_name] = outlier_bounds
 
@@ -100,8 +101,8 @@ class Spot:
         else:
             raise Exception
 
-        for ratio_name, [mean, st_error] in self.mean_st_error_isotope_ratios.items():
+        for ratio_name, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
             standard_ratio = standard_ratios[ratio_name]
-            delta, delta_uncertainty = calculate_delta_from_ratio(mean, st_error, standard_ratio)
+            delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
             self.not_corrected_deltas["delta " + ratio_name] = [delta, delta_uncertainty]
 

@@ -1,4 +1,10 @@
 import re
+import time
+
+import numpy as np
+from ltsfit.lts_linefit import lts_linefit
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 
 from src.model.elements import Element
 from src.model.sample import Sample
@@ -68,7 +74,7 @@ class SidrsModel:
             name_parts = re.split('-|_', full_sample_name)
             split_names.append(name_parts)
 
-        #TODO - at the end remove the self
+        # TODO - at the end remove the self
         self.sample_names = []
         for j in range(len(split_names[0])):
             for i in range(len(split_names)):
@@ -116,6 +122,50 @@ class SidrsModel:
                 spot.calculate_mean_st_error_for_isotope_ratios()
                 spot.calculate_raw_delta_for_isotope_ratio(self.element)
 
+    def drift_correction_process(self):
+        for ratio in self.method_dictionary["ratios"]:
+            ratio_name = ratio["numerator"] + "/" + ratio["denominator"]
+            for sample in self.samples_by_name.values():
+                if sample.is_primary_reference_material:
+                    primary_rm = sample
+                elif sample.is_secondary_reference_material:
+                    secondary_rm = sample
+                else:
+                    continue
+
+            primary_times = []
+            primary_time_uncertainties = []
+            primary_deltas = []
+            primary_delta_uncertainties = []
+            for spot in primary_rm.spots:
+                if spot.is_flagged is False:
+                    timestamp = time.mktime(spot.datetime.timetuple())
+                    primary_times.append(timestamp)
+                    primary_time_uncertainties.append(0.1)
+                    [delta, uncertainty] = spot.not_corrected_deltas["delta " + ratio_name]
+                    primary_deltas.append(delta)
+                    primary_delta_uncertainties.append(uncertainty)
+            xs = np.array(primary_times).reshape(-1, 1)
+            dxs = np.array(primary_time_uncertainties)
+            ys = np.array(primary_deltas)
+            dys = np.array(primary_delta_uncertainties)
+            print(xs)
+            print(dxs)
+            print(ys)
+            print(dys)
+
+            regressor = LinearRegression()
+            regressor.fit(xs, ys)
+            score = regressor.score(xs, ys)
+            print(score)
+
+            if score > 0.25:
+                # https://doi.org/10.1093/mnras/stt562
+                # Cappellari et al.(2013a, MNRAS, 432, 1709)
+                p = lts_linefit(xs, dxs, ys, dys, pivot=np.median(xs))
+
+                print(p.ab)
+
     ###############
     ### Signals ###
     ###############
@@ -140,4 +190,5 @@ class SidrsModel:
             if set(isotopes) == set(dictionary["isotopes"]):
                 return dictionary
 
-        raise Exception("The isotopes selected are not currently part of a method. For instructions on how to add methods view the HACKING.md file.")
+        raise Exception(
+            "The isotopes selected are not currently part of a method. For instructions on how to add methods view the HACKING.md file.")
