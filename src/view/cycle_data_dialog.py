@@ -1,5 +1,5 @@
 import matplotlib
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QTreeWidgetItem
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 
@@ -48,6 +48,18 @@ class CycleDataDialog(QDialog):
         layout.addWidget(self.sample_tree)
         self.sample_tree.set_samples(self.samples)
         self.sample_tree.select_first_spot()
+        # TODO show Matthew how broken I can make things
+        # for sample in self.samples:
+        #     for spot in sample.spots:
+        #         spot_item = self.sample_tree.tree.currentItem()
+        #         for i, value in enumerate(spot.raw_isotope_ratios[self.data_processing_dialog.method_dictionary["ratios"][0]]):
+        #             item = QTreeWidgetItem(spot_item)
+        #             item.setText(0, str(i))
+        #             item.is_sample = False
+        #             item.is_spot = False
+        #             spot_item.addChild(item)
+        #             item.is_flagged = False
+
 
         return layout
 

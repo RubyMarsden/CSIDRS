@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget, QTreeWidgetItemIterator
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget, QTreeWidgetItemIterator, \
+    QRadioButton
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 import matplotlib.dates as mdates
@@ -30,8 +31,15 @@ class DriftCorrectionWidget(QWidget):
 
     def _create_lhs_layout(self):
         layout = QVBoxLayout()
-        standard_table = QTableWidget()
-        layout.addWidget(standard_table)
+        reference_material_table = QTableWidget()
+        layout.addWidget(reference_material_table)
+        drift_explanation_text = QLabel("This explains why the drift is on or off and what it is etc")
+        drift_explanation_text.setWordWrap(True)
+        no_drift_radio_button = QRadioButton("Drift correction off")
+        drift_radio_button = QRadioButton("Linear drift correction on")
+        layout.addWidget(drift_explanation_text)
+        layout.addWidget(no_drift_radio_button)
+        layout.addWidget(drift_radio_button)
 
         return layout
 
