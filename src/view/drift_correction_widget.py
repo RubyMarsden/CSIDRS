@@ -12,12 +12,11 @@ class DriftCorrectionWidget(QWidget):
 
         layout = QHBoxLayout()
 
-        self.primary_sample = [
-            sample for sample in data_processing_dialog.samples if sample.is_primary_reference_material
-        ]
-        self.secondary_sample = [
-            sample for sample in data_processing_dialog.samples if sample.is_secondary_reference_material
-        ]
+        for sample in data_processing_dialog.samples:
+            if sample.is_primary_reference_material:
+                self.primary_sample = sample
+            elif sample.is_secondary_reference_material:
+                self.secondary_sample = sample
 
         lhs_layout = self._create_lhs_layout()
         rhs_layout = self._create_rhs_layout()
@@ -66,19 +65,15 @@ class DriftCorrectionWidget(QWidget):
 
     def _create_primary_drift_graph(self, sample, axis, ratio_name):
         axis.clear()
-        axis.set_title("Primary standard raw data for drift correction")
-        xs = []
-        ys = []
-        yerrors = []
+        axis.set_title("Primary reference material raw data for drift correction")
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        for spot in sample[0].spots:
-            ys.append(spot.not_corrected_deltas["delta " + ratio_name][0])
-            yerrors.append(spot.not_corrected_deltas["delta " + ratio_name][1])
-            xs.append(spot.datetime)
+        xs = [spot.datetime for spot in sample.spots]
+        ys = [spot.not_corrected_deltas["delta " + ratio_name][0] for spot in sample.spots]
+        yerrors = [spot.not_corrected_deltas["delta " + ratio_name][1] for spot in sample.spots]
 
-        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample[0].colour)
+        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
         axis.set_xlabel("Time")
         axis.set_ylabel("delta " + ratio_name)
         plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
@@ -91,18 +86,14 @@ class DriftCorrectionWidget(QWidget):
 
         axis.clear()
         axis.set_title("Secondary reference material with drift correction")
-        xs = []
-        ys = []
-        yerrors = []
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        for spot in sample[0].spots:
-            ys.append(spot.not_corrected_deltas["delta " + ratio_name][0])
-            yerrors.append(spot.not_corrected_deltas["delta " + ratio_name][1])
-            xs.append(spot.datetime)
+        xs = [spot.datetime for spot in sample.spots]
+        ys = [spot.not_corrected_deltas["delta " + ratio_name][0] for spot in sample.spots]
+        yerrors = [spot.not_corrected_deltas["delta " + ratio_name][1] for spot in sample.spots]
 
-        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample[0].colour)
+        axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
         axis.set_xlabel("Time")
         axis.set_ylabel("delta " + ratio_name)
         plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')

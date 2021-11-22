@@ -120,9 +120,6 @@ class CycleDataDialog(QDialog):
         ys = list(spot.raw_isotope_ratios.values())[0]
         xs = list(range(1, 1 + len(ys)))
 
-        removed_xs = []
-        removed_ys = []
-
         for x, y in zip(xs, ys):
             if y in spot.outliers_removed_from_raw_data[list(spot.raw_isotope_ratios.keys())[0]]:
                 axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")

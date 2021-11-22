@@ -181,12 +181,9 @@ class BasicDataCheckWidget(QWidget):
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
         for sample in samples:
-            xs = []
-            ys = []
             colour = sample.colour
-            for spot in sample.spots:
-                xs.append(spot.datetime)
-                ys.append(spot.secondary_ion_yield)
+            xs = [spot.datetime for spot in sample.spots]
+            ys = [spot.secondary_ion_yield for spot in sample.spots]
 
             axis.plot(xs, ys, marker="o", ls="", markersize=4, color=colour)
 
@@ -203,13 +200,10 @@ class BasicDataCheckWidget(QWidget):
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
         for sample in samples:
-            xs = []
-            ys = []
-            for spot in sample.spots:
-                xs.append(spot.distance_from_mount_centre)
-                ys.append(spot.secondary_ion_yield)
-
+            xs = [spot.distance_from_mount_centre for spot in sample.spots]
+            ys = [spot.secondary_ion_yield for spot in sample.spots]
             axis.plot(xs, ys, marker="o", ls="", markersize=4, color=sample.colour)
+
         axis.set_xlabel("Distance from centre of mount")
         axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
@@ -220,12 +214,8 @@ class BasicDataCheckWidget(QWidget):
         axis.spines['right'].set_visible(False)
 
         for sample in samples:
-            xs = []
-            ys = []
-            for spot in sample.spots:
-                xs.append(int(spot.x_position))
-                ys.append(int(spot.y_position))
-
+            xs = [int(spot.x_position) for spot in sample.spots]
+            ys = [int(spot.y_position) for spot in sample.spots]
             axis.plot(xs, ys, marker="o", ls="", markersize=1, color=sample.colour)
 
         circle = Circle((0, 0), 9000)

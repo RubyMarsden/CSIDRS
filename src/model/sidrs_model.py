@@ -69,10 +69,7 @@ class SidrsModel:
             if full_sample_name not in full_sample_names:
                 full_sample_names.append(full_sample_name)
 
-        split_names = []
-        for full_sample_name in full_sample_names:
-            name_parts = re.split('-|_', full_sample_name)
-            split_names.append(name_parts)
+        split_names = [re.split('-|_', full_sample_name) for full_sample_name in full_sample_names]
 
         # TODO - at the end remove the self
         self.sample_names = []

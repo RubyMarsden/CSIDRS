@@ -74,10 +74,9 @@ class Spot:
             numerator = ratio_dictionary["numerator"]
             denominator = ratio_dictionary["denominator"]
 
-            ratios = []
-            for i, j in zip(self.mass_peaks[numerator].detector_corrected_cps_data,
-                            self.mass_peaks[denominator].detector_corrected_cps_data):
-                ratios.append(i / j)
+            ratios = [i/j for i, j in zip(self.mass_peaks[numerator].detector_corrected_cps_data,
+                            self.mass_peaks[denominator].detector_corrected_cps_data)]
+
 
             self.raw_isotope_ratios[numerator + "/" + denominator] = ratios
 

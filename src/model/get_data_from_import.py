@@ -8,9 +8,7 @@ DETECTOR_PARAMETERS_LINE = 62
 
 def get_raw_cps_data(raw_data_line_start, column_number, spot_data, block_number):
     line_range = range(raw_data_line_start, raw_data_line_start + int(block_number))
-    raw_cps_data = []
-    for line in line_range:
-        raw_cps_data.append(spot_data[line][column_number])
+    raw_cps_data = [spot_data[line][column_number] for line in line_range]
 
     return raw_cps_data
 
