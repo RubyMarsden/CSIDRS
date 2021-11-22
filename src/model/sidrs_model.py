@@ -40,6 +40,7 @@ class SidrsModel:
 
     def import_all_files(self, filenames):
         self.sample_names_from_filenames(filenames)
+        print(self.isotopes)
         for filename in filenames:
             if filename in self.imported_files:
                 raise Exception("The file: " + filename + " has already been imported")
@@ -57,7 +58,6 @@ class SidrsModel:
                 for i in line:
                     line[line.index(i)] = str.strip(i)
                 data_for_spot.append(line)
-
         spot = Spot(filename, data_for_spot, self.isotopes)
         return spot
 
@@ -121,7 +121,6 @@ class SidrsModel:
 
     def drift_correction_process(self):
         for ratio in self.method_dictionary["ratios"]:
-            ratio_name = ratio["numerator"] + "/" + ratio["denominator"]
             for sample in self.samples_by_name.values():
                 if sample.is_primary_reference_material:
                     primary_rm = sample
@@ -139,7 +138,7 @@ class SidrsModel:
                     timestamp = time.mktime(spot.datetime.timetuple())
                     primary_times.append(timestamp)
                     primary_time_uncertainties.append(0.1)
-                    [delta, uncertainty] = spot.not_corrected_deltas["delta " + ratio_name]
+                    [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
                     primary_deltas.append(delta)
                     primary_delta_uncertainties.append(uncertainty)
             xs = np.array(primary_times).reshape(-1, 1)
@@ -171,6 +170,7 @@ class SidrsModel:
     ###############
 
     def _isotopes_input(self, isotopes, enum):
+        print(isotopes)
         self.isotopes = isotopes
         self.element = enum
         self.method_dictionary = self.create_method_dictionary_from_isotopes(self.isotopes)

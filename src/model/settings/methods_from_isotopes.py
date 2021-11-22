@@ -1,54 +1,50 @@
+from src.model.ratio import Ratio
+from src.model.isotopes import Isotope
+
+# Sulphur ratios
+S33_S32 = Ratio(Isotope.S33, Isotope.S32)
+S34_S32 = Ratio(Isotope.S34, Isotope.S32)
+S36_S32 = Ratio(Isotope.S36, Isotope.S32)
+
+# Oxygen ratios
+O17_O16 = Ratio(Isotope.O17, Isotope.O16)
+O18_O16 = Ratio(Isotope.O18, Isotope.O16)
+O16H1_O16 = Ratio(Isotope.HYD, Isotope.O16)
+
 three_isotopes_sulphur = {
-    "isotopes": ["32S", "33S", "34S"],
+    "isotopes": [Isotope.S32, Isotope.S33, Isotope.S34],
     "number_of_ratios": 2,
-    "ratios": [
-        {"numerator": "33S", "denominator": "32S"},
-        {"numerator": "34S", "denominator": "32S"}
-    ]
+    "ratios": [S33_S32, S34_S32]
 }
 
 four_isotopes_sulphur = {
-    "isotopes": ["32S", "33S", "34S"],
+    "isotopes": [Isotope.S32, Isotope.S33, Isotope.S34, Isotope.S36],
     "number_of_ratios": 3,
-    "ratios": [
-        {"numerator": "33S", "denominator": "32S"},
-        {"numerator": "34S", "denominator": "32S"},
-        {"numerator": "36S", "denominator": "32S"}
-    ]
+    "ratios": [S33_S32, S34_S32, S36_S32]
 }
 
 two_isotopes_no_hydroxide_oxygen = {
-    "isotopes": ["16O", "18O"],
+    "isotopes": [Isotope.O16, Isotope.O18],
     "number_of_ratios": 1,
-    "ratios": [{"numerator": "18O", "denominator": "16O"}]
+    "ratios": [O18_O16]
 }
 
 three_isotopes_no_hydroxide_oxygen = {
-    "isotopes": ["16O", "17O", "18O"],
+    "isotopes": [Isotope.O16, Isotope.O17, Isotope.O18],
     "number_of_ratios": 2,
-    "ratios": [
-        {"numerator": "18O", "denominator": "16O"},
-        {"numerator": "17O", "denominator": "16O"}
-    ]
+    "ratios": [O17_O16, O18_O16]
 }
 
 two_isotopes_hydroxide_oxygen = {
-    "isotopes": ['16O', '18O', '16O1H'],
+    "isotopes": [Isotope.O16, Isotope.O18, Isotope.HYD],
     "number_of_ratios": 2,
-    "ratios": [
-        {"numerator": "18O", "denominator": "16O"},
-        {"numerator": "16O1H", "denominator": "16O"}
-    ]
+    "ratios": [O18_O16, O16H1_O16]
 }
 
 three_isotopes_hydroxide_oxygen = {
-    "isotopes": ['16O', '17O', '18O', '16O1H'],
+    "isotopes": [Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
     "number_of_ratios": 3,
-    "ratios": [
-        {"numerator": "18O", "denominator": "16O"},
-        {"numerator": "17O", "denominator": "16O"},
-        {"numerator": "16O1H", "denominator": "16O"}
-    ]
+    "ratios": [O17_O16, O18_O16, O16H1_O16]
 }
 
 list_of_method_dictionaries = [three_isotopes_sulphur,

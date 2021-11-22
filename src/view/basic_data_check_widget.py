@@ -66,12 +66,11 @@ class BasicDataCheckWidget(QWidget):
     ###############
 
     def on_cycle_data_button_pushed(self):
-        dialog = CycleDataDialog(self.data_processing_dialog.samples)
+        dialog = CycleDataDialog(self.data_processing_dialog)
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
         print("Create a csv")
-        return
 
     #############
     ### Table ###
@@ -86,8 +85,7 @@ class BasicDataCheckWidget(QWidget):
 
         column_headers = ["Sample name"]
         for ratio in method["ratios"]:
-            ratio_name = "delta " + ratio["numerator"] + "/" + ratio["denominator"]
-            column_headers.append(ratio_name)
+            column_headers.append(ratio.delta_name)
             ratio_uncertainty_name = "uncertainty"
             column_headers.append(ratio_uncertainty_name)
 
@@ -129,8 +127,7 @@ class BasicDataCheckWidget(QWidget):
 
                 for ratio in method["ratios"]:
                     j += 1
-                    ratio_name = "delta " + ratio["numerator"] + "/" + ratio["denominator"]
-                    [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio_name]
+                    [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
                     delta_item = QTableWidgetItem(format(delta, ".3f"))
                     delta_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_item)
@@ -153,7 +150,6 @@ class BasicDataCheckWidget(QWidget):
                 self.basic_data_table.setItem(i, j + 4, distance_to_mount_centre_item)
                 i += 1
         self.basic_data_table.resizeColumnsToContents()
-        return
 
     ################
     ### Plotting ###

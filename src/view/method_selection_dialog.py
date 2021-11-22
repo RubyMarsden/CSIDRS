@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox
 from src.model.elements import Element
 from src.model.settings.isotope_lists import *
 from src.model.settings.material_lists import *
+from src.model.settings.methods_from_isotopes import four_isotopes_sulphur, three_isotopes_hydroxide_oxygen
 
 
 class MethodSelectionDialog(QDialog):
@@ -36,8 +37,8 @@ class MethodSelectionDialog(QDialog):
 
         if self.element == Element.OXY:
 
-            for isotope in oxygen_isotope_list:
-                box = QCheckBox(isotope)
+            for isotope in three_isotopes_hydroxide_oxygen["isotopes"]:
+                box = QCheckBox(isotope.value)
                 box.isotope = isotope
                 box.stateChanged.connect(self.on_isotopes_changed)
 
@@ -54,8 +55,8 @@ class MethodSelectionDialog(QDialog):
 
         elif self.element == Element.SUL:
 
-            for isotope in sulphur_isotope_list:
-                box = QCheckBox(isotope)
+            for isotope in four_isotopes_sulphur["isotopes"]:
+                box = QCheckBox(isotope.value)
                 box.isotope = isotope
                 box.stateChanged.connect(self.on_isotopes_changed)
 

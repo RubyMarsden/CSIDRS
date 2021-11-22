@@ -83,7 +83,6 @@ class ReferenceMaterialSelectionDialog(QDialog):
             self.primary_reference_material_selection,
             self.secondary_reference_material_selection
         )
-        return
 
     def new_reference_material_button_clicked(self):
         dialog = NewReferenceMaterialDialog(self.element)

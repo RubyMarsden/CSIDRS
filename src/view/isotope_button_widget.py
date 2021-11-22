@@ -34,15 +34,12 @@ class IsotopeButtonWidget(QWidget):
         result = dialog.exec()
         if result:
             self.emit_methods_signal(dialog)
-        return
-
     def on_S_button_pushed(self):
         self.element = Element.SUL
         dialog = MethodSelectionDialog(self.element)
         result = dialog.exec()
         if result:
             self.emit_methods_signal(dialog)
-        return
 
     def emit_methods_signal(self, dialog):
         if dialog.isotopes and dialog.material is not None:

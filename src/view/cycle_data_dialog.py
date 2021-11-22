@@ -11,13 +11,17 @@ import matplotlib.pyplot as plt
 
 
 class CycleDataDialog(QDialog):
-    def __init__(self, samples):
+    def __init__(self, data_processing_dialog):
         QDialog.__init__(self)
         self.setWindowTitle("Cycle data")
         self.setMinimumWidth(450)
 
-        self.samples = samples
+        self.data_processing_dialog = data_processing_dialog
+
+        self.samples = self.data_processing_dialog.samples
         self.sample_tree = SampleTreeWidget()
+
+        self.ratio = self.data_processing_dialog.method_dictionary["ratios"][0]
 
         layout = QHBoxLayout()
         right_widget = self._create_right_widget()
@@ -27,7 +31,8 @@ class CycleDataDialog(QDialog):
         self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.update_graphs(
             self.sample_tree.current_spot(),
             self.counts_axis,
-            self.ratios_axis
+            self.ratios_axis,
+            self.ratio
         )
                                                          )
 
@@ -58,12 +63,12 @@ class CycleDataDialog(QDialog):
     ### Actions ###
     ###############
 
-    def update_graphs(self, spot, counts_axis, ratios_axis):
+    def update_graphs(self, spot, counts_axis, ratios_axis, ratio):
         self.counts_axis.clear()
         self.ratios_axis.clear()
         if spot is not None:
-            self.create_counts_plot(spot, counts_axis)
-            self.create_ratio_plot(spot, ratios_axis)
+            self.create_counts_plot(spot, counts_axis, ratio)
+            self.create_ratio_plot(spot, ratios_axis, ratio)
 
         self.canvas.draw()
 
@@ -81,8 +86,8 @@ class CycleDataDialog(QDialog):
         self.counts_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.ratios_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
-        self.create_counts_plot(self.sample_tree.current_spot(), self.counts_axis)
-        self.create_ratio_plot(self.sample_tree.current_spot(), self.ratios_axis)
+        self.create_counts_plot(self.sample_tree.current_spot(), self.counts_axis, self.ratio)
+        self.create_ratio_plot(self.sample_tree.current_spot(), self.ratios_axis, self.ratio)
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
@@ -92,45 +97,52 @@ class CycleDataDialog(QDialog):
 
         return graph
 
-    def create_counts_plot(self, spot, axis):
+    def create_counts_plot(self, spot, axis, ratio):
+        #axis2 = axis.twinx()
         axis.clear()
+        #axis2.clear()
 
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        for mass_peak in spot.mass_peaks.values():
-            ys = mass_peak.detector_corrected_cps_data
-            xs = range(1, 1 + len(ys))
-            axis.plot(xs, ys, ls="", marker="x")
+        y1s = spot.mass_peaks[ratio.numerator].detector_corrected_cps_data
+        y2s = spot.mass_peaks[ratio.denominator].detector_corrected_cps_data
+
+        x1s = range(1, 1 + len(y1s))
+        x2s = range(1, 1 + len(y2s))
+
+        axis.plot(x1s, y1s, ls="", marker="x")
+        axis.plot(x2s, y2s, ls="", marker="+")
 
         axis.set_xlabel("Cycle")
         axis.set_ylabel("Counts per second")
-        plt.xticks(xs, xs)
-        axis.set_xticks(xs)
+        plt.xticks(x1s, x1s)
+        axis.set_xticks(x1s)
         plt.setp(axis.get_xticklabels(), visible=True)
+        plt.autoscale(enable=True, axis='y')
         plt.tight_layout()
 
-    def create_ratio_plot(self, spot, axis):
+    def create_ratio_plot(self, spot, axis, ratio):
         # TODO - add method to this section
         axis.clear()
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        axis.set_ylabel(spot.raw_isotope_ratios.keys())
+        axis.set_ylabel(ratio.name)
         ys = list(spot.raw_isotope_ratios.values())[0]
         xs = list(range(1, 1 + len(ys)))
 
         for x, y in zip(xs, ys):
-            if y in spot.outliers_removed_from_raw_data[list(spot.raw_isotope_ratios.keys())[0]]:
+            if y in spot.outliers_removed_from_raw_data[ratio.name]:
                 axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
             else:
                 axis.plot(x, y, ls="", marker="o", color="navy")
         axis.set_xlabel("Cycle")
 
-        mean, two_st_error = spot.mean_two_st_error_isotope_ratios[list(spot.raw_isotope_ratios.keys())[0]]
+        mean, two_st_error = spot.mean_two_st_error_isotope_ratios[ratio]
         plt.axhline(y=mean)
 
-        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[list(spot.raw_isotope_ratios.keys())[0]]
+        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[ratio.name]
         outlier_rectangle = Rectangle((0, outlier_minimum), len(xs)+1, outlier_maximum - outlier_minimum)
 
         outlier_rectangle.set_color("lightblue")

@@ -70,24 +70,24 @@ class Spot:
 
     def calculate_raw_isotope_ratios(self, method_dictionary):
 
-        for ratio_dictionary in method_dictionary["ratios"]:
-            numerator = ratio_dictionary["numerator"]
-            denominator = ratio_dictionary["denominator"]
+        for ratio in method_dictionary["ratios"]:
+            numerator = ratio.numerator
+            denominator = ratio.denominator
 
-            ratios = [i/j for i, j in zip(self.mass_peaks[numerator].detector_corrected_cps_data,
-                            self.mass_peaks[denominator].detector_corrected_cps_data)]
+            ratios = [i / j for i, j in zip(self.mass_peaks[numerator].detector_corrected_cps_data,
+                                            self.mass_peaks[denominator].detector_corrected_cps_data)]
 
-
-            self.raw_isotope_ratios[numerator + "/" + denominator] = ratios
+            self.raw_isotope_ratios[ratio] = ratios
 
     def calculate_mean_st_error_for_isotope_ratios(self):
-        for ratio_name, raw_ratio_list in self.raw_isotope_ratios.items():
+        for ratio, raw_ratio_list in self.raw_isotope_ratios.items():
             # TODO fix number of outliers allowed
-            mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list, 1)
+            mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
+                                                                                                        1)
             two_st_error = 2 * st_dev / math.sqrt(n)
-            self.mean_two_st_error_isotope_ratios[ratio_name] = [mean, two_st_error]
-            self.outliers_removed_from_raw_data[ratio_name] = removed_data
-            self.outlier_bounds[ratio_name] = outlier_bounds
+            self.mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
+            self.outliers_removed_from_raw_data[ratio.name] = removed_data
+            self.outlier_bounds[ratio.name] = outlier_bounds
 
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet
@@ -100,8 +100,7 @@ class Spot:
         else:
             raise Exception
 
-        for ratio_name, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
-            standard_ratio = standard_ratios[ratio_name]
+        for ratio, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
+            standard_ratio = standard_ratios[ratio.name]
             delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
-            self.not_corrected_deltas["delta " + ratio_name] = [delta, delta_uncertainty]
-
+            self.not_corrected_deltas[ratio.delta_name] = [delta, delta_uncertainty]

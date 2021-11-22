@@ -52,7 +52,7 @@ def get_data_from_old_asc(spot_data, mass_peak_name):
     raw_data_line_start = line_number + 6
 
     # +1 is because the file format is fairly terrible
-    column_number = spot_data[raw_data_mass_peak_line].index(mass_peak_name) + 1
+    column_number = spot_data[raw_data_mass_peak_line].index(mass_peak_name.value) + 1
 
     raw_cps_data = get_raw_cps_data(raw_data_line_start, column_number, spot_data, block_number)
 
