@@ -3,7 +3,7 @@ import matplotlib.dates as mdates
 import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QCheckBox, \
     QTableWidgetItem, QHeaderView
 from matplotlib.gridspec import GridSpec
@@ -135,6 +135,9 @@ class BasicDataCheckWidget(QWidget):
                     delta_uncertainty_item = QTableWidgetItem(format(delta_uncertainty, ".4f"))
                     delta_uncertainty_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_uncertainty_item)
+                    if spot.is_flagged:
+                        delta_item.setBackground(QColor("red"))
+                        delta_uncertainty_item.setBackground(QColor("red"))
 
                 dtfa_x_item = QTableWidgetItem(str(spot.dtfa_x))
                 dtfa_y_item = QTableWidgetItem(str(spot.dtfa_y))
@@ -143,6 +146,8 @@ class BasicDataCheckWidget(QWidget):
 
                 for item in [dtfa_x_item, dtfa_y_item, relative_ion_yield_item, distance_to_mount_centre_item]:
                     item.setFont(font)
+                    if spot.is_flagged:
+                        item.setBackground(QColor("red"))
 
                 self.basic_data_table.setItem(i, j + 1, dtfa_x_item)
                 self.basic_data_table.setItem(i, j + 2, dtfa_y_item)

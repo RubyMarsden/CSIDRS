@@ -1,9 +1,10 @@
 import matplotlib
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QTreeWidgetItem
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QTreeWidgetItem, QTreeWidget
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 
 from src.utils import gui_utils
+from src.view.cycle_tree_widget import CycleTreeWidget
 from src.view.sample_tree import SampleTreeWidget
 
 matplotlib.use('QT5Agg')
@@ -20,6 +21,7 @@ class CycleDataDialog(QDialog):
 
         self.samples = self.data_processing_dialog.samples
         self.sample_tree = SampleTreeWidget()
+        self.cycle_tree = CycleTreeWidget()
 
         self.ratio = self.data_processing_dialog.method_dictionary["ratios"][0]
 
@@ -48,6 +50,10 @@ class CycleDataDialog(QDialog):
         layout.addWidget(self.sample_tree)
         self.sample_tree.set_samples(self.samples)
         self.sample_tree.select_first_spot()
+
+        layout.addWidget(self.cycle_tree)
+        self.cycle_tree.set_cycles(self.sample_tree.current_spot(), self.ratio)
+
         # TODO show Matthew how broken I can make things
         # for sample in self.samples:
         #     for spot in sample.spots:
@@ -68,6 +74,8 @@ class CycleDataDialog(QDialog):
         title = QLabel("Ratios and cps per cycle")
         layout.addWidget(title)
         return layout
+
+
 
     ###############
     ### Actions ###
