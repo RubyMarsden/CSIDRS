@@ -40,7 +40,6 @@ class SidrsModel:
 
     def import_all_files(self, filenames):
         self.sample_names_from_filenames(filenames)
-        print(self.isotopes)
         for filename in filenames:
             if filename in self.imported_files:
                 raise Exception("The file: " + filename + " has already been imported")
@@ -145,10 +144,6 @@ class SidrsModel:
             dxs = np.array(primary_time_uncertainties)
             ys = np.array(primary_deltas)
             dys = np.array(primary_delta_uncertainties)
-            print(xs)
-            print(dxs)
-            print(ys)
-            print(dys)
 
             regressor = LinearRegression()
             regressor.fit(xs, ys)
@@ -170,7 +165,6 @@ class SidrsModel:
     ###############
 
     def _isotopes_input(self, isotopes, enum):
-        print(isotopes)
         self.isotopes = isotopes
         self.element = enum
         self.method_dictionary = self.create_method_dictionary_from_isotopes(self.isotopes)

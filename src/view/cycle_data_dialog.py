@@ -1,5 +1,6 @@
 import matplotlib
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QTreeWidgetItem, QTreeWidget
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QTreeWidgetItem, QTreeWidget, \
+    QPushButton, QDialogButtonBox
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 
@@ -54,6 +55,9 @@ class CycleDataDialog(QDialog):
         layout.addWidget(self.cycle_tree)
         self.cycle_tree.set_cycles(self.sample_tree.current_spot(), self.ratio)
 
+        button_widget = self._create_button_widget()
+        layout.addWidget(button_widget)
+
         # TODO show Matthew how broken I can make things
         # for sample in self.samples:
         #     for spot in sample.spots:
@@ -75,6 +79,20 @@ class CycleDataDialog(QDialog):
         layout.addWidget(title)
         return layout
 
+    def _create_button_widget(self):
+        button_widget = QWidget()
+        layout = QVBoxLayout()
+        update_button = QPushButton("Recalculate data")
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout.addWidget(update_button)
+        layout.addWidget(self.buttonBox)
+
+        button_widget.setLayout(layout)
+
+        return button_widget
 
 
     ###############
