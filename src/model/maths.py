@@ -44,3 +44,46 @@ def calculate_delta_from_ratio(mean, two_st_error, standard_ratio):
 def vector_length_from_origin(x: int, y: int):
     vector_length = math.sqrt(x ** 2 + y ** 2)
     return vector_length
+
+
+def drift_correction(xs, ys, dxs, dys, drift_coefficient, zero_time):
+    corrected_ys = []
+    for (x, y) in zip(xs, ys):
+        correction = (zero_time - x) * drift_coefficient
+        y_corrected = y + correction
+        corrected_ys.append(y_corrected)
+
+    return xs, corrected_ys, dxs, dys
+
+def calculate_added_uncertainty_to_make_single_population(ys, dys):
+    mean, uncertainty = calculate_error_weighted_mean_and_st_dev(ys, dys)
+
+
+    new_sample_uncertainty = (uncertainty ** 2) * (reduced_chi_squared ** 2)
+
+
+
+
+def calculate_error_weighted_mean_and_st_dev(values, errors):
+    non_zero_errors = [error for error in errors if error != 0]
+
+    # If all errors are zero then simply take the mean.
+    if len(non_zero_errors) == 0:
+        weighted_mean = np.mean(values)
+        weighted_st_dev = 0
+        return weighted_mean, weighted_st_dev
+
+    # If some errors are zero, replace them with a small value
+    if len(non_zero_errors) < len(errors):
+        small_value = min(non_zero_errors) / 10
+        errors = [(error if error != 0 else small_value) for error in errors]
+
+    inverse_errors = [1 / (error ** 2) for error in errors]
+    sigma = sum(inverse_errors)
+    weighted_mean = (sum([value * inverseError for value, inverseError in zip(values, inverse_errors)])) / sigma
+    weighted_st_dev = math.sqrt(1 / sigma)
+    return weighted_mean, weighted_st_dev
+
+
+def calculate_reduced_chi_squared():
+    # TODO - talk this out with Chris?

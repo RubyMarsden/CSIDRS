@@ -5,6 +5,7 @@ import numpy as np
 from ltsfit.lts_linefit import lts_linefit
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+import statsmodels.api as sm
 
 from src.model.elements import Element
 from src.model.sample import Sample
@@ -148,15 +149,21 @@ class SidrsModel:
             regressor = LinearRegression()
             regressor.fit(xs, ys)
             score = regressor.score(xs, ys)
+            coeff = regressor.coef_
+            intercept = regressor.intercept_
             print(score)
+            print(coeff)
+            print(intercept)
+
+            X = sm.add_constant(primary_times)
+
+            statsmodel_result = sm.OLS(primary_deltas, X).fit()
+            print(statsmodel_result.summary())
 
             if score > 0.25:
-                # https://doi.org/10.1093/mnras/stt562
-                # Cappellari et al.(2013a, MNRAS, 432, 1709)
-                p = lts_linefit(xs, dxs, ys, dys, pivot=np.median(xs))
-
-                print(p.ab)
-
+                print("linear fit")
+                drift_correction_coef = coeff
+                drift_correction_intercept = intercept
             else:
                 print("no fit")
 
