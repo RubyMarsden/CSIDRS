@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QLayout, QVBoxLayout, QPushButton, QHBoxLayout, QTreeWidget, QTabWidget
 
 from src.view.basic_data_check_widget import BasicDataCheckWidget
+from src.view.corrected_data_widget import CorrectedDataWidget
 from src.view.cycle_data_dialog import CycleDataDialog
 from src.view.drift_correction_widget import DriftCorrectionWidget
 from src.view.sample_tree import SampleTreeWidget
@@ -47,6 +48,7 @@ class DataProcessingDialog(QDialog):
         self.tabs = QTabWidget()
         self.tabs.addTab(BasicDataCheckWidget(self), "1. Basic data check")
         self.tabs.addTab(DriftCorrectionWidget(self), "2. Drift correction")
+        self.tabs.addTab(CorrectedDataWidget(self), "3. Corrected data")
 
         layout = QVBoxLayout()
 

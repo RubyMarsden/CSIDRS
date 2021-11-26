@@ -47,6 +47,8 @@ class Spot:
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
         self.not_corrected_deltas = {}
+        self.drift_corrected_deltas = {}
+        self.alpha_corrected_data = {}
 
         for mass_peak_name in self.mass_peak_names:
             raw_cps_data, detector_data = get_data_from_old_asc(self.spot_data, mass_peak_name)

@@ -8,8 +8,11 @@ from sklearn.metrics import r2_score
 import statsmodels.api as sm
 
 from src.model.elements import Element
+from src.model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction
 from src.model.sample import Sample
 from src.model.settings.colours import colour_list, q_colour_list
+from src.model.settings.isotope_reference_materials import oxygen_zircon_reference_material_dict, \
+    sulphur_pyrite_reference_material_dict
 from src.model.settings.methods_from_isotopes import list_of_method_dictionaries
 from src.model.spot import Spot
 import csv
@@ -121,6 +124,7 @@ class SidrsModel:
 
     def drift_correction_process(self):
         for ratio in self.method_dictionary["ratios"]:
+
             for sample in self.samples_by_name.values():
                 if sample.is_primary_reference_material:
                     primary_rm = sample
@@ -160,13 +164,47 @@ class SidrsModel:
             statsmodel_result = sm.OLS(primary_deltas, X).fit()
             print(statsmodel_result.summary())
 
+            t_zero = np.median(primary_times)
+
             if score > 0.25:
                 print("linear fit")
                 drift_correction_coef = coeff
                 drift_correction_intercept = intercept
+                for sample in self.samples_by_names.values():
+                    for spot in sample.spots:
+                        [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                        timestamp = time.mktime(spot.datetime.timetuple())
+                        spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(x=timestamp, y=delta,
+                                                                                         dy=uncertainty,
+                                                                                         drift_coefficient=drift_correction_coef,
+                                                                                         zero_time=t_zero)
             else:
                 print("no fit")
+                for sample in self.samples_by_name.values():
+                    for spot in sample.spots:
+                        spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
+    def SIMS_correction_process(self):
+        # This correction method is described fully in  Kita et al., 2009
+        # How does the ratio process work? Can you have different corrections for each one?
+        for ratio in self.method_dictionary["ratios"]:
+            for sample in self.samples_by_name.values():
+                if sample.is_primary_reference_material:
+                    primary_rm = sample
+
+            spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots]
+            primary_rm_mean = np.mean(spot_data)
+            primary_uncertainty = np.std(spot_data)
+
+            alpha_sims = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
+                                              externally_measured_primary_reference_value=
+                                              self.primary_reference_material_value[0])
+
+            for sample in self.samples_by_name.values():
+                for spot in sample.spots:
+                    data = spot.drift_corrected_deltas[ratio.delta_name]
+                    spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
+                                                                                             primary_uncertainty)
     ###############
     ### Signals ###
     ###############
@@ -185,6 +223,21 @@ class SidrsModel:
     def _reference_material_tag_samples(self, primary_reference_material, secondary_reference_material):
         self.primary_reference_material = primary_reference_material
         self.secondary_reference_material = secondary_reference_material
+
+        # TODO refactor this bit
+        if self.element == Element.OXY:
+            if self.material == "Zircon":
+                primary_data_list = oxygen_zircon_reference_material_dict[primary_reference_material]
+                self.primary_reference_material_value = primary_data_list[0], primary_data_list[1]
+                secondary_data_list = oxygen_zircon_reference_material_dict[secondary_reference_material]
+                self.secondary_reference_material_value = secondary_data_list[0], secondary_data_list[1]
+
+        elif self.element == Element.SUL:
+            if self.material == "Pyrite":
+                primary_data_list = sulphur_pyrite_reference_material_dict[primary_reference_material]
+                self.primary_reference_material_value = primary_data_list[0], primary_data_list[1]
+                secondary_data_list = sulphur_pyrite_reference_material_dict[secondary_reference_material]
+                self.secondary_reference_material_value = secondary_data_list[0], secondary_data_list[1]
 
     def create_method_dictionary_from_isotopes(self, isotopes):
         for dictionary in list_of_method_dictionaries:

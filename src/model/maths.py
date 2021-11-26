@@ -46,22 +46,17 @@ def vector_length_from_origin(x: int, y: int):
     return vector_length
 
 
-def drift_correction(xs, ys, dxs, dys, drift_coefficient, zero_time):
-    corrected_ys = []
-    for (x, y) in zip(xs, ys):
-        correction = (zero_time - x) * drift_coefficient
-        y_corrected = y + correction
-        corrected_ys.append(y_corrected)
+def drift_correction(x, y, dy, drift_coefficient, zero_time):
+    correction = (zero_time - x) * drift_coefficient
+    y_corrected = y + correction
 
-    return xs, corrected_ys, dxs, dys
+    return x, y_corrected, dy
+
 
 def calculate_added_uncertainty_to_make_single_population(ys, dys):
     mean, uncertainty = calculate_error_weighted_mean_and_st_dev(ys, dys)
 
-
     new_sample_uncertainty = (uncertainty ** 2) * (reduced_chi_squared ** 2)
-
-
 
 
 def calculate_error_weighted_mean_and_st_dev(values, errors):
@@ -87,3 +82,20 @@ def calculate_error_weighted_mean_and_st_dev(values, errors):
 
 def calculate_reduced_chi_squared():
     # TODO - talk this out with Chris?
+    return
+
+
+def calculate_sims_alpha(primary_reference_material_mean_delta, externally_measured_primary_reference_value):
+    alpha_sims = (1 + (primary_reference_material_mean_delta / 1000)) / \
+                 (1 + (externally_measured_primary_reference_value / 1000))
+
+    return alpha_sims
+
+
+def calculate_alpha_correction(data, alpha_sims, uncertainty_from_primary_st_dev):
+    data_point, uncertainty = data
+    alpha_corrected_data = ((1 + (data_point / 1000) / alpha_sims) - 1) * 1000
+    uncertainty_propagated_relatively = alpha_corrected_data * uncertainty / data_point
+    alpha_corrected_uncertainty = math.sqrt(
+        (uncertainty_propagated_relatively ** 2) + (uncertainty_from_primary_st_dev ** 2))
+    return alpha_corrected_data, alpha_corrected_uncertainty

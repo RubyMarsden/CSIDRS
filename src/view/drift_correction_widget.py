@@ -100,8 +100,8 @@ class DriftCorrectionWidget(QWidget):
         axis.spines['right'].set_visible(False)
 
         xs = [spot.datetime for spot in sample.spots]
-        ys = [spot.not_corrected_deltas[ratio.delta_name][0] for spot in sample.spots]
-        yerrors = [spot.not_corrected_deltas[ratio.delta_name][1] for spot in sample.spots]
+        ys = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in sample.spots]
+        yerrors = [spot.drift_corrected_deltas[ratio.delta_name][1] for spot in sample.spots]
 
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
         axis.set_xlabel("Time")
