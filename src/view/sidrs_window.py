@@ -59,5 +59,5 @@ class SidrsWindow(QMainWindow):
         self.model.process_data()
         self.model.drift_correction_process()
         self.model.SIMS_correction_process()
-        dialog = DataProcessingDialog(self.model.samples_by_name.values(), self.model.method_dictionary)
+        dialog = DataProcessingDialog(self.model)
         result = dialog.exec()

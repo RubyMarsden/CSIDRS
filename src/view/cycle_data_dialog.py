@@ -22,20 +22,20 @@ class CycleDataDialog(QDialog):
 
         self.samples = self.data_processing_dialog.samples
         self.sample_tree = SampleTreeWidget()
-        self.cycle_tree = CycleTreeWidget()
+        self.cycle_tree = CycleTreeWidget(self.data_processing_dialog)
 
         self.ratio = self.data_processing_dialog.method_dictionary["ratios"][0]
 
         layout = QHBoxLayout()
-        right_widget = self._create_right_widget()
+        right_layout = self._create_right_widget()
         layout.addLayout(self._create_left_widget())
-        layout.addLayout(right_widget)
+        layout.addLayout(right_layout)
 
         self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.update_graphs(
             self.sample_tree.current_spot(),
-            self.ratio
-        )
-                                                         )
+            self.ratio))
+
+        self.data_processing_dialog.model.signals.cycleTreeItemChanged.connect(self.on_cycle_tree_item_changed)
 
         self.setLayout(layout)
 
@@ -57,19 +57,6 @@ class CycleDataDialog(QDialog):
 
         button_widget = self._create_button_widget()
         layout.addWidget(button_widget)
-
-        # TODO show Matthew how broken I can make things
-        # for sample in self.samples:
-        #     for spot in sample.spots:
-        #         spot_item = self.sample_tree.tree.currentItem()
-        #         for i, value in enumerate(spot.raw_isotope_ratios[self.data_processing_dialog.method_dictionary["ratios"][0]]):
-        #             item = QTreeWidgetItem(spot_item)
-        #             item.setText(0, str(i))
-        #             item.is_sample = False
-        #             item.is_spot = False
-        #             spot_item.addChild(item)
-        #             item.is_flagged = False
-
 
         return layout
 
@@ -93,7 +80,6 @@ class CycleDataDialog(QDialog):
         button_widget.setLayout(layout)
 
         return button_widget
-
 
     ###############
     ### Actions ###
@@ -181,7 +167,7 @@ class CycleDataDialog(QDialog):
         plt.axhline(y=mean)
 
         (outlier_minimum, outlier_maximum) = spot.outlier_bounds[ratio.name]
-        outlier_rectangle = Rectangle((0, outlier_minimum), len(xs)+1, outlier_maximum - outlier_minimum)
+        outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
 
         outlier_rectangle.set_color("lightblue")
 
@@ -194,3 +180,29 @@ class CycleDataDialog(QDialog):
 
         plt.xticks(xs, xs)
         plt.tight_layout()
+
+    ###############
+    ### Actions ###
+    ###############
+
+    def on_cycle_tree_item_changed(self, cycle_number, previous_cycle_number):
+        self.highlight_selected_ratio_data_point(self.sample_tree.current_spot(), self.ratios_axis, self.ratio,
+                                                 cycle_number, previous_cycle_number)
+
+    def highlight_selected_ratio_data_point(self, spot, ratio_axis, ratio, cycle_number, previous_cycle_number):
+        ys = spot.raw_isotope_ratios[ratio]
+        xs = list(range(1, 1 + len(ys)))
+
+        for x, y in zip(xs, ys):
+            if x == cycle_number:
+                if y in spot.outliers_removed_from_raw_data[ratio.name]:
+                    ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="yellow")
+                else:
+                    ratio_axis.plot(x, y, ls="", marker="o", color="yellow")
+
+            if x == previous_cycle_number:
+                if y in spot.outliers_removed_from_raw_data[ratio.name]:
+                    ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
+                else:
+                    ratio_axis.plot(x, y, ls="", marker="o", color="navy")
+        self.canvas.draw()

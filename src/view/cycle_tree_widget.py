@@ -3,9 +3,11 @@ from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, 
 
 
 class CycleTreeWidget(QWidget):
-    def __init__(self):
+    def __init__(self, data_processing_dialog):
         super().__init__()
         self.tree = QTreeWidget()
+        self.data_processing_dialog = data_processing_dialog
+        self.model = self.data_processing_dialog.model
 
         self.tree.currentItemChanged.connect(self._on_selected_cycle_change)
 
@@ -30,6 +32,8 @@ class CycleTreeWidget(QWidget):
         self.next_item_button.setEnabled(any_samples)
         self.back_item_button.setEnabled(any_samples)
         self.select_first_cycle()
+
+        self._on_selected_cycle_change(self.tree.currentItem(), None)
 
     def select_first_cycle(self):
         first_cycle = self.tree.topLevelItem(0)
@@ -60,9 +64,9 @@ class CycleTreeWidget(QWidget):
             return None
         return current_item.spot
 
-    #######
-    # Actions
-    #######
+    ###########
+    # Actions #
+    ###########
 
     def on_next_item_clicked(self):
         self.back_item_button.setEnabled(True)
@@ -77,8 +81,12 @@ class CycleTreeWidget(QWidget):
         self.tree.setCurrentItem(previous_item)
 
     def _on_selected_cycle_change(self, current_tree_item, previous_tree_item):
-        if current_tree_item is None:
-            return
+        current_tree_item_integer = int(current_tree_item.text(0))
+        if previous_tree_item is None:
+            previous_tree_item_integer = 1
+        else:
+            previous_tree_item_integer = int(previous_tree_item.text(0))
+        self.model.signals.cycleTreeItemChanged.emit(current_tree_item_integer, previous_tree_item_integer)
 
         next_item = self.tree.itemBelow(current_tree_item)
         self.next_item_button.setDisabled(next_item is None)
@@ -86,10 +94,8 @@ class CycleTreeWidget(QWidget):
         previous_item = self.tree.itemAbove(current_tree_item)
         self.back_item_button.setDisabled(previous_item is None)
 
-    def highlight_spot(self, is_flagged):
+    def highlight_cycle_tree_item(self, is_flagged):
         current_tree_item = self.tree.currentItem()
-        if not current_tree_item:
-            return
 
         colour = QColor(255, 0, 0, 50) if is_flagged else QColor(0, 0, 0, 0)
         current_tree_item.setBackground(0, colour)

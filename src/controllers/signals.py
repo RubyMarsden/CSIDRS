@@ -9,3 +9,4 @@ class Signals(QObject):
     filenamesUpdated = pyqtSignal(list)
     sampleNamesUpdated = pyqtSignal(list)
     referenceMaterialsInput = pyqtSignal(str, str)
+    cycleTreeItemChanged = pyqtSignal(int, int)
