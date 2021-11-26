@@ -3,4 +3,4 @@ class Ratio:
         self.numerator = numerator
         self.denominator = denominator
         self.name = numerator.value + "/" + denominator.value
-        self.delta_name = "delta" + self.name
+        self.delta_name = "delta" + self.numerator.value
