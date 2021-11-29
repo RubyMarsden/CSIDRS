@@ -94,7 +94,7 @@ def calculate_sims_alpha(primary_reference_material_mean_delta, externally_measu
 
 def calculate_alpha_correction(data, alpha_sims, uncertainty_from_primary_st_dev):
     data_point, uncertainty = data
-    alpha_corrected_data = ((1 + (data_point / 1000) / alpha_sims) - 1) * 1000
+    alpha_corrected_data = (((1 + (data_point / 1000)) / alpha_sims) - 1) * 1000
     uncertainty_propagated_relatively = alpha_corrected_data * uncertainty / data_point
     alpha_corrected_uncertainty = math.sqrt(
         (uncertainty_propagated_relatively ** 2) + (uncertainty_from_primary_st_dev ** 2))
