@@ -27,6 +27,8 @@ class CycleDataDialog(QDialog):
 
         self.ratio = self.data_processing_dialog.method_dictionary["ratios"][0]
 
+        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+
         layout = QHBoxLayout()
         right_layout = self._create_right_widget()
         layout.addLayout(self._create_left_widget())
@@ -45,7 +47,8 @@ class CycleDataDialog(QDialog):
         layout.addLayout(self._create_title_bar())
         layout.addWidget(self._create_cycle_data_graphs())
 
-        self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method_dictionary["ratios"])
+        self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method_dictionary["ratios"],
+                                               self.data_processing_dialog.model.signals)
         layout.addWidget(self.ratio_box_widget)
 
         return layout
@@ -98,6 +101,10 @@ class CycleDataDialog(QDialog):
             self.create_ratio_plot(spot, self.ratios_axis, ratio)
 
         self.canvas.draw()
+
+    def change_ratio(self, ratio):
+        self.ratio = ratio
+        self.update_graphs(self.sample_tree.current_spot() ,ratio)
 
     ################
     ### Plotting ###

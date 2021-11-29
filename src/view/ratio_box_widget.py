@@ -3,10 +3,11 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QRadioButton
 
 
 class RatioBoxWidget(QWidget):
-    def __init__(self, ratios):
+    def __init__(self, ratios, signals):
         QWidget.__init__(self)
 
         self.ratio_radiobuttons = []
+        self.signals = signals
 
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -25,5 +26,7 @@ class RatioBoxWidget(QWidget):
         for button in self.ratio_radiobuttons:
             if button.isChecked():
                 ratio = button.ratio
+
+        self.signals.ratioToDisplayChanged.emit(ratio)
 
         print(ratio.name)
