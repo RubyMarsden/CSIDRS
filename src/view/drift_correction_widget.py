@@ -5,6 +5,7 @@ from matplotlib.gridspec import GridSpec
 import matplotlib.dates as mdates
 
 from src.utils import gui_utils
+from src.view.ratio_box_widget import RatioBoxWidget
 
 
 class DriftCorrectionWidget(QWidget):
@@ -12,6 +13,9 @@ class DriftCorrectionWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
+        self.ratio = self.data_processing_dialog.method_dictionary["ratios"][0]
+
+        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
 
         layout = QHBoxLayout()
 
@@ -46,8 +50,12 @@ class DriftCorrectionWidget(QWidget):
     def _create_rhs_layout(self):
         layout = QVBoxLayout()
 
-        graph_widget = self._create_graph_widget(self.data_processing_dialog.method_dictionary["ratios"][0])
+        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method_dictionary["ratios"],
+                                                    self.data_processing_dialog.model.signals)
 
+        graph_widget = self._create_graph_widget(self.ratio)
+
+        layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(graph_widget)
 
         return layout
@@ -72,6 +80,28 @@ class DriftCorrectionWidget(QWidget):
         graph.setLayout(layout)
 
         return graph
+    ###############
+    ### Actions ###
+    ###############
+
+    def update_graphs(self, ratio):
+        self.primary_drift_axis.clear()
+        self.secondary_check_axis.clear()
+
+        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis, ratio)
+        self._create_secondary_check_graph(self.secondary_sample, self.secondary_check_axis, ratio)
+
+        self.canvas.draw()
+
+    def change_ratio(self, ratio):
+        self.ratio = ratio
+        self.update_graphs(ratio)
+
+
+    ################
+    ### Plotting ###
+    ################
+
 
     def _create_primary_drift_graph(self, sample, axis, ratio):
         axis.clear()

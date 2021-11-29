@@ -44,12 +44,12 @@ class CycleDataDialog(QDialog):
 
     def _create_left_widget(self):
         layout = QVBoxLayout()
-        layout.addLayout(self._create_title_bar())
-        layout.addWidget(self._create_cycle_data_graphs())
-
         self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method_dictionary["ratios"],
                                                self.data_processing_dialog.model.signals)
+
+        layout.addLayout(self._create_title_bar())
         layout.addWidget(self.ratio_box_widget)
+        layout.addWidget(self._create_cycle_data_graphs())
 
         return layout
 
@@ -104,7 +104,7 @@ class CycleDataDialog(QDialog):
 
     def change_ratio(self, ratio):
         self.ratio = ratio
-        self.update_graphs(self.sample_tree.current_spot() ,ratio)
+        self.update_graphs(self.sample_tree.current_spot(), ratio)
 
     ################
     ### Plotting ###
