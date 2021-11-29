@@ -6,14 +6,24 @@ class RatioBoxWidget(QWidget):
     def __init__(self, ratios):
         QWidget.__init__(self)
 
+        self.ratio_radiobuttons = []
+
         layout = QHBoxLayout()
         self.setLayout(layout)
 
         for ratio in ratios:
-            box = QRadioButton(ratio.name)
-            layout.addWidget(box, alignment=Qt.AlignCenter)
+            button = QRadioButton(ratio.name)
+            button.ratio = ratio
+            layout.addWidget(button, alignment=Qt.AlignCenter)
+            button.toggled.connect(self.emit_ratio_change_signal)
+
+            self.ratio_radiobuttons.append(button)
 
         layout.addStretch()
 
     def emit_ratio_change_signal(self):
-        return
+        for button in self.ratio_radiobuttons:
+            if button.isChecked():
+                ratio = button.ratio
+
+        print(ratio.name)
