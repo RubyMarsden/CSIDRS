@@ -196,6 +196,8 @@ class SidrsModel:
             primary_rm_mean = np.mean(spot_data)
             primary_uncertainty = np.std(spot_data)
 
+            print(self.primary_reference_material_value[0])
+
             alpha_sims = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
                                               externally_measured_primary_reference_value=
                                               self.primary_reference_material_value[0])

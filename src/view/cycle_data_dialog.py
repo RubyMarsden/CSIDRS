@@ -6,6 +6,7 @@ from matplotlib.patches import Rectangle
 
 from src.utils import gui_utils
 from src.view.cycle_tree_widget import CycleTreeWidget
+from src.view.ratio_box_widget import RatioBoxWidget
 from src.view.sample_tree import SampleTreeWidget
 
 matplotlib.use('QT5Agg')
@@ -43,6 +44,9 @@ class CycleDataDialog(QDialog):
         layout = QVBoxLayout()
         layout.addLayout(self._create_title_bar())
         layout.addWidget(self._create_cycle_data_graphs())
+
+        self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method_dictionary["ratios"])
+        layout.addWidget(self.ratio_box_widget)
 
         return layout
 
