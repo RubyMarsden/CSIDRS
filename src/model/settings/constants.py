@@ -1,10 +1,12 @@
+from src.model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32, O17_O16, O18_O16
+
 # TODO make sure all constants come from this file.
 oxygen_isotope_reference = {
-    'VSMOW': {'18O/16O': 0.002005, '17O/16O': 0.0003799}
+    'VSMOW': {O18_O16: 0.002005, O17_O16: 0.0003799}
 }
 
 sulphur_isotope_reference = {
-    'VCDT': {'34S/32S': 0.04416259, '33S/32S': 0.00787724, '36S/32S': 0.00015349}
+    'VCDT': {S34_S32: 0.04416259, S33_S32: 0.00787724, S36_S32: 0.00015349}
 }
 
 carbon_isotope_reference = {
