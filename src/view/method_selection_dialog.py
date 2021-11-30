@@ -37,7 +37,7 @@ class MethodSelectionDialog(QDialog):
 
         if self.element == Element.OXY:
 
-            for isotope in three_isotopes_hydroxide_oxygen["isotopes"]:
+            for isotope in three_isotopes_hydroxide_oxygen.isotopes:
                 box = QCheckBox(isotope.value)
                 box.isotope = isotope
                 box.stateChanged.connect(self.on_isotopes_changed)
@@ -55,7 +55,7 @@ class MethodSelectionDialog(QDialog):
 
         elif self.element == Element.SUL:
 
-            for isotope in four_isotopes_sulphur["isotopes"]:
+            for isotope in four_isotopes_sulphur.isotopes:
                 box = QCheckBox(isotope.value)
                 box.isotope = isotope
                 box.stateChanged.connect(self.on_isotopes_changed)

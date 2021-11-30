@@ -13,7 +13,7 @@ class DriftCorrectionWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
-        self.ratio = self.data_processing_dialog.method_dictionary["ratios"][0]
+        self.ratio = self.data_processing_dialog.method.ratios[0]
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
 
@@ -50,7 +50,7 @@ class DriftCorrectionWidget(QWidget):
     def _create_rhs_layout(self):
         layout = QVBoxLayout()
 
-        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method_dictionary["ratios"],
+        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                     self.data_processing_dialog.model.signals)
 
         graph_widget = self._create_graph_widget(self.ratio)

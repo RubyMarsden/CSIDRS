@@ -78,13 +78,13 @@ class BasicDataCheckWidget(QWidget):
 
     def _create_basic_table(self):
 
-        method = self.data_processing_dialog.method_dictionary
+        method = self.data_processing_dialog.method
 
-        number_of_columns = 5 + (2 * method["number_of_ratios"])
+        number_of_columns = 5 + (2 * len(method.ratios))
         number_of_rows = 0
 
         column_headers = ["Sample name"]
-        for ratio in method["ratios"]:
+        for ratio in method.ratios:
             column_headers.append(ratio.delta_name)
             ratio_uncertainty_name = "uncertainty"
             column_headers.append(ratio_uncertainty_name)
@@ -111,7 +111,7 @@ class BasicDataCheckWidget(QWidget):
         return table
 
     def _populate_basic_table(self):
-        method = self.data_processing_dialog.method_dictionary
+        method = self.data_processing_dialog.method
 
         font_family = self.basic_data_table.font().family()
         font = QFont(font_family, 9)
@@ -125,7 +125,7 @@ class BasicDataCheckWidget(QWidget):
                 name_item.setFont(font)
                 self.basic_data_table.setItem(i, j, name_item)
 
-                for ratio in method["ratios"]:
+                for ratio in method.ratios:
                     j += 1
                     [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
                     delta_item = QTableWidgetItem(format(delta, ".3f"))

@@ -13,7 +13,7 @@ from src.model.sample import Sample
 from src.model.settings.colours import colour_list, q_colour_list
 from src.model.settings.isotope_reference_materials import oxygen_zircon_reference_material_dict, \
     sulphur_pyrite_reference_material_dict
-from src.model.settings.methods_from_isotopes import list_of_method_dictionaries
+from src.model.settings.methods_from_isotopes import list_of_methods
 from src.model.spot import Spot
 import csv
 
@@ -31,7 +31,7 @@ class SidrsModel:
         self.primary_reference_material = None
         self.secondary_reference_material = None
 
-        self.method_dictionary = None
+        self.method = None
 
         self.signals.isotopesInput.connect(self._isotopes_input)
         self.signals.materialInput.connect(self._material_input)
@@ -118,12 +118,12 @@ class SidrsModel:
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 spot.calculate_relative_secondary_ion_yield()
-                spot.calculate_raw_isotope_ratios(self.method_dictionary)
+                spot.calculate_raw_isotope_ratios(self.method)
                 spot.calculate_mean_st_error_for_isotope_ratios()
                 spot.calculate_raw_delta_for_isotope_ratio(self.element)
 
     def drift_correction_process(self):
-        for ratio in self.method_dictionary["ratios"]:
+        for ratio in self.method.ratios:
 
             for sample in self.samples_by_name.values():
                 if sample.is_primary_reference_material:
@@ -187,7 +187,7 @@ class SidrsModel:
     def SIMS_correction_process(self):
         # This correction method is described fully in  Kita et al., 2009
         # How does the ratio process work? Can you have different corrections for each one?
-        for ratio in self.method_dictionary["ratios"]:
+        for ratio in self.method.ratios:
             for sample in self.samples_by_name.values():
                 if sample.is_primary_reference_material:
                     primary_rm = sample
@@ -217,7 +217,7 @@ class SidrsModel:
     def _isotopes_input(self, isotopes, enum):
         self.isotopes = isotopes
         self.element = enum
-        self.method_dictionary = self.create_method_dictionary_from_isotopes(self.isotopes)
+        self.method = self.create_method_dictionary_from_isotopes(self.isotopes)
 
     def _material_input(self, material):
         self.material = material
@@ -245,9 +245,9 @@ class SidrsModel:
                 self.secondary_reference_material_value = secondary_data_list[0], secondary_data_list[1]
 
     def create_method_dictionary_from_isotopes(self, isotopes):
-        for dictionary in list_of_method_dictionaries:
-            if set(isotopes) == set(dictionary["isotopes"]):
-                return dictionary
+        for method in list_of_methods:
+            if set(isotopes) == set(method.isotopes):
+                return method
 
         raise Exception(
             "The isotopes selected are not currently part of a method. For instructions on how to add methods view the HACKING.md file.")

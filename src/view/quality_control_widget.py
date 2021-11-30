@@ -18,7 +18,7 @@ class QualityControlWidget(QWidget):
 
         layout = QHBoxLayout()
 
-        graph_widget = self._create_graph_widget(self.data_processing_dialog.method_dictionary["ratios"][0])
+        graph_widget = self._create_graph_widget(self.data_processing_dialog.method.ratios[0])
 
         layout.addWidget(graph_widget)
 

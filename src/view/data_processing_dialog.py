@@ -17,7 +17,7 @@ class DataProcessingDialog(QDialog):
         self.samples = model.samples_by_name.values()
         self.sample_tree = SampleTreeWidget()
 
-        self.method_dictionary = model.method_dictionary
+        self.method = model.method
 
         self.setWindowTitle("Data processing")
         self.setMinimumWidth(500)
