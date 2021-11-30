@@ -104,5 +104,6 @@ class Spot:
 
         for ratio, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
             standard_ratio = standard_ratios[ratio.name]
+            print(standard_ratio)
             delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
             self.not_corrected_deltas[ratio.delta_name] = [delta, delta_uncertainty]
