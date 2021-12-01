@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTab
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
+from src.utils.make_csv_file import write_csv_output
+
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
 
@@ -70,7 +72,34 @@ class BasicDataCheckWidget(QWidget):
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
-        print("Create a csv")
+        method = self.data_processing_dialog.method
+
+        column_headers = ["Sample name"]
+        for ratio in method.ratios:
+            column_headers.append(ratio.delta_name)
+            ratio_uncertainty_name = "uncertainty"
+            column_headers.append(ratio_uncertainty_name)
+
+        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
+
+        rows = []
+        for sample in self.data_processing_dialog.samples:
+            for spot in sample.spots:
+                row = [str(sample.name + " " + spot.id)]
+
+                for ratio in method.ratios:
+                    [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                    row.append(delta)
+                    row.append(delta_uncertainty)
+
+                row.append(spot.dtfa_x)
+                row.append(spot.dtfa_y)
+                row.append(format(spot.secondary_ion_yield, ".5f"))
+                row.append(spot.distance_from_mount_centre)
+
+                rows.append(row)
+
+        write_csv_output(headers=column_headers, rows=rows, output_file="raw_data.csv")
 
     #############
     ### Table ###

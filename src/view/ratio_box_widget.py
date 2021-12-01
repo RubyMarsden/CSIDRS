@@ -29,4 +29,3 @@ class RatioBoxWidget(QWidget):
 
         self.signals.ratioToDisplayChanged.emit(ratio)
 
-        print(ratio.name)

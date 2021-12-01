@@ -205,11 +205,8 @@ class SidrsModel:
             for sample in self.samples_by_name.values():
                 for spot in sample.spots:
                     data = spot.drift_corrected_deltas[ratio.delta_name]
-                    print(data)
-                    print(alpha_sims)
                     spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
                                                                                              primary_uncertainty)
-                    print(spot.alpha_corrected_data[ratio.delta_name])
     ###############
     ### Signals ###
     ###############
