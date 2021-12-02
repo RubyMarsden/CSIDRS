@@ -47,6 +47,8 @@ class CycleDataDialog(QDialog):
         self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                self.data_processing_dialog.model.signals)
 
+        self.ratio_box_widget.set_ratio(self.ratio)
+
         layout.addLayout(self._create_title_bar())
         layout.addWidget(self.ratio_box_widget)
         layout.addWidget(self._create_cycle_data_graphs())
@@ -93,14 +95,19 @@ class CycleDataDialog(QDialog):
     ###############
 
     def update_graphs(self, spot, ratio):
-        self.counts_axis.clear()
-        self.counts_axis2.clear()
-        self.ratios_axis.clear()
-        if spot is not None:
-            self.create_counts_plot(spot, self.counts_axis, self.counts_axis2, ratio)
-            self.create_ratio_plot(spot, self.ratios_axis, ratio)
+        try:
+            self.counts_axis.clear()
+            self.counts_axis2.clear()
+            self.ratios_axis.clear()
+        except AttributeError:
+            pass
+        else:
 
-        self.canvas.draw()
+            if spot is not None:
+                self.create_counts_plot(spot, self.counts_axis, self.counts_axis2, ratio)
+                self.create_ratio_plot(spot, self.ratios_axis, ratio)
+
+            self.canvas.draw()
 
     def change_ratio(self, ratio):
         self.ratio = ratio

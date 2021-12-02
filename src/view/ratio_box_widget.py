@@ -29,3 +29,9 @@ class RatioBoxWidget(QWidget):
 
         self.signals.ratioToDisplayChanged.emit(ratio)
 
+    def set_ratio(self, ratio):
+        for button in self.ratio_radiobuttons:
+            if button.ratio == ratio:
+                button.setChecked(True)
+            else:
+                button.setChecked(False)

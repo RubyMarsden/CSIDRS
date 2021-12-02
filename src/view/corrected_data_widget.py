@@ -1,20 +1,9 @@
-import matplotlib
-import matplotlib.dates as mdates
-import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QCheckBox, \
-    QTableWidgetItem, QHeaderView, QFileDialog
-from matplotlib.gridspec import GridSpec
-from matplotlib.patches import Circle
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem, QFileDialog
 
 from src.utils.make_csv_file import write_csv_output
-
-matplotlib.use('QT5Agg')
-from matplotlib import pyplot as plt
-
-from src.utils import gui_utils
 from src.view.cycle_data_dialog import CycleDataDialog
 
 
