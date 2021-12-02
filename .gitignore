@@ -5,3 +5,4 @@ __pycache__/
 /data/
 /src/raw_data.csv
 /corrected_data.csv
+/raw_data.csv

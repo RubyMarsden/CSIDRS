@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QCheckBox, \
-    QTableWidgetItem, QHeaderView
+    QTableWidgetItem, QHeaderView, QFileDialog
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
@@ -57,7 +57,7 @@ class CorrectedDataWidget(QWidget):
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
-        print("Create a csv")
+        output_file_name = self.get_output_file()
 
         method = self.data_processing_dialog.method
 
@@ -85,8 +85,16 @@ class CorrectedDataWidget(QWidget):
                 row.append(spot.distance_from_mount_centre)
 
                 rows.append(row)
+        if output_file_name:
+            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
+            print("Exported")
 
-        write_csv_output(headers=column_headers, rows=rows, output_file="corrected_data.csv")
+    def get_output_file(self):
+        return QFileDialog.getSaveFileName(self,
+                                           caption='Save CSV file',
+                                           directory="home/ruby/Documents/Programming/UWA/SIDRS/data",
+                                           options=QFileDialog.DontUseNativeDialog
+                                           )[0]
 
     #############
     ### Table ###
