@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox
 
 
 class CycleTreeWidget(QWidget):
@@ -13,8 +13,10 @@ class CycleTreeWidget(QWidget):
 
         self.tree.setHeaderLabel("Cycle number")
         self.buttons = self._create_next_and_back_buttons()
+        self.exclude_cycle_checkbox = QCheckBox("Exclude cycle from calculations")
 
         layout = QVBoxLayout()
+        layout.addWidget(self.exclude_cycle_checkbox)
         layout.addWidget(self.tree)
         layout.addWidget(self.buttons)
         layout.setContentsMargins(0, 0, 0, 0)
