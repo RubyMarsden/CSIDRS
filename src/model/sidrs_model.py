@@ -2,7 +2,7 @@ import re
 import time
 
 import numpy as np
-from ltsfit.lts_linefit import lts_linefit
+# from ltsfit.lts_linefit import lts_linefit
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 import statsmodels.api as sm
@@ -30,6 +30,8 @@ class SidrsModel:
         self.material = None
         self.primary_reference_material = None
         self.secondary_reference_material = None
+        self.cycle_outlier_likelihood_statement = None
+        self.primary_rm_outlier_likelihood_statement = None
 
         self.method = None
 

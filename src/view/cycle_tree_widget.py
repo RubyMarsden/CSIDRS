@@ -1,6 +1,8 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox
 
+from src.view.stats_dialog import StatsWarningDialog
+
 
 class CycleTreeWidget(QWidget):
     def __init__(self, data_processing_dialog):
@@ -14,6 +16,8 @@ class CycleTreeWidget(QWidget):
         self.tree.setHeaderLabel("Cycle number")
         self.buttons = self._create_next_and_back_buttons()
         self.exclude_cycle_checkbox = QCheckBox("Exclude cycle from calculations")
+
+        self.exclude_cycle_checkbox.stateChanged.connect(self.excluded_cycle_checked)
 
         layout = QVBoxLayout()
         layout.addWidget(self.exclude_cycle_checkbox)
@@ -101,3 +105,7 @@ class CycleTreeWidget(QWidget):
 
         colour = QColor(255, 0, 0, 50) if is_flagged else QColor(0, 0, 0, 0)
         current_tree_item.setBackground(0, colour)
+
+    def excluded_cycle_checked(self):
+        dialog = StatsWarningDialog()
+        dialog.exec()
