@@ -7,7 +7,12 @@ colour_list = [
     "cornflowerblue",
     "darkviolet",
     "plum",
-    "yellow"
+    "yellow",
+    "lightcoral",
+    "sienna",
+    "forestgreen",
+    "aquamarine",
+    "grey"
 ]
 
 q_colour_list = [
@@ -17,5 +22,10 @@ q_colour_list = [
     QColor(100, 149, 237, 100),
     QColor(171, 0, 214, 100),
     QColor(235, 135, 222, 100),
-    QColor(246, 255, 0, 100)
+    QColor(246, 255, 0, 100),
+    QColor(240, 128, 128, 100),
+    QColor(160, 82, 45, 100),
+    QColor(34, 139, 34, 100),
+    QColor(127, 255, 212, 100),
+    QColor(128, 128, 128, 100)
 ]

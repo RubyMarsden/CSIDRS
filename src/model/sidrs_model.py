@@ -170,9 +170,9 @@ class SidrsModel:
 
             if score > 0.25:
                 print("linear fit")
-                drift_correction_coef = coeff
+                drift_correction_coef = float(coeff)
                 drift_correction_intercept = intercept
-                for sample in self.samples_by_names.values():
+                for sample in self.samples_by_name.values():
                     for spot in sample.spots:
                         [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
                         timestamp = time.mktime(spot.datetime.timetuple())
@@ -207,6 +207,7 @@ class SidrsModel:
             for sample in self.samples_by_name.values():
                 for spot in sample.spots:
                     data = spot.drift_corrected_deltas[ratio.delta_name]
+                    print(data)
                     spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
                                                                                              primary_uncertainty)
     ###############

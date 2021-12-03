@@ -50,7 +50,7 @@ def drift_correction(x, y, dy, drift_coefficient, zero_time):
     correction = (zero_time - x) * drift_coefficient
     y_corrected = y + correction
 
-    return x, y_corrected, dy
+    return y_corrected, dy
 
 
 def calculate_added_uncertainty_to_make_single_population(ys, dys):
