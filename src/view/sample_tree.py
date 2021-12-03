@@ -101,6 +101,7 @@ class SampleTreeWidget(QWidget):
 
         previous_item = self.tree.itemAbove(current_tree_item)
         self.back_item_button.setDisabled(previous_item is None)
+
         if current_tree_item.is_sample:
             self.exclude_spot_checkbox.setChecked(False)
             self.exclude_spot_checkbox.setEnabled(False)
