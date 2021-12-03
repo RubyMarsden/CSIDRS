@@ -32,15 +32,10 @@ class CycleTreeWidget(QWidget):
     def set_cycles(self, spot, ratio):
         self.tree.clear()
         cycles = [i for i in enumerate(spot.raw_isotope_ratios[ratio])]
-        outliers = spot.outliers_removed_from_raw_data[ratio.name]
-        print(outliers)
         for i, value in enumerate(spot.raw_isotope_ratios[ratio]):
-            print("Value: " + str(value))
+            exclude_cycle = spot.cycle_flagging_information[ratio][i]
             cycle_tree_item = QTreeWidgetItem(self.tree, [str(i+1)])
-            cycle_tree_item.is_flagged = False
-            if value in outliers:
-                cycle_tree_item.is_flagged = True
-                print("OUTLIER")
+            cycle_tree_item.is_flagged = exclude_cycle
 
             self.highlight_cycle_tree_item(cycle_tree_item)
 
@@ -110,6 +105,8 @@ class CycleTreeWidget(QWidget):
 
             previous_item = self.tree.itemAbove(current_tree_item)
             self.back_item_button.setDisabled(previous_item is None)
+
+            self.exclude_cycle_checkbox.setChecked(current_tree_item.is_flagged)
         else:
             print("no current tree item")
 
@@ -125,5 +122,8 @@ class CycleTreeWidget(QWidget):
             dialog = StatsWarningDialog()
             dialog.exec()
             self.has_seen_stats_warning_dialog = True
+        self.tree.currentItem().is_flagged = self.exclude_cycle_checkbox.isChecked()
         self.highlight_cycle_tree_item(self.tree.currentItem())
+        cycle_number = int(self.tree.currentItem.text()) - 1
+        self.data_processing_dialog.model.signals.cycleFlagged.emit(cycle_number)
 

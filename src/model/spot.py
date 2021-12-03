@@ -46,6 +46,7 @@ class Spot:
         self.mean_two_st_error_isotope_ratios = {}
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
+        self.cycle_flagging_information = {}
         self.not_corrected_deltas = {}
         self.drift_corrected_deltas = {}
         self.alpha_corrected_data = {}
@@ -88,8 +89,16 @@ class Spot:
                                                                                                         1)
             two_st_error = 2 * st_dev / math.sqrt(n)
             self.mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
-            self.outliers_removed_from_raw_data[ratio.name] = removed_data
-            self.outlier_bounds[ratio.name] = outlier_bounds
+            self.outliers_removed_from_raw_data[ratio] = removed_data
+            self.outlier_bounds[ratio] = outlier_bounds
+
+            cycle_exclude_list = []
+            for value in raw_ratio_list:
+                if value in self.outliers_removed_from_raw_data[ratio]:
+                    cycle_exclude_list.append(True)
+                else:
+                    cycle_exclude_list.append(False)
+            self.cycle_flagging_information[ratio] = cycle_exclude_list
 
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet

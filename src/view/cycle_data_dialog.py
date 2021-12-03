@@ -81,6 +81,8 @@ class CycleDataDialog(QDialog):
         button_widget = QWidget()
         layout = QVBoxLayout()
         update_button = QPushButton("Recalculate data")
+        update_button.clicked.connect(self.on_update_button_pushed)
+
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
@@ -114,6 +116,10 @@ class CycleDataDialog(QDialog):
     def change_ratio(self, ratio):
         self.ratio = ratio
         self.update_graphs(self.sample_tree.current_spot(), ratio)
+
+    def on_update_button_pushed(self):
+        self.data_processing_dialog.model.signals.recalculateNewCycleData.emit()
+
 
     ################
     ### Plotting ###
@@ -177,7 +183,7 @@ class CycleDataDialog(QDialog):
         xs = list(range(1, 1 + len(ys)))
 
         for x, y in zip(xs, ys):
-            if y in spot.outliers_removed_from_raw_data[ratio.name]:
+            if y in spot.outliers_removed_from_raw_data[ratio]:
                 ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
             else:
                 ratio_axis.plot(x, y, ls="", marker="o", color="navy")
@@ -186,7 +192,7 @@ class CycleDataDialog(QDialog):
         mean, two_st_error = spot.mean_two_st_error_isotope_ratios[ratio]
         plt.axhline(y=mean)
 
-        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[ratio.name]
+        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[ratio]
         outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
 
         outlier_rectangle.set_color("lightblue")
@@ -215,14 +221,13 @@ class CycleDataDialog(QDialog):
 
         for x, y in zip(xs, ys):
             if x == cycle_number:
-                if y in spot.outliers_removed_from_raw_data[ratio.name]:
+                if y in spot.outliers_removed_from_raw_data[ratio]:
                     ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="yellow")
                 else:
                     ratio_axis.plot(x, y, ls="", marker="o", color="yellow")
 
             if x == previous_cycle_number:
-                if y in spot.outliers_removed_from_raw_data[ratio.name]:
-                    ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
+                if y in spot.outliers_removed_from_raw_data[ratio]:                    ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
                 else:
                     ratio_axis.plot(x, y, ls="", marker="o", color="navy")
         self.canvas.draw()
