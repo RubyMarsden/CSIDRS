@@ -1,18 +1,22 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox
 
 
 class SampleTreeWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.tree = QTreeWidget()
+        self.exclude_spot_checkbox = QCheckBox("Exclude spot from calculations")
+
+        self.exclude_spot_checkbox.stateChanged.connect(self.on_exclude_spot_checkbox_state_changed)
 
         self.tree.currentItemChanged.connect(self._on_selected_sample_change)
-
         self.tree.setHeaderLabel("Samples")
+
         self.buttons = self._create_next_and_back_buttons()
 
         layout = QVBoxLayout()
+        layout.addWidget(self.exclude_spot_checkbox)
         layout.addWidget(self.tree)
         layout.addWidget(self.buttons)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -97,6 +101,12 @@ class SampleTreeWidget(QWidget):
 
         previous_item = self.tree.itemAbove(current_tree_item)
         self.back_item_button.setDisabled(previous_item is None)
+        if current_tree_item.is_sample:
+            self.exclude_spot_checkbox.setChecked(False)
+            self.exclude_spot_checkbox.setEnabled(False)
+        else:
+            self.exclude_spot_checkbox.setEnabled(True)
+            self.exclude_spot_checkbox.setChecked(current_tree_item.spot.is_flagged)
 
     def highlight_spot(self, is_flagged):
         current_tree_item = self.tree.currentItem()
@@ -105,3 +115,7 @@ class SampleTreeWidget(QWidget):
 
         colour = QColor(255, 0, 0, 50) if is_flagged else QColor(0, 0, 0, 0)
         current_tree_item.setBackground(0, colour)
+
+    def on_exclude_spot_checkbox_state_changed(self):
+        self.current_spot().is_flagged = self.exclude_spot_checkbox.isChecked()
+        self.highlight_spot(self.current_spot().is_flagged)
