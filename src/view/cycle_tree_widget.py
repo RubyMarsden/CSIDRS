@@ -11,13 +11,15 @@ class CycleTreeWidget(QWidget):
         self.data_processing_dialog = data_processing_dialog
         self.model = self.data_processing_dialog.model
 
+        self.has_seen_stats_warning_dialog = False
+
         self.tree.currentItemChanged.connect(self._on_selected_cycle_change)
 
         self.tree.setHeaderLabel("Cycle number")
         self.buttons = self._create_next_and_back_buttons()
         self.exclude_cycle_checkbox = QCheckBox("Exclude cycle from calculations")
 
-        self.exclude_cycle_checkbox.stateChanged.connect(self.excluded_cycle_checked)
+        self.exclude_cycle_checkbox.stateChanged.connect(self.exclude_cycle_checkbox_state_changed)
 
         layout = QVBoxLayout()
         layout.addWidget(self.exclude_cycle_checkbox)
@@ -30,9 +32,17 @@ class CycleTreeWidget(QWidget):
     def set_cycles(self, spot, ratio):
         self.tree.clear()
         cycles = [i for i in enumerate(spot.raw_isotope_ratios[ratio])]
+        outliers = spot.outliers_removed_from_raw_data[ratio.name]
+        print(outliers)
         for i, value in enumerate(spot.raw_isotope_ratios[ratio]):
+            print("Value: " + str(value))
             cycle_tree_item = QTreeWidgetItem(self.tree, [str(i+1)])
             cycle_tree_item.is_flagged = False
+            if value in outliers:
+                cycle_tree_item.is_flagged = True
+                print("OUTLIER")
+
+            self.highlight_cycle_tree_item(cycle_tree_item)
 
         any_samples = len(cycles) > 0
         self.next_item_button.setEnabled(any_samples)
@@ -87,25 +97,33 @@ class CycleTreeWidget(QWidget):
         self.tree.setCurrentItem(previous_item)
 
     def _on_selected_cycle_change(self, current_tree_item, previous_tree_item):
-        current_tree_item_integer = int(current_tree_item.text(0))
-        if previous_tree_item is None:
-            previous_tree_item_integer = 1
+        if current_tree_item:
+            current_tree_item_integer = int(current_tree_item.text(0))
+            if previous_tree_item is None:
+                previous_tree_item_integer = 1
+            else:
+                previous_tree_item_integer = int(previous_tree_item.text(0))
+            self.model.signals.cycleTreeItemChanged.emit(current_tree_item_integer, previous_tree_item_integer)
+
+            next_item = self.tree.itemBelow(current_tree_item)
+            self.next_item_button.setDisabled(next_item is None)
+
+            previous_item = self.tree.itemAbove(current_tree_item)
+            self.back_item_button.setDisabled(previous_item is None)
         else:
-            previous_tree_item_integer = int(previous_tree_item.text(0))
-        self.model.signals.cycleTreeItemChanged.emit(current_tree_item_integer, previous_tree_item_integer)
+            print("no current tree item")
 
-        next_item = self.tree.itemBelow(current_tree_item)
-        self.next_item_button.setDisabled(next_item is None)
+    def highlight_cycle_tree_item(self, tree_item):
+        if tree_item is None:
+            tree_item = self.tree.currentItem()
 
-        previous_item = self.tree.itemAbove(current_tree_item)
-        self.back_item_button.setDisabled(previous_item is None)
+        colour = QColor(255, 0, 0, 50) if tree_item.is_flagged else QColor(0, 0, 0, 0)
+        tree_item.setBackground(0, colour)
 
-    def highlight_cycle_tree_item(self, is_flagged):
-        current_tree_item = self.tree.currentItem()
+    def exclude_cycle_checkbox_state_changed(self):
+        if not self.has_seen_stats_warning_dialog:
+            dialog = StatsWarningDialog()
+            dialog.exec()
+            self.has_seen_stats_warning_dialog = True
+        self.highlight_cycle_tree_item(self.tree.currentItem())
 
-        colour = QColor(255, 0, 0, 50) if is_flagged else QColor(0, 0, 0, 0)
-        current_tree_item.setBackground(0, colour)
-
-    def excluded_cycle_checked(self):
-        dialog = StatsWarningDialog()
-        dialog.exec()

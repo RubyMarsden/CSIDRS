@@ -37,6 +37,8 @@ class CycleDataDialog(QDialog):
         self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.update_graphs(
             self.sample_tree.current_spot(),
             self.ratio))
+        self.sample_tree.tree.currentItemChanged.connect(
+            lambda x, y: self.cycle_tree.set_cycles(self.sample_tree.current_spot(), self.ratio))
 
         self.data_processing_dialog.model.signals.cycleTreeItemChanged.connect(self.on_cycle_tree_item_changed)
 
