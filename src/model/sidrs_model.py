@@ -39,6 +39,8 @@ class SidrsModel:
         self.signals.materialInput.connect(self._material_input)
         self.signals.sampleNamesUpdated.connect(self._sample_names_updated)
         self.signals.referenceMaterialsInput.connect(self._reference_material_tag_samples)
+        self.signals.cycleFlagged.connect(self._remove_cycle_from_spot)
+        self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
 
     #################
     ### Importing ###
@@ -209,6 +211,7 @@ class SidrsModel:
                     data = spot.drift_corrected_deltas[ratio.delta_name]
                     spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
                                                                                              primary_uncertainty)
+
     ###############
     ### Signals ###
     ###############
@@ -249,4 +252,17 @@ class SidrsModel:
                 return method
 
         raise Exception(
-            "The isotopes selected are not currently part of a method. For instructions on how to add methods view the HACKING.md file.")
+            "The isotopes selected are not currently part of a method. For instructions on how to add methods view "
+            "the HACKING.md file.")
+
+    def recalculate_data_with_cycles_changed(self):
+        for sample in self.samples_by_name.values():
+            for spot in sample.spots:
+                spot.calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers()
+                spot.calculate_raw_delta_for_isotope_ratio(self.element)
+
+        self.drift_correction_process()
+        self.SIMS_correction_process()
+
+    def _remove_cycle_from_spot(self):
+        print("hi")

@@ -12,5 +12,5 @@ class Signals(QObject):
     referenceMaterialsInput = pyqtSignal(str, str)
     cycleTreeItemChanged = pyqtSignal(int, int)
     ratioToDisplayChanged = pyqtSignal(Ratio)
-    cycleFlagged = pyqtSignal(int)
+    cycleFlagged = pyqtSignal(int, bool)
     recalculateNewCycleData = pyqtSignal()
