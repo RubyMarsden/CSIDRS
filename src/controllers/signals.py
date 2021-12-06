@@ -2,6 +2,7 @@ from PyQt5.QtCore import pyqtSignal, QObject
 
 from src.model.elements import Element
 from src.model.ratio import Ratio
+from src.model.spot import Spot
 
 
 class Signals(QObject):
@@ -13,4 +14,5 @@ class Signals(QObject):
     cycleTreeItemChanged = pyqtSignal(int, int)
     ratioToDisplayChanged = pyqtSignal(Ratio)
     cycleFlagged = pyqtSignal(int, bool)
+    spotAndCycleFlagged = pyqtSignal(Spot, int, bool, Ratio)
     recalculateNewCycleData = pyqtSignal()

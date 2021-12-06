@@ -125,6 +125,5 @@ class CycleTreeWidget(QWidget):
         self.tree.currentItem().is_flagged = self.exclude_cycle_checkbox.isChecked()
         self.highlight_cycle_tree_item(self.tree.currentItem())
         cycle_number = int(self.tree.currentItem().text(0)) - 1
-        print(cycle_number)
         self.data_processing_dialog.model.signals.cycleFlagged.emit(cycle_number, self.tree.currentItem().is_flagged)
 

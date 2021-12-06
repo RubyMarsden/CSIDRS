@@ -116,20 +116,22 @@ class Spot:
             delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
             self.not_corrected_deltas[ratio.delta_name] = [delta, delta_uncertainty]
 
-
     def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(self):
         for ratio in self.raw_isotope_ratios.keys():
             list_of_cycle_exclusion_information = self.cycle_flagging_information[ratio]
             raw_ratio_list = self.raw_isotope_ratios[ratio]
-            print(list_of_cycle_exclusion_information)
-            print("original list: " + str(raw_ratio_list))
             raw_ratio_list_exclude = []
             for i, boolean in enumerate(list_of_cycle_exclusion_information):
                 if not boolean:
                     raw_ratio_list_exclude.append(i)
 
             raw_ratio_list = [raw_ratio_list[i] for i in raw_ratio_list_exclude]
-            print("excluded list: " + str(raw_ratio_list))
 
             mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
                                                                                                         0)
+            two_st_error = 2 * st_dev / math.sqrt(n)
+
+            self.mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
+
+    def exclude_cycle_information_update(self, cycle_number, is_flagged, ratio):
+        self.cycle_flagging_information[ratio][cycle_number] = is_flagged

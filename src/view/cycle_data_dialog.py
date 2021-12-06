@@ -28,6 +28,10 @@ class CycleDataDialog(QDialog):
         self.ratio = self.data_processing_dialog.method.ratios[0]
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+        self.data_processing_dialog.model.signals.cycleFlagged.connect(self.on_cycle_flagged)
+        self.data_processing_dialog.model.signals.recalculateNewCycleData.connect(lambda x, y: self.update_graphs(
+            self.sample_tree.current_spot(),
+            self.ratio))
 
         layout = QHBoxLayout()
         right_layout = self._create_right_widget()
@@ -116,6 +120,10 @@ class CycleDataDialog(QDialog):
     def change_ratio(self, ratio):
         self.ratio = ratio
         self.update_graphs(self.sample_tree.current_spot(), ratio)
+
+    def on_cycle_flagged(self, cycle_number, is_flagged):
+        self.data_processing_dialog.model.signals.spotAndCycleFlagged.emit(self.sample_tree.current_spot(),
+                                                                           cycle_number, is_flagged, self.ratio)
 
     def on_update_button_pushed(self):
         self.data_processing_dialog.model.signals.recalculateNewCycleData.emit()
