@@ -99,3 +99,9 @@ def calculate_alpha_correction(data, alpha_sims, uncertainty_from_primary_st_dev
     alpha_corrected_uncertainty = math.sqrt(
         (uncertainty_propagated_relatively ** 2) + (uncertainty_from_primary_st_dev ** 2))
     return alpha_corrected_data, alpha_corrected_uncertainty
+
+
+def calculate_probability_one_outlier(number_of_tests):
+    # We define an outlier as having a 1% probability of occurring. (Approximately outside of the 1.5 IQR bounds)
+    probability = 1 - (0.99 ** int(number_of_tests))
+    return probability

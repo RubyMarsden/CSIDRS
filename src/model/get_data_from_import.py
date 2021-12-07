@@ -30,15 +30,7 @@ def get_detector_data(spot_data, column_number):
 
 
 def get_data_from_old_asc(spot_data, mass_peak_name):
-    # Finding the number of blocks
-    line_number = 113
-    contains_blocks = "Blocks" in spot_data[line_number]
-    while not contains_blocks:
-        line_number += 1
-        line = spot_data[line_number]
-        contains_blocks = "Blocks" in line
-    block_index = spot_data[line_number].index("Blocks")
-    block_number = spot_data[line_number][block_index - 1]
+    block_number = get_block_number_from_old_asc(spot_data)
 
     # Finding the start of the raw data
     line_number = 160
@@ -91,3 +83,17 @@ def get_dtfa_x_and_y_from_old_asc(spot_data):
     dtfa_y = int(spot_data[line_number][4])
 
     return dtfa_x, dtfa_y
+
+def get_block_number_from_old_asc(spot_data):
+    # Finding the number of blocks - this is actually the number of cycles, but is labelled blocks in the asc file.
+    line_number = 113
+    contains_blocks = "Blocks" in spot_data[line_number]
+    while not contains_blocks:
+        line_number += 1
+        line = spot_data[line_number]
+        contains_blocks = "Blocks" in line
+    block_index = spot_data[line_number].index("Blocks")
+    block_number = spot_data[line_number][block_index - 1]
+
+    return block_number
+

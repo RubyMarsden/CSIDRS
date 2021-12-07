@@ -8,7 +8,9 @@ from sklearn.metrics import r2_score
 import statsmodels.api as sm
 
 from src.model.elements import Element
-from src.model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction
+from src.model.get_data_from_import import get_block_number_from_old_asc
+from src.model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction, \
+    calculate_probability_one_outlier
 from src.model.sample import Sample
 from src.model.settings.colours import colour_list, q_colour_list
 from src.model.settings.isotope_reference_materials import oxygen_zircon_reference_material_dict, \
@@ -26,12 +28,13 @@ class SidrsModel:
         self.signals = signals
         self.list_of_sample_names = []
         self.imported_files = []
+        self.number_of_cycles = None
         self.isotopes = None
         self.material = None
         self.primary_reference_material = None
         self.secondary_reference_material = None
-        self.cycle_outlier_likelihood_statement = None
-        self.primary_rm_outlier_likelihood_statement = None
+        self.cycle_outlier_probability_list = []
+        self.primary_rm_outlier_probability_list = []
 
         self.method = None
 
@@ -67,6 +70,8 @@ class SidrsModel:
                     line[line.index(i)] = str.strip(i)
                 data_for_spot.append(line)
         spot = Spot(filename, data_for_spot, self.isotopes)
+        # In the asc file cycles are labelled blocks
+        self.number_of_cycles = get_block_number_from_old_asc(data_for_spot)
         return spot
 
     def sample_names_from_filenames(self, filenames):
@@ -111,6 +116,7 @@ class SidrsModel:
             if sample.name == self.primary_reference_material:
                 sample.is_primary_reference_material = True
                 primary_reference_material_exists = True
+                number_of_primary_rm_spots = len(sample.spots)
             elif sample.name == self.secondary_reference_material:
                 sample.is_secondary_reference_material = True
                 secondary_reference_material_exists = True
@@ -119,6 +125,12 @@ class SidrsModel:
             print("fix this")
         else:
             raise Exception("The reference materials selected does not match your sample data")
+
+        self.cycle_outlier_probability_list = [calculate_probability_one_outlier(self.number_of_cycles)]
+        self.primary_rm_outlier_probability_list = [calculate_probability_one_outlier(number_of_primary_rm_spots)]
+        print(self.cycle_outlier_probability_list)
+        print(self.primary_rm_outlier_probability_list)
+
 
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
