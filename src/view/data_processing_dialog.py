@@ -15,7 +15,7 @@ class DataProcessingDialog(QDialog):
         self.model = model
 
         self.samples = model.samples_by_name.values()
-        self.sample_tree = SampleTreeWidget()
+        self.sample_tree = SampleTreeWidget(self)
 
         self.method = model.method
 

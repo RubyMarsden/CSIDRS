@@ -3,8 +3,9 @@ from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, 
 
 
 class SampleTreeWidget(QWidget):
-    def __init__(self):
+    def __init__(self, data_processing_dialog):
         super().__init__()
+        self.data_processing_dialog = data_processing_dialog
         self.tree = QTreeWidget()
         self.exclude_spot_checkbox = QCheckBox("Exclude spot from calculations")
 
@@ -120,3 +121,4 @@ class SampleTreeWidget(QWidget):
     def on_exclude_spot_checkbox_state_changed(self):
         self.current_spot().is_flagged = self.exclude_spot_checkbox.isChecked()
         self.highlight_spot(self.current_spot().is_flagged)
+        self.data_processing_dialog.model.signals.spotFlagged.emit(self.current_spot(), self.current_spot().is_flagged)

@@ -22,7 +22,7 @@ class CycleDataDialog(QDialog):
         self.data_processing_dialog = data_processing_dialog
 
         self.samples = self.data_processing_dialog.samples
-        self.sample_tree = SampleTreeWidget()
+        self.sample_tree = SampleTreeWidget(self.data_processing_dialog)
         self.cycle_tree = CycleTreeWidget(self.data_processing_dialog)
 
         self.ratio = self.data_processing_dialog.method.ratios[0]
