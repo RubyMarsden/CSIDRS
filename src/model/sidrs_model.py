@@ -41,6 +41,7 @@ class SidrsModel:
         self.signals.referenceMaterialsInput.connect(self._reference_material_tag_samples)
         self.signals.spotAndCycleFlagged.connect(self._remove_cycle_from_spot)
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
+        self.signals.recalculateNewSpotData.connect(self.recalculate_data_with_spots_excluded)
 
     #################
     ### Importing ###
@@ -266,3 +267,7 @@ class SidrsModel:
 
     def _remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
         spot.exclude_cycle_information_update(cycle_number, is_flagged, ratio)
+
+    def recalculate_data_with_spots_excluded(self):
+        self.drift_correction_process()
+        self.SIMS_correction_process()

@@ -16,5 +16,4 @@ class Signals(QObject):
     cycleFlagged = pyqtSignal(int, bool)
     spotAndCycleFlagged = pyqtSignal(Spot, int, bool, Ratio)
     recalculateNewCycleData = pyqtSignal()
-    spotFlagged = pyqtSignal(Spot, bool)
     recalculateNewSpotData = pyqtSignal()
