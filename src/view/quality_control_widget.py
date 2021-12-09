@@ -1,12 +1,15 @@
-import numpy as np
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget, QTreeWidgetItemIterator, \
-    QRadioButton
-from matplotlib import pyplot as plt
-from matplotlib.gridspec import GridSpec
+import matplotlib
 import matplotlib.dates as mdates
+import numpy as np
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
+from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
 from src.utils import gui_utils
+from src.view.ratio_box_widget import RatioBoxWidget
+
+matplotlib.use('QT5Agg')
+from matplotlib import pyplot as plt
 
 
 class QualityControlWidget(QWidget):
@@ -14,12 +17,22 @@ class QualityControlWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
+        self.ratio = self.data_processing_dialog.method.ratios[0]
         self.samples = data_processing_dialog.samples
 
-        layout = QHBoxLayout()
+        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
 
-        graph_widget = self._create_graph_widget(self.data_processing_dialog.method.ratios[0])
+        self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_graphs)
 
+        layout = QVBoxLayout()
+
+        graph_widget = self._create_graph_tab_widget(self.ratio)
+        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
+                                                    self.data_processing_dialog.model.signals)
+
+        self.ratio_radiobox_widget.set_ratio(self.ratio)
+
+        layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(graph_widget)
 
         self.setLayout(layout)
@@ -163,3 +176,26 @@ class QualityControlWidget(QWidget):
         axis.set_xlabel("dtfa-y")
         axis.set_ylabel(ratio.delta_name)
         plt.tight_layout()
+
+    ###############
+    ### Actions ###
+    ###############
+
+    def change_ratio(self, ratio):
+        self.ratio = ratio
+        print(ratio)
+        self.update_graphs()
+
+    def update_graphs(self):
+        self.delta_vs_time_axis.clear()
+        self.delta_vs_secondary_ion_yield_axis.clear()
+        self.delta_vs_distance_from_mount_centre_axis.clear()
+        self.delta_vs_dtfa_x_axis.clear()
+        self.delta_vs_dtfa_y_axis.clear()
+        self._create_delta_vs_time_graph(self.delta_vs_time_axis, self.ratio)
+        self._create_delta_vs_secondary_ion_yield_graph(self.delta_vs_secondary_ion_yield_axis, self.ratio)
+        self._create_delta_vs_distance_from_mount_centre_graph(self.delta_vs_distance_from_mount_centre_axis, self.ratio)
+        self._create_delta_vs_dtfa_x_graph(self.delta_vs_dtfa_x_axis, self.ratio)
+        self._create_delta_vs_dtfa_y_graph(self.delta_vs_dtfa_y_axis, self.ratio)
+
+        self.canvas.draw()
