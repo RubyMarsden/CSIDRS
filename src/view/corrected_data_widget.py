@@ -13,6 +13,10 @@ class CorrectedDataWidget(QWidget):
 
         self.data_processing_dialog = data_processing_dialog
 
+        self.basic_data_table = self._create_basic_table()
+
+        self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_basic_table)
+
         layout = QHBoxLayout()
 
         lhs_layout = self._create_lhs_layout()
@@ -25,7 +29,6 @@ class CorrectedDataWidget(QWidget):
         layout = QVBoxLayout()
         button_layout = QHBoxLayout()
 
-        self.basic_data_table = self._create_basic_table()
         self._populate_basic_table()
 
         data_output_button = QPushButton("Export corrected data")
@@ -168,3 +171,7 @@ class CorrectedDataWidget(QWidget):
                 self.basic_data_table.setItem(i, j + 4, distance_to_mount_centre_item)
                 i += 1
         self.basic_data_table.resizeColumnsToContents()
+
+    def update_basic_table(self):
+        self.basic_data_table.clearContents()
+        self._populate_basic_table()

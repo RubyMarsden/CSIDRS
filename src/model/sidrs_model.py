@@ -283,3 +283,7 @@ class SidrsModel:
     def recalculate_data_with_spots_excluded(self):
         self.drift_correction_process()
         self.SIMS_correction_process()
+        self.on_data_recalculated()
+
+    def on_data_recalculated(self):
+        self.signals.replotAndTabulateRecalculatedData.emit()
