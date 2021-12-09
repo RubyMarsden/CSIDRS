@@ -85,9 +85,11 @@ def calculate_reduced_chi_squared():
     return
 
 
-def calculate_sims_alpha(primary_reference_material_mean_delta, externally_measured_primary_reference_value):
+def calculate_sims_alpha(primary_reference_material_mean_delta,
+                         externally_measured_primary_reference_value_and_uncertainty):
+    externally_measured_rm_value, uncertainty = externally_measured_primary_reference_value_and_uncertainty
     alpha_sims = (1 + (primary_reference_material_mean_delta / 1000)) / \
-                 (1 + (externally_measured_primary_reference_value / 1000))
+                 (1 + (externally_measured_rm_value / 1000))
 
     return alpha_sims
 

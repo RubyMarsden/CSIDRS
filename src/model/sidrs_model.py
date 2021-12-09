@@ -131,7 +131,6 @@ class SidrsModel:
         print(self.cycle_outlier_probability_list)
         print(self.primary_rm_outlier_probability_list)
 
-
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 spot.calculate_relative_secondary_ion_yield()
@@ -209,15 +208,14 @@ class SidrsModel:
                 if sample.is_primary_reference_material:
                     primary_rm = sample
 
-            spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots]
+            spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
+                         not spot.is_flagged]
             primary_rm_mean = np.mean(spot_data)
             primary_uncertainty = np.std(spot_data)
 
-            print(self.primary_reference_material_value[0])
-
             alpha_sims = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
-                                              externally_measured_primary_reference_value=
-                                              self.primary_reference_material_value[0])
+                                              externally_measured_primary_reference_value_and_uncertainty=
+                                              self.primary_rm_values_by_ratio[ratio])
 
             for sample in self.samples_by_name.values():
                 for spot in sample.spots:
@@ -247,17 +245,13 @@ class SidrsModel:
         # TODO refactor this bit
         if self.element == Element.OXY:
             if self.material == "Zircon":
-                primary_data_list = oxygen_zircon_reference_material_dict[primary_reference_material]
-                self.primary_reference_material_value = primary_data_list[0], primary_data_list[1]
-                secondary_data_list = oxygen_zircon_reference_material_dict[secondary_reference_material]
-                self.secondary_reference_material_value = secondary_data_list[0], secondary_data_list[1]
+                self.primary_rm_values_by_ratio = oxygen_zircon_reference_material_dict[primary_reference_material]
+                self.secondary_rm_values_by_ratio = oxygen_zircon_reference_material_dict[secondary_reference_material]
 
         elif self.element == Element.SUL:
             if self.material == "Pyrite":
-                primary_data_list = sulphur_pyrite_reference_material_dict[primary_reference_material]
-                self.primary_reference_material_value = primary_data_list[0], primary_data_list[1]
-                secondary_data_list = sulphur_pyrite_reference_material_dict[secondary_reference_material]
-                self.secondary_reference_material_value = secondary_data_list[0], secondary_data_list[1]
+                self.primary_rm_values_by_ratio = sulphur_pyrite_reference_material_dict[primary_reference_material]
+                self.secondary_rm_values_by_ratio = sulphur_pyrite_reference_material_dict[secondary_reference_material]
 
     def create_method_dictionary_from_isotopes(self, isotopes):
         for method in list_of_methods:
