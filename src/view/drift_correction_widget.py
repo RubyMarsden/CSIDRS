@@ -16,6 +16,7 @@ class DriftCorrectionWidget(QWidget):
         self.ratio = self.data_processing_dialog.method.ratios[0]
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+        self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_widget_contents)
 
         layout = QHBoxLayout()
 
@@ -80,6 +81,7 @@ class DriftCorrectionWidget(QWidget):
         graph.setLayout(layout)
 
         return graph
+
     ###############
     ### Actions ###
     ###############
@@ -97,11 +99,12 @@ class DriftCorrectionWidget(QWidget):
         self.ratio = ratio
         self.update_graphs(ratio)
 
+    def update_widget_contents(self):
+        self.update_graphs(self.ratio)
 
     ################
     ### Plotting ###
     ################
-
 
     def _create_primary_drift_graph(self, sample, axis, ratio):
         axis.clear()
