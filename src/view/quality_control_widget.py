@@ -123,8 +123,6 @@ class QualityControlWidget(QWidget):
 
         self.delta_vs_time_axis.set_xlabel("Time")
         self.delta_vs_time_axis.set_ylabel(ratio.delta_name)
-        plt.setp(self.delta_vs_time_axis.get_xticklabels(), rotation=30, horizontalalignment='right')
-
         self.delta_vs_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         plt.tight_layout()
@@ -137,7 +135,7 @@ class QualityControlWidget(QWidget):
         for sample in self.samples:
             xs = [int(spot.x_position) for spot in sample.spots]
             ys = [int(spot.y_position) for spot in sample.spots]
-            self.x_and_y_position_axis.plot(xs, ys, marker="o", ls="", markersize=1, color=sample.colour)
+            self.x_and_y_position_axis.plot(xs, ys, marker="o", ls="", markersize=3, color=sample.colour)
 
         circle = Circle((0, 0), 9000)
         circle.set_color("lightgoldenrodyellow")
@@ -151,7 +149,7 @@ class QualityControlWidget(QWidget):
         self.x_and_y_position_axis.set_xlabel("X position")
         self.x_and_y_position_axis.set_ylabel("Y position")
         self.x_and_y_position_axis.set(xlim=(-9000, 9000), ylim=(-9000, 9000))
-        plt.axis('equal')
+        plt.axis('scaled')
         plt.tight_layout()
 
     def _create_delta_vs_secondary_ion_yield_graph(self, ratio):
@@ -219,13 +217,14 @@ class QualityControlWidget(QWidget):
 
             self.delta_vs_dtfa_y_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
-        x_minimum = min(total_xs)
-        x_maximum = max(total_xs)
+        x_minimum = min(total_xs) - 2
+        x_maximum = max(total_xs) + 2
 
         self.delta_vs_dtfa_y_axis.set_xlabel("dtfa-y")
         self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name)
-        self.delta_vs_dtfa_y_axis.set_xlim([x_minimum, x_maximum])
-        plt.xlim([x_minimum, x_maximum])
+        self.delta_vs_dtfa_y_axis.set(xlim=(x_minimum, x_maximum))
+        # plt.xlim([x_minimum, x_maximum])
+
         plt.tight_layout()
 
     ###############
@@ -237,11 +236,6 @@ class QualityControlWidget(QWidget):
         self.update_graph_tabs()
 
     def update_graph_tabs(self):
-        self.delta_vs_time_axis.clear()
-        self.delta_vs_secondary_ion_yield_axis.clear()
-        self.delta_vs_distance_from_mount_centre_axis.clear()
-        self.delta_vs_dtfa_x_axis.clear()
-        self.delta_vs_dtfa_y_axis.clear()
         self._create_delta_vs_time_graph(self.ratio)
         self._create_x_y_position_graph()
         self._create_delta_vs_secondary_ion_yield_graph(self.ratio)

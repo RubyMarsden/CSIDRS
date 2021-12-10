@@ -8,7 +8,7 @@ def create_figure_widget(fig, parent):
     toolbar = NavigationToolbar(canvas, parent)
 
     layout = QVBoxLayout()
-    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setContentsMargins(2, 2, 2, 2)
     layout.addWidget(canvas)
     layout.addWidget(toolbar)
 
