@@ -35,6 +35,8 @@ class SidrsModel:
         self.secondary_reference_material = None
         self.cycle_outlier_probability_list = []
         self.primary_rm_outlier_probability_list = []
+        self.drift_coefficient = None
+        self.drift_y_intercept = None
 
         self.method = None
 
@@ -179,6 +181,7 @@ class SidrsModel:
 
             statsmodel_result = sm.OLS(primary_deltas, X).fit()
             print(statsmodel_result.summary())
+            self.drift_y_intercept, self.drift_coefficient = statsmodel_result.params
 
             t_zero = np.median(primary_times)
 

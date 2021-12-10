@@ -1,3 +1,5 @@
+import time
+
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget, QTreeWidgetItemIterator, \
     QRadioButton
 from matplotlib import pyplot as plt
@@ -14,6 +16,8 @@ class DriftCorrectionWidget(QWidget):
 
         self.data_processing_dialog = data_processing_dialog
         self.ratio = self.data_processing_dialog.method.ratios[0]
+        self.drift_coefficient = self.data_processing_dialog.model.drift_coefficient
+        self.drift_intercept = self.data_processing_dialog.model.drift_y_intercept
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
         self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_widget_contents)
@@ -51,10 +55,11 @@ class DriftCorrectionWidget(QWidget):
     def _create_rhs_layout(self):
         layout = QVBoxLayout()
 
+        graph_widget = self._create_graph_widget(self.ratio)
+
         self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                     self.data_processing_dialog.model.signals)
-
-        graph_widget = self._create_graph_widget(self.ratio)
+        self.ratio_radiobox_widget.set_ratio(self.ratio)
 
         layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(graph_widget)
@@ -71,7 +76,8 @@ class DriftCorrectionWidget(QWidget):
         self.primary_drift_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.secondary_check_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
-        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis, ratio)
+        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis, ratio, self.drift_coefficient,
+                                         self.drift_intercept)
         self._create_secondary_check_graph(self.secondary_sample, self.secondary_check_axis, ratio)
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
@@ -90,7 +96,7 @@ class DriftCorrectionWidget(QWidget):
         self.primary_drift_axis.clear()
         self.secondary_check_axis.clear()
 
-        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis, ratio)
+        self._create_primary_drift_graph(self.primary_sample, self.primary_drift_axis, ratio, self.drift_coefficient, self.drift_intercept)
         self._create_secondary_check_graph(self.secondary_sample, self.secondary_check_axis, ratio)
 
         self.canvas.draw()
@@ -106,7 +112,7 @@ class DriftCorrectionWidget(QWidget):
     ### Plotting ###
     ################
 
-    def _create_primary_drift_graph(self, sample, axis, ratio):
+    def _create_primary_drift_graph(self, sample, axis, ratio, drift_coefficient, drift_intercept):
         axis.clear()
         axis.set_title("Primary reference material raw data for drift correction")
         axis.spines['top'].set_visible(False)
@@ -117,6 +123,13 @@ class DriftCorrectionWidget(QWidget):
         yerrors = [spot.not_corrected_deltas[ratio.delta_name][1] for spot in sample.spots]
 
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
+
+        y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
+        y_line_label = "y = " + str(drift_coefficient) + "x + " + str(drift_intercept)
+
+        axis.plot(xs, y_line, marker="", label=y_line_label)
+        axis.legend()
+
         axis.set_xlabel("Time")
         axis.set_ylabel(ratio.delta_name)
         plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
@@ -126,7 +139,6 @@ class DriftCorrectionWidget(QWidget):
         plt.tight_layout()
 
     def _create_secondary_check_graph(self, sample, axis, ratio):
-
         axis.clear()
         axis.set_title("Secondary reference material with drift correction")
         axis.spines['top'].set_visible(False)
