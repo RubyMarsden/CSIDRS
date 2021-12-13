@@ -19,7 +19,6 @@ class IsotopeButtonWidget(QWidget):
 
     def create_O_button(self):
         o_button = QPushButton("O")
-        o_button.resize(100, 100)
         o_button.clicked.connect(self.on_O_button_pushed)
         return o_button
 
