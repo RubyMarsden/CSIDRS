@@ -27,7 +27,7 @@ As this case is covered in the method for making a totally new set of methods fo
 
 ## Creating a new element method:
 
-1. Create a new element Enum in src/model/elements.py
+1. Create a new element Enum in `src/model/elements.py`
 e.g.: 
     ```python
     class Element(Enum):
@@ -35,7 +35,7 @@ e.g.:
         NEW_ELEMENT = "New Element"
    ```
    
-2. Create the new isotope Enums in src/model/isotopes.py
+2. Create the new isotope Enums in `src/model/isotopes.py`
 e.g.:
     ```python
     class Isotope(Enum):
@@ -44,7 +44,7 @@ e.g.:
         NE2 = "2NE"
        
     ```
-3. Create Ratio objects in src/model/settings/methods_from_isotopes.py where the first isotope is the numerator and the second is the denominator in the isotopic ratio. 
+3. Create Ratio objects in `src/model/settings/methods_from_isotopes.py` where the first isotope is the numerator and the second is the denominator in the isotopic ratio. 
 e.g.:
     ```python
    # Sulphur ratios
@@ -55,7 +55,7 @@ e.g.:
    NE1_NE2 = Ratio(Isotope.NE1, Isotope.NE2) 
    ```
 
-4. Instantiate the new Method object and add it to the list of methods in src/model/settings/methods_from_isotopes.py. e.g.:
+4. Instantiate the new Method object and add it to the list of methods in `src/model/settings/methods_from_isotopes.py` e.g.:
     ```python
     three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
                                              [O17_O16, O18_O16, O16H1_O16])
@@ -73,7 +73,7 @@ e.g.:
     ```
 
 
-5. Add the required delta notation constants into src/model/settings/constants.py
+5. Add the required delta notation constants into `src/model/settings/constants.py`
 e.g.:
    ```python
    oxygen_isotope_reference = {
@@ -83,14 +83,12 @@ e.g.:
         'VNEW': {ISO_RATIO: float, ISO_RATIO_2: float}
     ```
    
-6. Add the material list for the element into src/model/settings/material_lists.py
-e.g.:
+6. Add the material list for the element into `src/model/settings/material_lists.py` e.g.:
    ```python
    oxygen_material_list = ['Zircon', 'Quartz']
    new_material_list = ['Mineral 1', 'Mineral 2']
    ```
-7. Add the element button to src/view/isotope_button_widget.py
-e.g.:
+7. Add the element button to `src/view/isotope_button_widget.py` e.g.:
    ```python
            layout.addWidget(self.create_O_button())
            layout.addWidget(self.create_NE_button()) 
@@ -122,7 +120,7 @@ e.g.:
                self.emit_methods_signal(dialog)
    ```
 
-8. Add the possible isotopes to the method selection dialog which is called when the element button is pushed in src/view/method_selection_dialog.py
+8. Add the possible isotopes to the method selection dialog which is called when the element button is pushed in `src/view/method_selection_dialog.py`
 e.g.:
    ```python
            if self.element == Element.OXY:
