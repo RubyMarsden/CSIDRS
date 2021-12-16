@@ -16,6 +16,7 @@ class IsotopeButtonWidget(QWidget):
 
         layout.addWidget(self.create_O_button())
         layout.addWidget(self.create_S_button())
+        layout.addWidget(self.create_Cl_button())
 
     def create_O_button(self):
         o_button = QPushButton("O")
@@ -27,6 +28,11 @@ class IsotopeButtonWidget(QWidget):
         s_button.clicked.connect(self.on_S_button_pushed)
         return s_button
 
+    def create_Cl_button(self):
+        cl_button = QPushButton("Cl")
+        cl_button.clicked.connect(self.on_Cl_button_pushed)
+        return cl_button
+
     def on_O_button_pushed(self):
         self.element = Element.OXY
         dialog = MethodSelectionDialog(self.element)
@@ -35,6 +41,12 @@ class IsotopeButtonWidget(QWidget):
             self.emit_methods_signal(dialog)
     def on_S_button_pushed(self):
         self.element = Element.SUL
+        dialog = MethodSelectionDialog(self.element)
+        result = dialog.exec()
+        if result:
+            self.emit_methods_signal(dialog)
+    def on_Cl_button_pushed(self):
+        self.element = Element.CHL
         dialog = MethodSelectionDialog(self.element)
         result = dialog.exec()
         if result:

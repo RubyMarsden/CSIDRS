@@ -1,4 +1,4 @@
-from src.model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32, O17_O16, O18_O16
+from src.model.settings.methods_from_isotopes import Cl37_Cl35, F19_Cl37, S33_S32, S34_S32, S36_S32, O17_O16, O18_O16, C13_C12
 # TODO should these be objects derived from a reference material class?
 # rm_91500 = ReferenceMaterial(name="91500", O18_O16_value=9.94, O18_O16_uncertainty=0.2, citation="Wiedenbeck et al., 2004")
 oxygen_zircon_reference_material_dict = {
@@ -36,3 +36,7 @@ sulphur_pentlandite_reference_material_dict = {
 sulphur_Apatite_reference_material_dict = {
     "Big1": {S33_S32: (7.22, 0.20), S34_S32: (14.02, 0.40), "Citation": "Hammerli et al. 2021"}}
 # All isotope ratios were measured, NO 36S data on Big1
+
+chlorine_Apatite_reference_material_dict = {
+    "TUBAF50": {Cl37_Cl35: (0.32, 0.25), "Citation": "Wurarska et al. 2021"},
+    "Big1": {Cl37_Cl35: (0.63, 0.14), "Citation": "In-house collated data, n=53"}}

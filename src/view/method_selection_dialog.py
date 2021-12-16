@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox
 from src.model.elements import Element
 from src.model.settings.isotope_lists import *
 from src.model.settings.material_lists import *
-from src.model.settings.methods_from_isotopes import four_isotopes_sulphur, three_isotopes_hydroxide_oxygen
+from src.model.settings.methods_from_isotopes import four_isotopes_sulphur, three_isotopes_hydroxide_oxygen, two_isotopes_carbon, two_isotopes_chlorine_fluorine
 
 
 class MethodSelectionDialog(QDialog):
@@ -71,6 +71,23 @@ class MethodSelectionDialog(QDialog):
                 rhs_box_layout.addWidget(box)
                 self.material_box_list.append(box)
 
+        elif self.element == Element.CHL:
+
+            for isotope in two_isotopes_chlorine_fluorine.isotopes:
+                box = QCheckBox(isotope.value)
+                box.isotope = isotope
+                box.stateChanged.connect(self.on_isotopes_changed)
+
+                lhs_box_layout.addWidget(box)
+                self.isotope_box_list.append(box)
+
+            for material in chlorine_material_list:
+                box = QRadioButton(material)
+                box.material = material
+                box.toggled.connect(self.on_material_changed)
+
+                rhs_box_layout.addWidget(box)
+                self.material_box_list.append(box)
         else:
             raise Exception
 

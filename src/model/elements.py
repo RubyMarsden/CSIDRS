@@ -5,3 +5,4 @@ class Element(Enum):
     OXY = "Oxygen"
     SUL = "Sulphur"
     CAR = "Carbon"
+    CHL = "Chlorine"

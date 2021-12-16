@@ -13,4 +13,7 @@ class Isotope(Enum):
     S33 = "33S"
     S34 = "34S"
     S36 = "36S"
+    F19 = "19F"
+    Cl35 = "35Cl"
+    Cl37 = "37Cl"
 

@@ -1,4 +1,4 @@
-from src.model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32, O17_O16, O18_O16
+from src.model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32, O17_O16, O18_O16, Cl37_Cl35, F19_Cl37, C13_C12
 
 # TODO make sure all constants come from this file.
 oxygen_isotope_reference = {
@@ -10,5 +10,9 @@ sulphur_isotope_reference = {
 }
 
 carbon_isotope_reference = {
-    'VPDB': {'13C/12C': 0.011180}
+    'VPDB': {C13_C12: 0.011180}
+}
+
+chlorine_isotope_reference = {
+    'SMOC': {Cl37_Cl35: 0.319533}
 }

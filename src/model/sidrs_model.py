@@ -14,7 +14,7 @@ from src.model.maths import drift_correction, calculate_sims_alpha, calculate_al
 from src.model.sample import Sample
 from src.model.settings.colours import colour_list, q_colour_list
 from src.model.settings.isotope_reference_materials import oxygen_zircon_reference_material_dict, \
-    sulphur_pyrite_reference_material_dict
+    sulphur_pyrite_reference_material_dict, chlorine_Apatite_reference_material_dict
 from src.model.settings.methods_from_isotopes import list_of_methods
 from src.model.spot import Spot
 import csv
