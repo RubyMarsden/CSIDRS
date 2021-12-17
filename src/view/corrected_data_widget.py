@@ -84,7 +84,7 @@ class CorrectedDataWidget(QWidget):
     def get_output_file(self):
         return QFileDialog.getSaveFileName(self,
                                            caption='Save CSV file',
-                                           directory="home/ruby/Documents/Programming/UWA/SIDRS/data",
+                                           directory="home/ruby/Documents/Programming/UWA/CSIDRS/data",
                                            options=QFileDialog.DontUseNativeDialog
                                            )[0]
 
