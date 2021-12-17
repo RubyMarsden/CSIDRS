@@ -13,8 +13,7 @@ from src.model.maths import drift_correction, calculate_sims_alpha, calculate_al
     calculate_probability_one_outlier
 from src.model.sample import Sample
 from src.model.settings.colours import colour_list, q_colour_list
-from src.model.settings.isotope_reference_materials import oxygen_zircon_reference_material_dict, \
-    sulphur_pyrite_reference_material_dict, chlorine_Apatite_reference_material_dict
+from src.model.settings.isotope_reference_materials import *
 from src.model.settings.methods_from_isotopes import list_of_methods
 from src.model.spot import Spot
 import csv
@@ -192,7 +191,9 @@ class SidrsModel:
                             spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
             else:
-                spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+                for sample in self.samples_by_name.values():
+                    for spot in sample.spots:
+                        spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
     def SIMS_correction_process(self):
         # This correction method is described fully in  Kita et al., 2009
@@ -203,19 +204,24 @@ class SidrsModel:
                     primary_rm = sample
 
             spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
-                         not spot.is_flagged]
-            primary_rm_mean = np.mean(spot_data)
-            primary_uncertainty = np.std(spot_data)
+                         not spot.is_flagged and spot.drift_corrected_deltas[ratio.delta_name][0]]
 
-            alpha_sims = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
-                                              externally_measured_primary_reference_value_and_uncertainty=
-                                              self.primary_rm_values_by_ratio[ratio])
+            if spot_data:
+                primary_rm_mean = np.mean(spot_data)
+                primary_uncertainty = np.std(spot_data)
+
+                alpha_sims = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
+                                                  externally_measured_primary_reference_value_and_uncertainty=
+                                                  self.primary_rm_values_by_ratio[ratio])
 
             for sample in self.samples_by_name.values():
                 for spot in sample.spots:
                     data = spot.drift_corrected_deltas[ratio.delta_name]
-                    spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
-                                                                                             primary_uncertainty)
+                    if data[0]:
+                        spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
+                                                                                                primary_uncertainty)
+                    else:
+                        spot.alpha_corrected_data[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
     ###############
     ### Signals ###
@@ -241,11 +247,38 @@ class SidrsModel:
             if self.material == "Zircon":
                 self.primary_rm_values_by_ratio = oxygen_zircon_reference_material_dict[primary_reference_material]
                 self.secondary_rm_values_by_ratio = oxygen_zircon_reference_material_dict[secondary_reference_material]
+            elif self.material == "Quartz":
+                self.primary_rm_values_by_ratio = oxygen_quartz_reference_material_dict[primary_reference_material]
+                self.secondary_rm_values_by_ratio = oxygen_quartz_reference_material_dict[secondary_reference_material]
 
         elif self.element == Element.SUL:
             if self.material == "Pyrite":
                 self.primary_rm_values_by_ratio = sulphur_pyrite_reference_material_dict[primary_reference_material]
                 self.secondary_rm_values_by_ratio = sulphur_pyrite_reference_material_dict[secondary_reference_material]
+            elif self.material == "Pyrrhotite":
+                self.primary_rm_values_by_ratio = sulphur_pyrrhotite_reference_material_dict[primary_reference_material]
+                self.secondary_rm_values_by_ratio = sulphur_pyrrhotite_reference_material_dict[
+                    secondary_reference_material]
+            elif self.material == "Chalcopyrite":
+                self.primary_rm_values_by_ratio = sulphur_chalcopyrite_reference_material_dict[
+                    primary_reference_material]
+                self.secondary_rm_values_by_ratio = sulphur_chalcopyrite_reference_material_dict[
+                    secondary_reference_material]
+            elif self.material == "Pentlandite":
+                self.primary_rm_values_by_ratio = sulphur_pentlandite_reference_material_dict[
+                    primary_reference_material]
+                self.secondary_rm_values_by_ratio = sulphur_pentlandite_reference_material_dict[
+                    secondary_reference_material]
+            elif self.material == "Apatite":
+                self.primary_rm_values_by_ratio = sulphur_apatite_reference_material_dict[primary_reference_material]
+                self.secondary_rm_values_by_ratio = sulphur_apatite_reference_material_dict[
+                    secondary_reference_material]
+
+        elif self.element == Element.CHL:
+            if self.material == "Apatite":
+                self.primary_rm_values_by_ratio = chlorine_apatite_reference_material_dict[primary_reference_material]
+                self.secondary_rm_values_by_ratio = chlorine_apatite_reference_material_dict[
+                    secondary_reference_material]
 
     def create_method_dictionary_from_isotopes(self, isotopes):
         for method in list_of_methods:

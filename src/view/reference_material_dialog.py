@@ -50,7 +50,7 @@ class ReferenceMaterialSelectionDialog(QDialog):
 
         elif self.element == Element.CHL:
             if self.material == "Apatite":
-                reference_materials = [*chlorine_Apatite_reference_material_dict]
+                reference_materials = [*chlorine_apatite_reference_material_dict]
 
         else:
             raise Exception

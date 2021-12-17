@@ -30,7 +30,7 @@ As this case is covered in the method for making a totally new set of methods fo
 1. Create a new element Enum in `src/model/elements.py`
 e.g.: 
     ```python
-    class Element(Enum):
+   class Element(Enum):
         OXY = "Oxygen"
         NEW_ELEMENT = "New Element"
    ```
@@ -38,7 +38,7 @@ e.g.:
 2. Create the new isotope Enums in `src/model/isotopes.py`
 e.g.:
     ```python
-    class Isotope(Enum):
+   class Isotope(Enum):
         C12 = "12C"
         NE1 = "1NE"
         NE2 = "2NE"
@@ -46,22 +46,22 @@ e.g.:
     ```
 3. Create Ratio objects in `src/model/settings/methods_from_isotopes.py` where the first isotope is the numerator and the second is the denominator in the isotopic ratio. 
 e.g.:
-    ```python
+   ```python
    # Sulphur ratios
-    S33_S32 = Ratio(Isotope.S33, Isotope.S32)
-    S34_S32 = Ratio(Isotope.S34, Isotope.S32)
-   
+   S33_S32 = Ratio(Isotope.S33, Isotope.S32)
+   S34_S32 = Ratio(Isotope.S34, Isotope.S32)
+      
    # New element ratios
    NE1_NE2 = Ratio(Isotope.NE1, Isotope.NE2) 
    ```
 
 4. Instantiate the new Method object and add it to the list of methods in `src/model/settings/methods_from_isotopes.py` e.g.:
     ```python
-    three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
+   three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
                                              [O17_O16, O18_O16, O16H1_O16])
-    new_method = Method([Isotope.NE1, Isotope.NE2], [NE1_NE2])
+   new_method = Method([Isotope.NE1, Isotope.NE2], [NE1_NE2])
    
-    list_of_methods = [three_isotopes_sulphur,
+   list_of_methods = [three_isotopes_sulphur,
                        four_isotopes_sulphur,
                        two_isotopes_hydroxide_oxygen,
                        two_isotopes_no_hydroxide_oxygen,
@@ -80,7 +80,7 @@ e.g.:
         'VSMOW': {O18_O16: 0.002005, O17_O16: 0.0003799}}
    
    new_element_isotope_reference = {
-        'VNEW': {ISO_RATIO: float, ISO_RATIO_2: float}
+        'VNEW': {ISO_RATIO: float, ISO_RATIO_2: float}}
     ```
    
 6. Add the material list for the element into `src/model/settings/material_lists.py` e.g.:
@@ -90,8 +90,8 @@ e.g.:
    ```
 7. Add the element button to `src/view/isotope_button_widget.py` e.g.:
    ```python
-           layout.addWidget(self.create_O_button())
-           layout.addWidget(self.create_NE_button()) 
+            layout.addWidget(self.create_O_button())
+            layout.addWidget(self.create_NE_button()) 
    
        def create_O_button(self):
            o_button = QPushButton("O")
@@ -123,39 +123,39 @@ e.g.:
 8. Add the possible isotopes to the method selection dialog which is called when the element button is pushed in `src/view/method_selection_dialog.py`
 e.g.:
    ```python
-           if self.element == Element.OXY:
+        if self.element == Element.OXY:
    
-               for isotope in three_isotopes_hydroxide_oxygen.isotopes:
-                   box = QCheckBox(isotope.value)
-                   box.isotope = isotope
-                   box.stateChanged.connect(self.on_isotopes_changed)
+            for isotope in three_isotopes_hydroxide_oxygen.isotopes:
+                box = QCheckBox(isotope.value)
+                box.isotope = isotope
+                box.stateChanged.connect(self.on_isotopes_changed)
    
-                   lhs_box_layout.addWidget(box)
-                   self.isotope_box_list.append(box)
+                lhs_box_layout.addWidget(box)
+                self.isotope_box_list.append(box)
    
-               for material in oxygen_material_list:
-                   box = QRadioButton(material)
-                   box.material = material
-                   box.toggled.connect(self.on_material_changed)
+            for material in oxygen_material_list:
+                box = QRadioButton(material)
+                box.material = material
+                box.toggled.connect(self.on_material_changed)
    
-                   rhs_box_layout.addWidget(box)
-                   self.material_box_list.append(box)
+                rhs_box_layout.addWidget(box)
+                self.material_box_list.append(box)
    
-           elif self.element == Element.NEW_ELEMENT:
+        elif self.element == Element.NEW_ELEMENT:
    
-               for isotope in new_method.isotopes:
-                   box = QCheckBox(isotope.value)
-                   box.isotope = isotope
-                   box.stateChanged.connect(self.on_isotopes_changed)
+            for isotope in new_method.isotopes:
+                box = QCheckBox(isotope.value)
+                box.isotope = isotope
+                box.stateChanged.connect(self.on_isotopes_changed)
    
-                   lhs_box_layout.addWidget(box)
-                   self.isotope_box_list.append(box)
+                lhs_box_layout.addWidget(box)
+                self.isotope_box_list.append(box)
    
-               for material in new_material_list:
-                   box = QRadioButton(material)
-                   box.material = material
-                   box.toggled.connect(self.on_material_changed)
+            for material in new_material_list:
+                box = QRadioButton(material)
+                box.material = material
+                box.toggled.connect(self.on_material_changed)
    
-                   rhs_box_layout.addWidget(box)
-                   self.material_box_list.append(box)
+                rhs_box_layout.addWidget(box)
+                self.material_box_list.append(box)
    ```

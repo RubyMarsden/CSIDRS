@@ -11,6 +11,8 @@ oxygen_zircon_reference_material_dict = {
     "CZ3": {O18_O16: (15.4, 0.4),"Citation": "Cavosie et al., 2011"}
 }
 
+oxygen_quartz_reference_material_dict = {}
+
 sulphur_pyrite_reference_material_dict = {
     "Sierra": {S33_S32: (1.09, 0.30), S34_S32: (2.17, 0.28), S36_S32: (3.96, 0.6), "Citation": "Laflamme et al. 2016"},
     # All isotope ratios were measured
@@ -29,14 +31,16 @@ sulphur_pyrrhotite_reference_material_dict = {
     "Alexo": {S33_S32: (1.73, 0.20), S34_S32: (5.23, 0.40), S36_S32: (10.98, 0.59), "Citation": "Laflamme et al. 2016"}}
 # All isotope ratios were measured
 
+sulphur_chalcopyrite_reference_material_dict = {}
+
 sulphur_pentlandite_reference_material_dict = {
     "VMSO": {S33_S32: (1.66, 0.24), S34_S32: (3.22, 0.51), S36_S32: (6.37, 0.83), "Citation": "Laflamme et al. 2016"}}
 # All isotope ratios were measured
 
-sulphur_Apatite_reference_material_dict = {
+sulphur_apatite_reference_material_dict = {
     "Big1": {S33_S32: (7.22, 0.20), S34_S32: (14.02, 0.40), "Citation": "Hammerli et al. 2021"}}
 # All isotope ratios were measured, NO 36S data on Big1
 
-chlorine_Apatite_reference_material_dict = {
+chlorine_apatite_reference_material_dict = {
     "Tubaf50": {Cl37_Cl35: (0.32, 0.25), "Citation": "Wurarska et al. 2021"},
     "BIG1": {Cl37_Cl35: (0.63, 0.14), "Citation": "In-house collated data, n=53"}}
