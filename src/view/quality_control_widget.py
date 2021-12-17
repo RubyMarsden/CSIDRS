@@ -116,13 +116,23 @@ class QualityControlWidget(QWidget):
         self.delta_vs_time_axis.spines['right'].set_visible(False)
         for sample in self.samples:
             xs = [spot.datetime for spot in sample.spots]
-            ys = [spot.alpha_corrected_data[ratio.delta_name][0] for spot in sample.spots]
-            dys = [spot.alpha_corrected_data[ratio.delta_name][1] for spot in sample.spots]
+            ys = []
+            dys = []
+            for spot in sample.spots:
+                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
+                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+
+                    self.delta_vs_time_axis.set_ylabel(ratio.delta_name)
+                else:
+                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+
+                    self.delta_vs_time_axis.set_ylabel(ratio.name)
 
             self.delta_vs_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
         self.delta_vs_time_axis.set_xlabel("Time")
-        self.delta_vs_time_axis.set_ylabel(ratio.delta_name)
         self.delta_vs_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         plt.tight_layout()
@@ -160,12 +170,22 @@ class QualityControlWidget(QWidget):
 
         for sample in self.samples:
             xs = [spot.secondary_ion_yield for spot in sample.spots]
-            ys = [spot.alpha_corrected_data[ratio.delta_name][0] for spot in sample.spots]
-            dys = [spot.alpha_corrected_data[ratio.delta_name][1] for spot in sample.spots]
+            ys = []
+            dys = []
+            for spot in sample.spots:
+                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
+                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+
+                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.delta_name)
+                else:
+                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+
+                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.name)
 
             self.delta_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_secondary_ion_yield_axis.set_xlabel("Secondary ion yield")
-        self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.delta_name)
         plt.tight_layout()
 
     def _create_delta_vs_distance_from_mount_centre_graph(self, ratio):
@@ -176,12 +196,22 @@ class QualityControlWidget(QWidget):
 
         for sample in self.samples:
             xs = [spot.distance_from_mount_centre for spot in sample.spots]
-            ys = [spot.alpha_corrected_data[ratio.delta_name][0] for spot in sample.spots]
-            dys = [spot.alpha_corrected_data[ratio.delta_name][1] for spot in sample.spots]
+            ys = []
+            dys = []
+            for spot in sample.spots:
+                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
+                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+
+                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.delta_name)
+                else:
+                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+
+                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.name)
 
             self.delta_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_distance_from_mount_centre_axis.set_xlabel("Distance from mount centre")
-        self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.delta_name)
 
         plt.tight_layout()
 
@@ -193,12 +223,22 @@ class QualityControlWidget(QWidget):
 
         for sample in self.samples:
             xs = [spot.dtfa_x for spot in sample.spots]
-            ys = [spot.alpha_corrected_data[ratio.delta_name][0] for spot in sample.spots]
-            dys = [spot.alpha_corrected_data[ratio.delta_name][1] for spot in sample.spots]
+            ys = []
+            dys = []
+            for spot in sample.spots:
+                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
+                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+
+                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.delta_name)
+                else:
+                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+
+                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.name)
 
             self.delta_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_dtfa_x_axis.set_xlabel("dtfa-x")
-        self.delta_vs_dtfa_x_axis.set_ylabel(ratio.delta_name)
 
         plt.tight_layout()
 
@@ -211,8 +251,19 @@ class QualityControlWidget(QWidget):
         total_xs = []
         for sample in self.samples:
             xs = [spot.dtfa_y for spot in sample.spots]
-            ys = [spot.alpha_corrected_data[ratio.delta_name][0] for spot in sample.spots]
-            dys = [spot.alpha_corrected_data[ratio.delta_name][1] for spot in sample.spots]
+            ys = []
+            dys = []
+            for spot in sample.spots:
+                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
+                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+
+                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name)
+                else:
+                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+
+                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.name)
             total_xs.extend(xs)
 
             self.delta_vs_dtfa_y_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)

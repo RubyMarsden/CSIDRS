@@ -191,6 +191,7 @@ class SidrsModel:
                             spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
             else:
+                self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = None, None
                 for sample in self.samples_by_name.values():
                     for spot in sample.spots:
                         spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]

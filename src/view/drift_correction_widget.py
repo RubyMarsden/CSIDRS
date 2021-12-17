@@ -117,20 +117,31 @@ class DriftCorrectionWidget(QWidget):
         axis.spines['right'].set_visible(False)
 
         xs = [spot.datetime for spot in sample.spots]
-        ys = [spot.not_corrected_deltas[ratio.delta_name][0] for spot in sample.spots]
-        yerrors = [spot.not_corrected_deltas[ratio.delta_name][1] for spot in sample.spots]
+        ys = []
+        yerrors = []
+        for spot in sample.spots:
+            if spot.not_corrected_deltas[ratio.delta_name][0]:
+                ys.append(spot.not_corrected_deltas[ratio.delta_name][0])
+                yerrors.append(spot.not_corrected_deltas[ratio.delta_name][1])
+
+                axis.set_ylabel(ratio.delta_name)
+            else:
+                ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                yerrors.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+
+                axis.set_ylabel(ratio.name)
 
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
         drift_coefficient = self.drift_coefficient[ratio]
         drift_intercept = self.drift_intercept[ratio]
-        y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
-        y_line_label = "y = " + str(drift_coefficient) + "x + " + str(drift_intercept)
+        if drift_coefficient:
+            y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
+            y_line_label = "y = " + str(drift_coefficient) + "x + " + str(drift_intercept)
 
-        axis.plot(xs, y_line, marker="", label=y_line_label)
-        axis.legend()
+            axis.plot(xs, y_line, marker="", label=y_line_label)
+            axis.legend()
 
         axis.set_xlabel("Time")
-        axis.set_ylabel(ratio.delta_name)
         plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
 
         axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
@@ -144,8 +155,19 @@ class DriftCorrectionWidget(QWidget):
         axis.spines['right'].set_visible(False)
 
         xs = [spot.datetime for spot in sample.spots]
-        ys = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in sample.spots]
-        yerrors = [spot.drift_corrected_deltas[ratio.delta_name][1] for spot in sample.spots]
+        ys = []
+        yerrors = []
+        for spot in sample.spots:
+            if spot.drift_corrected_deltas[ratio.delta_name][0]:
+                ys.append(spot.drift_corrected_deltas[ratio.delta_name][0])
+                yerrors.append(spot.drift_corrected_deltas[ratio.delta_name][1])
+
+                axis.set_ylabel(ratio.delta_name)
+            else:
+                ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                yerrors.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+
+                axis.set_ylabel(ratio.name)
 
         axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
         axis.set_xlabel("Time")
