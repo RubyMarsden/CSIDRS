@@ -108,12 +108,17 @@ class Spot:
             standard_ratios = sulphur_isotope_reference["VCDT"]
         elif element == Element.CAR:
             standard_ratios = carbon_isotope_reference["VPDB"]
+        elif element == Element.CHL:
+            standard_ratios = chlorine_isotope_reference["SMOC"]
         else:
             raise Exception
 
         for ratio, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
             standard_ratio = standard_ratios[ratio]
-            delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
+            if standard_ratio:
+                delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
+            else:
+                delta, delta_uncertainty = None, None
             self.not_corrected_deltas[ratio.delta_name] = [delta, delta_uncertainty]
 
     def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(self):

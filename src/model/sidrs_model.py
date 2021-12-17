@@ -141,67 +141,58 @@ class SidrsModel:
                 spot.calculate_raw_delta_for_isotope_ratio(self.element)
 
     def drift_correction_process(self):
+        for sample in self.samples_by_name.values():
+            if sample.is_primary_reference_material:
+                primary_rm = sample
+            elif sample.is_secondary_reference_material:
+                secondary_rm = sample
+            else:
+                continue
+
         for ratio in self.method.ratios:
-
-            for sample in self.samples_by_name.values():
-                if sample.is_primary_reference_material:
-                    primary_rm = sample
-                elif sample.is_secondary_reference_material:
-                    secondary_rm = sample
-                else:
-                    continue
-
             primary_times = []
             primary_time_uncertainties = []
             primary_deltas = []
             primary_delta_uncertainties = []
             for spot in primary_rm.spots:
-                if spot.is_flagged is False:
+                if any(spot.not_corrected_deltas[ratio.delta_name]) and spot.is_flagged is False:
                     timestamp = time.mktime(spot.datetime.timetuple())
                     primary_times.append(timestamp)
                     primary_time_uncertainties.append(0.1)
                     [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
                     primary_deltas.append(delta)
                     primary_delta_uncertainties.append(uncertainty)
-            xs = np.array(primary_times).reshape(-1, 1)
-            dxs = np.array(primary_time_uncertainties)
-            ys = np.array(primary_deltas)
-            dys = np.array(primary_delta_uncertainties)
 
-            regressor = LinearRegression()
-            regressor.fit(xs, ys)
-            score = regressor.score(xs, ys)
-            coeff = regressor.coef_
-            intercept = regressor.intercept_
-            print(score)
-            print(coeff)
-            print(intercept)
+            if primary_deltas:
+                X = sm.add_constant(primary_times)
 
-            X = sm.add_constant(primary_times)
+                statsmodel_result = sm.OLS(primary_deltas, X).fit()
+                print(statsmodel_result.summary())
+                self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = statsmodel_result.params
+                score = statsmodel_result.rsquared
 
-            statsmodel_result = sm.OLS(primary_deltas, X).fit()
-            print(statsmodel_result.summary())
-            self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = statsmodel_result.params
+                t_zero = np.median(primary_times)
 
-            t_zero = np.median(primary_times)
+                if score > 0.25:
+                    print("linear fit")
+                    drift_correction_coef = float(self.drift_coefficient[ratio])
+                    drift_correction_intercept = self.drift_y_intercept[ratio]
+                    for sample in self.samples_by_name.values():
+                        for spot in sample.spots:
+                            [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                            timestamp = time.mktime(spot.datetime.timetuple())
+                            spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(x=timestamp, y=delta,
+                                                                                             dy=uncertainty,
+                                                                                             drift_coefficient=drift_correction_coef,
+                                                                                             zero_time=t_zero)
+                else:
+                    print("no fit")
+                    for sample in self.samples_by_name.values():
+                        for spot in sample.spots:
+                            spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
-            if score > 0.25:
-                print("linear fit")
-                drift_correction_coef = float(coeff)
-                drift_correction_intercept = intercept
-                for sample in self.samples_by_name.values():
-                    for spot in sample.spots:
-                        [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                        timestamp = time.mktime(spot.datetime.timetuple())
-                        spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(x=timestamp, y=delta,
-                                                                                         dy=uncertainty,
-                                                                                         drift_coefficient=drift_correction_coef,
-                                                                                         zero_time=t_zero)
             else:
-                print("no fit")
-                for sample in self.samples_by_name.values():
-                    for spot in sample.spots:
-                        spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+                spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
     def SIMS_correction_process(self):
         # This correction method is described fully in  Kita et al., 2009

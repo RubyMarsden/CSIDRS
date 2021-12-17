@@ -38,5 +38,5 @@ sulphur_Apatite_reference_material_dict = {
 # All isotope ratios were measured, NO 36S data on Big1
 
 chlorine_Apatite_reference_material_dict = {
-    "TUBAF50": {Cl37_Cl35: (0.32, 0.25), "Citation": "Wurarska et al. 2021"},
-    "Big1": {Cl37_Cl35: (0.63, 0.14), "Citation": "In-house collated data, n=53"}}
+    "Tubaf50": {Cl37_Cl35: (0.32, 0.25), "Citation": "Wurarska et al. 2021"},
+    "BIG1": {Cl37_Cl35: (0.63, 0.14), "Citation": "In-house collated data, n=53"}}
