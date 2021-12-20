@@ -112,7 +112,7 @@ class SidrsModel:
         print("Processing...")
         self._create_samples_from_sample_names(self.spots)
         primary_reference_material_exists = False
-        secondary_reference_material_exists = False
+        secondary_reference_material_accounted_for = False
         for sample in self.samples_by_name.values():
             if sample.name == self.primary_reference_material:
                 sample.is_primary_reference_material = True
@@ -120,11 +120,12 @@ class SidrsModel:
                 number_of_primary_rm_spots = len(sample.spots)
             elif sample.name == self.secondary_reference_material:
                 sample.is_secondary_reference_material = True
-                secondary_reference_material_exists = True
+                secondary_reference_material_accounted_for = True
 
-        if primary_reference_material_exists and secondary_reference_material_exists:
-            print("fix this")
-        else:
+            if self.secondary_reference_material == "No secondary reference material":
+                secondary_reference_material_accounted_for = True
+
+        if not primary_reference_material_exists or not secondary_reference_material_accounted_for:
             raise Exception("The reference materials selected does not match your sample data")
 
         self.cycle_outlier_probability_list = [calculate_probability_one_outlier(self.number_of_cycles)]
@@ -244,42 +245,67 @@ class SidrsModel:
         self.secondary_reference_material = secondary_reference_material
 
         # TODO refactor this bit
+
         if self.element == Element.OXY:
             if self.material == "Zircon":
                 self.primary_rm_values_by_ratio = oxygen_zircon_reference_material_dict[primary_reference_material]
-                self.secondary_rm_values_by_ratio = oxygen_zircon_reference_material_dict[secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = oxygen_zircon_reference_material_dict[secondary_reference_material]
             elif self.material == "Quartz":
                 self.primary_rm_values_by_ratio = oxygen_quartz_reference_material_dict[primary_reference_material]
-                self.secondary_rm_values_by_ratio = oxygen_quartz_reference_material_dict[secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = oxygen_quartz_reference_material_dict[secondary_reference_material]
 
         elif self.element == Element.SUL:
             if self.material == "Pyrite":
                 self.primary_rm_values_by_ratio = sulphur_pyrite_reference_material_dict[primary_reference_material]
-                self.secondary_rm_values_by_ratio = sulphur_pyrite_reference_material_dict[secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = sulphur_pyrite_reference_material_dict[secondary_reference_material]
             elif self.material == "Pyrrhotite":
                 self.primary_rm_values_by_ratio = sulphur_pyrrhotite_reference_material_dict[primary_reference_material]
-                self.secondary_rm_values_by_ratio = sulphur_pyrrhotite_reference_material_dict[
-                    secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = sulphur_pyrrhotite_reference_material_dict[
+                        secondary_reference_material]
             elif self.material == "Chalcopyrite":
                 self.primary_rm_values_by_ratio = sulphur_chalcopyrite_reference_material_dict[
                     primary_reference_material]
-                self.secondary_rm_values_by_ratio = sulphur_chalcopyrite_reference_material_dict[
-                    secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = sulphur_chalcopyrite_reference_material_dict[
+                        secondary_reference_material]
             elif self.material == "Pentlandite":
                 self.primary_rm_values_by_ratio = sulphur_pentlandite_reference_material_dict[
                     primary_reference_material]
-                self.secondary_rm_values_by_ratio = sulphur_pentlandite_reference_material_dict[
-                    secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = sulphur_pentlandite_reference_material_dict[
+                        secondary_reference_material]
             elif self.material == "Apatite":
                 self.primary_rm_values_by_ratio = sulphur_apatite_reference_material_dict[primary_reference_material]
-                self.secondary_rm_values_by_ratio = sulphur_apatite_reference_material_dict[
-                    secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = sulphur_apatite_reference_material_dict[
+                        secondary_reference_material]
 
         elif self.element == Element.CHL:
             if self.material == "Apatite":
                 self.primary_rm_values_by_ratio = chlorine_apatite_reference_material_dict[primary_reference_material]
-                self.secondary_rm_values_by_ratio = chlorine_apatite_reference_material_dict[
-                    secondary_reference_material]
+                if self.secondary_reference_material == "No secondary reference material":
+                    self.secondary_rm_values_by_ratio = None
+                else:
+                    self.secondary_rm_values_by_ratio = chlorine_apatite_reference_material_dict[
+                        secondary_reference_material]
 
     def create_method_dictionary_from_isotopes(self, isotopes):
         for method in list_of_methods:

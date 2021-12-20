@@ -67,6 +67,13 @@ class ReferenceMaterialSelectionDialog(QDialog):
 
             layout_one.addWidget(box1)
             layout_two.addWidget(box2)
+
+        self.no_secondary_box = QRadioButton("No secondary reference material")
+        self.secondary_radiobuttons.append(self.no_secondary_box)
+        self.no_secondary_box.toggled.connect(self.on_secondary_radio_button_selected)
+
+        layout_two.addWidget(self.no_secondary_box)
+
         self.reference_list_widget.setLayout(layout_one)
         self.secondary_reference_list_widget.setLayout(layout_two)
 
