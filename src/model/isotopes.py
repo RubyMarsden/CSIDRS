@@ -16,4 +16,3 @@ class Isotope(Enum):
     F19 = "19F"
     Cl35 = "35Cl"
     Cl37 = "37Cl"
-

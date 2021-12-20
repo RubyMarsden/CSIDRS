@@ -73,14 +73,19 @@ e.g.:
     ```
 
 
-5. Add the required delta notation constants into `src/model/settings/constants.py`
+5. Add the required delta notation constants into `src/model/settings/constants.py` by adding an Enum in the DeltaReferenceMaterial class and then adding a dictionary for that material
 e.g.:
    ```python
+   class DeltaReferenceMaterial(Enum):
+      VSMOW = 'VSMOW'
+      VNEW = 'VNEW'
+   ```
+   ```python
    oxygen_isotope_reference = {
-        'VSMOW': {O18_O16: 0.002005, O17_O16: 0.0003799}}
+        DeltaReferenceMaterial.VSMOW: {O18_O16: 0.002005, O17_O16: 0.0003799}}
    
    new_element_isotope_reference = {
-        'VNEW': {ISO_RATIO: float, ISO_RATIO_2: float}}
+        DeltaReferenceMaterial.VNEW: {ISO_RATIO: float, ISO_RATIO_2: float}}
     ```
    
 6. Add the material list for the element into `src/model/settings/material_lists.py` e.g.:

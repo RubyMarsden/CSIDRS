@@ -3,13 +3,14 @@ import re
 from datetime import datetime
 
 from src.model.elements import Element
+from src.model.settings.delta_constants import DeltaReferenceMaterial
 from src.model.mass_peak import MassPeak
 from src.model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev, \
     calculate_delta_from_ratio
 from src.model.settings.asc_file_settings_general import *
 from src.model.get_data_from_import import get_data_from_old_asc, get_primary_beam_current_data_old_asc, \
     get_dtfa_x_and_y_from_old_asc
-from src.model.settings.constants import oxygen_isotope_reference, sulphur_isotope_reference, carbon_isotope_reference, chlorine_isotope_reference
+from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, carbon_isotope_reference, chlorine_isotope_reference
 from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time
 
 
@@ -103,13 +104,13 @@ class Spot:
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet
         if element == Element.OXY:
-            standard_ratios = oxygen_isotope_reference["VSMOW"]
+            standard_ratios = oxygen_isotope_reference[DeltaReferenceMaterial.VSMOW]
         elif element == Element.SUL:
-            standard_ratios = sulphur_isotope_reference["VCDT"]
+            standard_ratios = sulphur_isotope_reference[DeltaReferenceMaterial.VCDT]
         elif element == Element.CAR:
-            standard_ratios = carbon_isotope_reference["VPDB"]
+            standard_ratios = carbon_isotope_reference[DeltaReferenceMaterial.VPDB]
         elif element == Element.CHL:
-            standard_ratios = chlorine_isotope_reference["SMOC"]
+            standard_ratios = chlorine_isotope_reference[DeltaReferenceMaterial.SMOC]
         else:
             raise Exception
 
