@@ -204,12 +204,12 @@ class SidrsModel:
                 if sample.is_primary_reference_material:
                     primary_rm = sample
 
-            spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
+            primary_rm_spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
                          not spot.is_flagged and spot.drift_corrected_deltas[ratio.delta_name][0]]
 
-            if spot_data:
-                primary_rm_mean = np.mean(spot_data)
-                primary_uncertainty = np.std(spot_data)
+            if primary_rm_spot_data:
+                primary_rm_mean = np.mean(primary_rm_spot_data)
+                primary_uncertainty = np.std(primary_rm_spot_data)
 
                 alpha_sims = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
                                                   externally_measured_primary_reference_value_and_uncertainty=
