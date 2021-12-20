@@ -57,9 +57,7 @@ class BasicDataCheckWidget(QWidget):
     def _create_rhs_layout(self):
         layout = QVBoxLayout()
         graphs = self._create_graphs_to_check_data()
-        checkbox = QCheckBox("Ok")
         layout.addWidget(graphs)
-        layout.addWidget(checkbox, alignment=Qt.AlignRight)
 
         return layout
 
