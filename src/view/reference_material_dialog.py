@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QPushButton, QRadioButton, \
-    QGridLayout, QWidget
+    QGridLayout, QWidget, QFrame
 
 from src.model.elements import Element
 from src.model.settings.isotope_reference_materials import *
@@ -24,6 +24,10 @@ class ReferenceMaterialSelectionDialog(QDialog):
 
         self.reference_list_widget = QWidget()
         self.secondary_reference_list_widget = QWidget()
+
+        self.line = QFrame()
+        self.line.setFrameShape(QFrame.VLine)
+        self.line.setLineWidth(1)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
@@ -80,6 +84,7 @@ class ReferenceMaterialSelectionDialog(QDialog):
         layout.addWidget(title, 0, 0)
         layout.addWidget(secondary_title, 0, 1)
         layout.addWidget(self.reference_list_widget, 1, 0)
+        layout.addWidget(self.line)
         layout.addWidget(self.secondary_reference_list_widget, 1, 1)
         layout.addWidget(self.buttonBox, 2, 1)
         self.setLayout(layout)
