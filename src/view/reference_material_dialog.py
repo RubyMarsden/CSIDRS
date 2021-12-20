@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QPus
 
 from src.model.elements import Element
 from src.model.settings.isotope_reference_materials import *
-from src.view.new_reference_material_dialog import NewReferenceMaterialDialog
 
 
 class ReferenceMaterialSelectionDialog(QDialog):
@@ -25,9 +24,6 @@ class ReferenceMaterialSelectionDialog(QDialog):
 
         self.reference_list_widget = QWidget()
         self.secondary_reference_list_widget = QWidget()
-        self.new_reference_material_button = QPushButton("New reference")
-        self.new_reference_material_button.setFixedWidth(150)
-        self.new_reference_material_button.clicked.connect(self.new_reference_material_button_clicked)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
@@ -78,7 +74,6 @@ class ReferenceMaterialSelectionDialog(QDialog):
         layout.addWidget(secondary_title, 0, 1)
         layout.addWidget(self.reference_list_widget, 1, 0)
         layout.addWidget(self.secondary_reference_list_widget, 1, 1)
-        layout.addWidget(self.new_reference_material_button, 2, 0)
         layout.addWidget(self.buttonBox, 2, 1)
         self.setLayout(layout)
 
@@ -87,13 +82,6 @@ class ReferenceMaterialSelectionDialog(QDialog):
             self.primary_reference_material_selection,
             self.secondary_reference_material_selection
         )
-
-    def new_reference_material_button_clicked(self):
-        dialog = NewReferenceMaterialDialog(self.element)
-        result = dialog.exec()
-        if result == QDialog.Accepted:
-            return dialog.add_reference_material()
-        return None
 
     def on_primary_radio_button_selected(self):
         for box in self.primary_radiobuttons:
