@@ -1,8 +1,7 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QPushButton, QRadioButton, \
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QRadioButton, \
     QGridLayout, QWidget, QFrame
 
-from src.model.elements import Element
-from src.model.settings.isotope_reference_materials import *
+from src.model.settings.isotope_reference_materials import reference_material_dictionary
 
 
 class ReferenceMaterialSelectionDialog(QDialog):
@@ -35,25 +34,10 @@ class ReferenceMaterialSelectionDialog(QDialog):
 
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
-        if self.element == Element.OXY:
-            if self.material == "Zircon":
-                reference_materials = [*oxygen_zircon_reference_material_dict]
-            elif self.material == "Quartz":
-                # TODO make quartz reference material dictionary
-                reference_materials = []
-            else:
-                raise Exception
-
-        elif self.element == Element.SUL:
-            if self.material == "Pyrite":
-                reference_materials = [*sulphur_pyrite_reference_material_dict]
-
-        elif self.element == Element.CHL:
-            if self.material == "Apatite":
-                reference_materials = [*chlorine_apatite_reference_material_dict]
-
-        else:
-            raise Exception
+        reference_materials = []
+        for (i, j, k) in reference_material_dictionary.keys():
+            if i == self.element and j == self.material:
+                reference_materials.append(k)
 
         layout_one = QVBoxLayout()
         layout_two = QVBoxLayout()

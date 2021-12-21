@@ -55,4 +55,4 @@ class IsotopeButtonWidget(QWidget):
     def emit_methods_signal(self, dialog):
         if dialog.isotopes and dialog.material is not None:
             self.model.signals.isotopesInput.emit(dialog.isotopes, self.element)
-            self.model.signals.materialInput.emit(dialog.material.value)
+            self.model.signals.materialInput.emit(dialog.material)
