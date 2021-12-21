@@ -44,7 +44,16 @@ e.g.:
         NE2 = "2NE"
        
     ```
-3. Create Ratio objects in `src/model/settings/methods_from_isotopes.py` where the first isotope is the numerator and the second is the denominator in the isotopic ratio. 
+3. Add the isotopes to the isotope_by_element dictionary in `src/model/isotopes.py`
+   ```python
+   isotopes_by_element = {
+      Element.CAR: [Isotope.C12, Isotope.C13, Isotope.C14],
+      Element.OXY: [Isotope.O17, Isotope.O16, Isotope.O18, Isotope.O16H1],
+      Element.NEW_ELEMENT: [Isotope.NE1, Isotope.NE2]
+   }
+   ```
+
+4. Create Ratio objects in `src/model/settings/methods_from_isotopes.py` where the first isotope is the numerator and the second is the denominator in the isotopic ratio. 
 e.g.:
    ```python
    # Sulphur ratios
@@ -55,7 +64,7 @@ e.g.:
    NE1_NE2 = Ratio(Isotope.NE1, Isotope.NE2) 
    ```
 
-4. Instantiate the new Method object and add it to the list of methods in `src/model/settings/methods_from_isotopes.py` e.g.:
+5. Instantiate the new Method object and add it to the list of methods in `src/model/settings/methods_from_isotopes.py` e.g.:
     ```python
    three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
                                              [O17_O16, O18_O16, O16H1_O16])
@@ -91,50 +100,18 @@ e.g.:
         DeltaReferenceMaterial.VNEW: {NE1_NE2: float, ISO_RATIO_2: float}}
     ```
    
-6. Add the material list for the element into `src/model/settings/material_lists.py` e.g.:
+6. Add the material list for the element into the material by element dictionary in `src/model/settings/material_lists.py` e.g.:
    ```python
-   oxygen_material_list = ['Zircon', 'Quartz']
-   new_material_list = ['Mineral 1', 'Mineral 2']
+   materials_by_element = {
+      Element.OXY: [Material.ZIR, Material.QTZ],
+      Element.NEW_ELEMENT: [Material.MAT]}
    ```
 
-7. Add the possible isotopes to the method selection dialog which is called when the element button is pushed in `src/view/method_selection_dialog.py`
-e.g.:
+7. If Material.MAT does not already exist in the Material class in `src/model/settings/material_lists.py` then it must be added e.g.,:
    ```python
-        if self.element == Element.OXY:
-   
-            for isotope in three_isotopes_hydroxide_oxygen.isotopes:
-                box = QCheckBox(isotope.value)
-                box.isotope = isotope
-                box.stateChanged.connect(self.on_isotopes_changed)
-   
-                lhs_box_layout.addWidget(box)
-                self.isotope_box_list.append(box)
-   
-            for material in oxygen_material_list:
-                box = QRadioButton(material)
-                box.material = material
-                box.toggled.connect(self.on_material_changed)
-   
-                rhs_box_layout.addWidget(box)
-                self.material_box_list.append(box)
-   
-        elif self.element == Element.NEW_ELEMENT:
-   
-            for isotope in new_method.isotopes:
-                box = QCheckBox(isotope.value)
-                box.isotope = isotope
-                box.stateChanged.connect(self.on_isotopes_changed)
-   
-                lhs_box_layout.addWidget(box)
-                self.isotope_box_list.append(box)
-   
-            for material in new_material_list:
-                box = QRadioButton(material)
-                box.material = material
-                box.toggled.connect(self.on_material_changed)
-   
-                rhs_box_layout.addWidget(box)
-                self.material_box_list.append(box)
+   class Material(Enum):
+       ZIR = "Zircon"
+       MAT = "Material"
    ```
 
 8. Add the delta reference material to the Spot class in `src/model/spot.py` and additionally import the reference required.

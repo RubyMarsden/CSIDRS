@@ -1,5 +1,8 @@
 from enum import Enum
 
+from src.model.elements import Element
+
+
 class Material(Enum):
     ZIR = "Zircon"
     QTZ = "Quartz"
@@ -9,7 +12,8 @@ class Material(Enum):
     PLT = "Pentlandite"
     APT = "Apatite"
 
-
-oxygen_material_list = [Material.ZIR, Material.QTZ]
-sulphur_material_list = [Material.PYR, Material.PRH, Material.CPT, Material.PLT, Material.APT]
-chlorine_material_list = [Material.APT]
+materials_by_element = {
+    Element.OXY: [Material.ZIR, Material.QTZ],
+    Element.SUL: [Material.PYR, Material.PRH, Material.CPT, Material.PLT, Material.APT],
+    Element.CHL: [Material.APT]
+}

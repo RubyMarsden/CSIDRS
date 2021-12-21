@@ -2,10 +2,8 @@
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox, \
     QRadioButton
 
-from src.model.elements import Element
-from src.model.settings.isotope_lists import *
-from src.model.settings.material_lists import *
-from src.model.settings.methods_from_isotopes import four_isotopes_sulphur, three_isotopes_hydroxide_oxygen, two_isotopes_carbon, two_isotopes_chlorine_fluorine
+from src.model.settings.material_lists import materials_by_element
+from src.model.isotopes import isotopes_by_element
 
 
 class MethodSelectionDialog(QDialog):
@@ -35,61 +33,24 @@ class MethodSelectionDialog(QDialog):
         lhs_box_layout = QVBoxLayout()
         rhs_box_layout = QVBoxLayout()
 
-        if self.element == Element.OXY:
+        isotope_list = isotopes_by_element[self.element]
+        material_list = materials_by_element[self.element]
 
-            for isotope in three_isotopes_hydroxide_oxygen.isotopes:
-                box = QCheckBox(isotope.value)
-                box.isotope = isotope
-                box.stateChanged.connect(self.on_isotopes_changed)
+        for isotope in isotope_list:
+            box = QCheckBox(isotope.value)
+            box.isotope = isotope
+            box.stateChanged.connect(self.on_isotopes_changed)
 
-                lhs_box_layout.addWidget(box)
-                self.isotope_box_list.append(box)
+            lhs_box_layout.addWidget(box)
+            self.isotope_box_list.append(box)
 
-            for material in oxygen_material_list:
-                box = QRadioButton(material.value)
-                box.material = material
-                box.toggled.connect(self.on_material_changed)
+        for material in material_list:
+            box = QRadioButton(material.value)
+            box.material = material
+            box.toggled.connect(self.on_material_changed)
 
-                rhs_box_layout.addWidget(box)
-                self.material_box_list.append(box)
-
-        elif self.element == Element.SUL:
-
-            for isotope in four_isotopes_sulphur.isotopes:
-                box = QCheckBox(isotope.value)
-                box.isotope = isotope
-                box.stateChanged.connect(self.on_isotopes_changed)
-
-                lhs_box_layout.addWidget(box)
-                self.isotope_box_list.append(box)
-
-            for material in sulphur_material_list:
-                box = QRadioButton(material.value)
-                box.material = material
-                box.toggled.connect(self.on_material_changed)
-
-                rhs_box_layout.addWidget(box)
-                self.material_box_list.append(box)
-
-        elif self.element == Element.CHL:
-
-            for isotope in two_isotopes_chlorine_fluorine.isotopes:
-                box = QCheckBox(isotope.value)
-                box.isotope = isotope
-                box.stateChanged.connect(self.on_isotopes_changed)
-
-                lhs_box_layout.addWidget(box)
-                self.isotope_box_list.append(box)
-
-            for material in chlorine_material_list:
-                box = QRadioButton(material.value)
-                box.material = material
-                box.toggled.connect(self.on_material_changed)
-
-                rhs_box_layout.addWidget(box)
-                self.material_box_list.append(box)
-        else:
-            raise Exception
+            rhs_box_layout.addWidget(box)
+            self.material_box_list.append(box)
 
         self.lhs_box_list.setLayout(lhs_box_layout)
         self.rhs_box_list.setLayout(rhs_box_layout)
