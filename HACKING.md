@@ -13,7 +13,6 @@ The CSIDRS software is designed to have a degree of flexibility - this means tha
 - src/model/settings/material_lists.py
 - src/model/settings/methods_from_isotopes
 
-- src/view/isotope_button_widget.py
 - src/view/method_selection_dialog.py
 
 
@@ -32,8 +31,8 @@ As this case is covered in the method for making a totally new set of methods fo
 e.g.: 
     ```python
    class Element(Enum):
-        OXY = "Oxygen"
-        NEW_ELEMENT = "New Element"
+        OXY = "Oxygen", "O"
+        NEW_ELEMENT = "New Element", "Ne"
    ```
    
 2. Create the new isotope Enums in `src/model/isotopes.py`
@@ -97,39 +96,8 @@ e.g.:
    oxygen_material_list = ['Zircon', 'Quartz']
    new_material_list = ['Mineral 1', 'Mineral 2']
    ```
-7. Add the element button to `src/view/isotope_button_widget.py` e.g.:
-   ```python
-            layout.addWidget(self.create_O_button())
-            layout.addWidget(self.create_NE_button()) 
-   
-       def create_O_button(self):
-           o_button = QPushButton("O")
-           o_button.clicked.connect(self.on_O_button_pushed)
-           return o_button
-   
-       def on_O_button_pushed(self):
-           self.element = Element.OXY
-           dialog = MethodSelectionDialog(self.element)
-           result = dialog.exec()
-           if result:
-               self.emit_methods_signal(dialog)
-   
-           layout.addWidget(self.create_NE_button())
-   
-       def create_NE_button(self):
-           ne_button = QPushButton("New element")
-           ne_button.clicked.connect(self.on_NE_button_pushed)
-           return ne_button
-   
-       def on_NE_button_pushed(self):
-           self.element = Element.NEW_ELEMENT
-           dialog = MethodSelectionDialog(self.element)
-           result = dialog.exec()
-           if result:
-               self.emit_methods_signal(dialog)
-   ```
 
-8. Add the possible isotopes to the method selection dialog which is called when the element button is pushed in `src/view/method_selection_dialog.py`
+7. Add the possible isotopes to the method selection dialog which is called when the element button is pushed in `src/view/method_selection_dialog.py`
 e.g.:
    ```python
         if self.element == Element.OXY:
@@ -169,7 +137,7 @@ e.g.:
                 self.material_box_list.append(box)
    ```
 
-9. Add the delta reference material to the Spot class in `src/model/spot.py` and additionally import the reference required.
+8. Add the delta reference material to the Spot class in `src/model/spot.py` and additionally import the reference required.
    ```python
    from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, new_element_isotope_reference
    ```
