@@ -46,7 +46,7 @@ class MethodSelectionDialog(QDialog):
                 self.isotope_box_list.append(box)
 
             for material in oxygen_material_list:
-                box = QRadioButton(material)
+                box = QRadioButton(material.value)
                 box.material = material
                 box.toggled.connect(self.on_material_changed)
 
@@ -64,7 +64,7 @@ class MethodSelectionDialog(QDialog):
                 self.isotope_box_list.append(box)
 
             for material in sulphur_material_list:
-                box = QRadioButton(material)
+                box = QRadioButton(material.value)
                 box.material = material
                 box.toggled.connect(self.on_material_changed)
 
@@ -82,7 +82,7 @@ class MethodSelectionDialog(QDialog):
                 self.isotope_box_list.append(box)
 
             for material in chlorine_material_list:
-                box = QRadioButton(material)
+                box = QRadioButton(material.value)
                 box.material = material
                 box.toggled.connect(self.on_material_changed)
 
