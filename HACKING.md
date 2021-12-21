@@ -6,8 +6,9 @@ The CSIDRS software is designed to have a degree of flexibility - this means tha
 
 - src/model/elements.py
 - src/model/isotopes.py
+- src/model/spot.py
 
-- src/model/settings/constants.py
+- src/model/settings/delta_constants.py
 - src/model/settings/isotope_reference_materials.py
 - src/model/settings/material_lists.py
 - src/model/settings/methods_from_isotopes
@@ -73,8 +74,11 @@ e.g.:
     ```
 
 
-5. Add the required delta notation constants into `src/model/settings/constants.py` by adding an Enum in the DeltaReferenceMaterial class and then adding a dictionary for that material
+5. Add the required delta notation constants into `src/model/settings/delta_constants.py` by adding an Enum in the DeltaReferenceMaterial class and then adding a dictionary for that material. Additionally, add the correct import statements for the new Ratio objects added in step 3.
 e.g.:
+   ```python
+   from src/model/settings/methods_from_isotopes.py import [Ratios], NE1_NE2
+   ```
    ```python
    class DeltaReferenceMaterial(Enum):
       VSMOW = 'VSMOW'
@@ -85,7 +89,7 @@ e.g.:
         DeltaReferenceMaterial.VSMOW: {O18_O16: 0.002005, O17_O16: 0.0003799}}
    
    new_element_isotope_reference = {
-        DeltaReferenceMaterial.VNEW: {ISO_RATIO: float, ISO_RATIO_2: float}}
+        DeltaReferenceMaterial.VNEW: {NE1_NE2: float, ISO_RATIO_2: float}}
     ```
    
 6. Add the material list for the element into `src/model/settings/material_lists.py` e.g.:
@@ -163,4 +167,19 @@ e.g.:
    
                 rhs_box_layout.addWidget(box)
                 self.material_box_list.append(box)
+   ```
+
+9. Add the delta reference material to the Spot class in `src/model/spot.py` and additionally import the reference required.
+   ```python
+   from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, new_element_isotope_reference
+   ```
+   ```python
+   def calculate_raw_delta_for_isotope_ratio(self, element):
+      
+      if element == Element.OXY:
+         standard_ratios = oxygen_isotope_reference[DeltaReferenceMaterial.VSMOW]
+      elif element == Element.SUL:
+         standard_ratios = sulphur_isotope_reference[DeltaReferenceMaterial.VCDT]
+      elif element == Element.NEW_ELEMENT:
+         standard_ratios = new_element_isotope_reference[DeltaReferenceMaterial.VNEW]
    ```
