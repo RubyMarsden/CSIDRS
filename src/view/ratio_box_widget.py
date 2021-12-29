@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QRadioButton
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QRadioButton, QButtonGroup
 
 
 class RatioBoxWidget(QWidget):
@@ -9,6 +9,8 @@ class RatioBoxWidget(QWidget):
         self.ratio_radiobuttons = []
         self.signals = signals
 
+        self.ratio_qbutton_group = QButtonGroup()
+
         layout = QHBoxLayout()
         self.setLayout(layout)
 
@@ -16,6 +18,7 @@ class RatioBoxWidget(QWidget):
             button = QRadioButton(ratio.name)
             button.ratio = ratio
             layout.addWidget(button, alignment=Qt.AlignCenter)
+            self.ratio_qbutton_group.addButton(button)
             button.toggled.connect(self.emit_ratio_change_signal)
 
             self.ratio_radiobuttons.append(button)
