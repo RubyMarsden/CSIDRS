@@ -166,11 +166,12 @@ class SidrsModel:
                 statsmodel_result = sm.OLS(primary_deltas, X).fit()
                 print(statsmodel_result.summary())
                 self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = statsmodel_result.params
-                score = statsmodel_result.rsquared
+                self.linear_rsquared = statsmodel_result.rsquared
+                self.linear_rsquared_adj = statsmodel_result.rsquared_adj
 
                 t_zero = np.median(primary_times)
 
-                if score > 0.25:
+                if self.linear_rsquared > 0.25:
                     print("linear fit")
                     drift_correction_coef = float(self.drift_coefficient[ratio])
                     drift_correction_intercept = self.drift_y_intercept[ratio]
@@ -273,7 +274,4 @@ class SidrsModel:
     def recalculate_data_with_spots_excluded(self):
         self.drift_correction_process()
         self.SIMS_correction_process()
-        self.on_data_recalculated()
-
-    def on_data_recalculated(self):
         self.signals.replotAndTabulateRecalculatedData.emit()
