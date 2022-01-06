@@ -149,7 +149,7 @@ class SidrsModel:
         for ratio in self.method.ratios:
             primary_times = []
             primary_time_uncertainties = []
-            primary_deltas = []
+            self.primary_deltas = []
             primary_delta_uncertainties = []
             for spot in primary_rm.spots:
                 if any(spot.not_corrected_deltas[ratio.delta_name]) and spot.is_flagged is False:
@@ -157,17 +157,17 @@ class SidrsModel:
                     primary_times.append(timestamp)
                     primary_time_uncertainties.append(0.1)
                     [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                    primary_deltas.append(delta)
+                    self.primary_deltas.append(delta)
                     primary_delta_uncertainties.append(uncertainty)
 
-            if primary_deltas:
+            if self.primary_deltas:
                 X = sm.add_constant(primary_times)
 
-                statsmodel_result = sm.OLS(primary_deltas, X).fit()
-                print(statsmodel_result.summary())
-                self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = statsmodel_result.params
-                self.linear_rsquared = statsmodel_result.rsquared
-                self.linear_rsquared_adj = statsmodel_result.rsquared_adj
+                self.statsmodel_result = sm.OLS(self.primary_deltas, X).fit()
+                print(self.statsmodel_result.summary())
+                self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = self.statsmodel_result.params
+                self.linear_rsquared = self.statsmodel_result.rsquared
+                self.linear_rsquared_adj = self.statsmodel_result.rsquared_adj
 
                 t_zero = np.median(primary_times)
 
