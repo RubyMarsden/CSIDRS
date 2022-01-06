@@ -39,12 +39,11 @@ class DriftCorrectionWidget(QWidget):
             elif self.data_processing_dialog.model.secondary_reference_material == "No secondary reference material":
                 self.secondary_sample = None
 
-        self._create_linear_regression_widget()
-        linear_regression_widget = self.linear_regression_widget
+        self.linear_regression_widget = self._create_linear_regression_widget()
         more_information_button_layout = self._create_more_information_button_layout()
 
-        self.layout.addWidget(ratio_selection_widget)
-        self.layout.addWidget(linear_regression_widget)
+        self.layout.addWidget(self.ratio_selection_widget)
+        self.layout.addWidget(self.linear_regression_widget)
         self.layout.addLayout(more_information_button_layout)
 
         self.setLayout(self.layout)
@@ -57,7 +56,7 @@ class DriftCorrectionWidget(QWidget):
         return self.ratio_radiobox_widget
 
     def _create_linear_regression_widget(self):
-        self.linear_regression_widget = QWidget()
+        linear_regression_widget = QWidget()
 
         layout = QHBoxLayout()
 
@@ -107,7 +106,8 @@ class DriftCorrectionWidget(QWidget):
         layout.addLayout(info_layout, 3.5)
         layout.addWidget(graph_widget, 6.5)
 
-        self.linear_regression_widget.setLayout(layout)
+        linear_regression_widget.setLayout(layout)
+        return linear_regression_widget
 
     def _create_more_information_button_layout(self):
         layout = QHBoxLayout()
@@ -148,10 +148,11 @@ class DriftCorrectionWidget(QWidget):
         self.update_graphs(ratio)
 
     def update_widget_contents(self):
+        updated_linear_regression_widget = self._create_linear_regression_widget()
         self.update_graphs(self.ratio)
-        self.linear_regression_widget.removeWidget()
-        self._create_linear_regression_widget()
-
+        self.layout.replaceWidget(self.linear_regression_widget, updated_linear_regression_widget)
+        self.layout.removeWidget(self.linear_regression_widget)
+        self.linear_regression_widget = updated_linear_regression_widget
     ################
     ### Plotting ###
     ################
