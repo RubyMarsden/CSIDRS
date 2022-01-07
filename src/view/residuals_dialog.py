@@ -1,8 +1,6 @@
-import statsmodels.graphics.regressionplots
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QWidget, QLabel, QVBoxLayout
 from matplotlib import pyplot as plt
-from matplotlib.gridspec import GridSpec
 
 from src.utils import gui_utils
 
@@ -39,8 +37,12 @@ class ResidualsDialog(QDialog):
         summary_iterable = str(summary).splitlines()
         for line in summary_iterable:
             print(line)
-            q_line = QLabel(line)
-            layout.addWidget(q_line, alignment=Qt.AlignLeft)
+            h_layout = QHBoxLayout()
+            for item in line.split():
+                q_item = QLabel(item)
+                h_layout.addWidget(q_item)
+            h_layout.setAlignment(Qt.AlignCenter)
+            layout.addLayout(h_layout)
 
         regression_results_widget.setLayout(layout)
 
