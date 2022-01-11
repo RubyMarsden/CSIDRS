@@ -1,5 +1,7 @@
 import csv
 
+from PyQt5.QtWidgets import QFileDialog
+
 CSV_DELIMITER = ","
 
 
@@ -10,3 +12,9 @@ def write_csv_output(headers, rows, output_file) -> None:
         writer.writerow(headers)
         for row in rows:
             writer.writerow(row)
+
+def get_output_file():
+    return QFileDialog.getSaveFileName(caption='Save CSV file',
+                                       directory="home/ruby/Documents/Programming/UWA/CSIDRS/data",
+                                       options=QFileDialog.DontUseNativeDialog
+                                       )[0]
