@@ -153,7 +153,7 @@ class CycleDataDialog(QDialog):
             for spot in sample.spots:
                 spot_name = str(sample.name + " " + spot.id)
                 ratio = method.ratios[0]
-                for i, boolean in enumerate(spot.cycle_flagging_information[ratio]):
+                for i, value in enumerate(spot.cycle_flagging_information[ratio]):
                     row = [spot_name, i]
                     for ratio in method.ratios:
                         boolean = spot.cycle_flagging_information[ratio][i]
