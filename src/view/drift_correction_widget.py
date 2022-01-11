@@ -25,12 +25,12 @@ class DriftCorrectionWidget(QWidget):
         # Create the ratio selection button here - because the button must exist before ratio can change.
         self.ratio_selection_widget = self._create_ratio_selection_widget()
 
-        self.drift_coefficient = self.data_processing_dialog.model.drift_coefficient
-        self.drift_intercept = self.data_processing_dialog.model.drift_y_intercept
+        self.drift_coefficient = self.data_processing_dialog.model.drift_coefficient_by_ratio
+        self.drift_intercept = self.data_processing_dialog.model.drift_y_intercept_by_ratio
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
         self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_widget_contents)
-
+        self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.layout = QVBoxLayout()
 
         for sample in self.data_processing_dialog.samples:
@@ -41,13 +41,11 @@ class DriftCorrectionWidget(QWidget):
             elif self.data_processing_dialog.model.secondary_reference_material == "No secondary reference material":
                 self.secondary_sample = None
 
-
         self.graph_widget = self._create_graph_widget(self.ratio)
 
         self.linear_regression_widget = self._create_linear_regression_widget()
         more_information_button_layout = self._create_more_information_buttons_layout()
 
-        self.layout.addWidget(self.ratio_selection_widget)
         self.layout.addWidget(self.linear_regression_widget)
         self.layout.addLayout(more_information_button_layout)
         more_information_button_layout.setAlignment(Qt.AlignLeft)
@@ -66,18 +64,18 @@ class DriftCorrectionWidget(QWidget):
 
         layout = QHBoxLayout()
 
-
         linear_r_squared = self.data_processing_dialog.model.linear_rsquared
         linear_adj_r_squared = self.data_processing_dialog.model.linear_rsquared_adj
+        linear_gradient = self.data_processing_dialog.model.drift_coefficient_by_ratio[self.ratio]
+        linear_gradient_st_error = self.data_processing_dialog.model.statsmodel_result.bse[1]
 
         info_layout = QVBoxLayout()
 
         explanation_text = QLabel(
             "The information below is a summary of the statistics provided from the statsmodels python package "
-            "ordinary least squares regression module. If the user suspects that the linear drift correction is not "
-            "appropriate for their data then further information about these statistics can be found by selecting the "
-            "'More information' button and asking the CAMECA 1280 operator. Any guidelines below on interpreting "
-            "these statistics come from Frost (2019)")
+            "ordinary least squares regression module. Further information about these statistics can be found by "
+            "selecting the 'Residuals and statsmodels statistics summary' button. Any guidelines below on "
+            "interpreting these statistics come from Frost (2019)")
         font_family = explanation_text.font().family()
         font = QFont(font_family, 9)
         explanation_text.setWordWrap(True)
@@ -91,25 +89,42 @@ class DriftCorrectionWidget(QWidget):
         citation_text.setFont(font_italic)
         r_squared_text = QLabel("R<sup>2</sup>: " + format(linear_r_squared, ".3f"))
         r_squared_text.setWordWrap(True)
+        r_squared_text.setFont(font)
         adj_r_squared_explanation_text = QLabel(
-            "Adjusted R<sup>2</sup> takes into account the number of terms in the model - adding more terms to multiple linear regression analysis always increases the R<sup>2</sup> value.")
+            "Adjusted R<sup>2</sup> takes into account the number of terms in the model - adding more terms to "
+            "multiple linear regression analysis always increases the R<sup>2</sup> value.")
         adj_r_squared_explanation_text.setWordWrap(True)
         adj_r_squared_explanation_text.setFont(font)
         adj_r_squared_text = QLabel("Adjusted R<sup>2</sup>: " + format(linear_adj_r_squared, ".3f"))
         adj_r_squared_text.setWordWrap(True)
+        adj_r_squared_text.setFont(font)
+        linear_gradient_value_text = QLabel("Gradient of calculated linear drift: " + "{:.3e}".format(linear_gradient))
+        linear_gradient_value_text.setWordWrap(True)
+        linear_gradient_value_text.setFont(font)
+        linear_gradient_st_error_explanation_text = QLabel("Explain the st error here")
+        linear_gradient_st_error_explanation_text.setWordWrap(True)
+        linear_gradient_st_error_explanation_text.setFont(font)
+        linear_gradient_standard_error_text = QLabel(
+            "Standard error on the gradient: " + "{:.3e}".format(linear_gradient_st_error))
+        linear_gradient_standard_error_text.setWordWrap(True)
+        linear_gradient_standard_error_text.setFont(font)
         self.no_drift_radio_button = QRadioButton("Drift correction off")
         self.drift_radio_button = QRadioButton("Linear drift correction on")
 
+        info_layout.addWidget(self.ratio_selection_widget)
         info_layout.addWidget(explanation_text, alignment=Qt.AlignTop)
         info_layout.addWidget(citation_text, alignment=Qt.AlignTop)
         info_layout.addWidget(r_squared_text, alignment=Qt.AlignTop)
         info_layout.addWidget(adj_r_squared_explanation_text, alignment=Qt.AlignTop)
         info_layout.addWidget(adj_r_squared_text, alignment=Qt.AlignTop)
+        info_layout.addWidget(linear_gradient_value_text, alignment=Qt.AlignTop)
+        info_layout.addWidget(linear_gradient_st_error_explanation_text, alignment=Qt.AlignTop)
+        info_layout.addWidget(linear_gradient_standard_error_text, alignment=Qt.AlignTop)
         info_layout.addWidget(self.no_drift_radio_button)
         info_layout.addWidget(self.drift_radio_button)
 
-        layout.addLayout(info_layout, 3.5)
-        layout.addWidget(self.graph_widget, 6.5)
+        layout.addLayout(info_layout, 4)
+        layout.addWidget(self.graph_widget, 6)
 
         linear_regression_widget.setLayout(layout)
         return linear_regression_widget
@@ -168,7 +183,7 @@ class DriftCorrectionWidget(QWidget):
         self.update_graphs(self.ratio)
 
     def on_residual_button_pushed(self):
-        dialog = ResidualsDialog(self.data_processing_dialog)
+        dialog = ResidualsDialog(self.data_processing_dialog, self.ratio)
         result = dialog.exec()
 
     def on_operators_button_pushed(self):

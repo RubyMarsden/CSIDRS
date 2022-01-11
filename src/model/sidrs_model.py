@@ -33,8 +33,9 @@ class SidrsModel:
         self.secondary_reference_material = None
         self.cycle_outlier_probability_list = []
         self.primary_rm_outlier_probability_list = []
-        self.drift_coefficient = {}
-        self.drift_y_intercept = {}
+        self.primary_rm_deltas_by_ratio = {}
+        self.drift_coefficient_by_ratio = {}
+        self.drift_y_intercept_by_ratio = {}
 
         self.method = None
 
@@ -167,53 +168,73 @@ class SidrsModel:
                 continue
 
         for ratio in self.method.ratios:
-            primary_times = []
-            primary_time_uncertainties = []
-            self.primary_deltas = []
-            primary_delta_uncertainties = []
-            for spot in primary_rm.spots:
-                if any(spot.not_corrected_deltas[ratio.delta_name]) and spot.is_flagged is False:
-                    timestamp = time.mktime(spot.datetime.timetuple())
-                    primary_times.append(timestamp)
-                    primary_time_uncertainties.append(0.1)
-                    [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                    self.primary_deltas.append(delta)
-                    primary_delta_uncertainties.append(uncertainty)
 
-            if self.primary_deltas:
-                X = sm.add_constant(primary_times)
-
-                self.statsmodel_result = sm.OLS(self.primary_deltas, X).fit()
-                print(self.statsmodel_result.summary())
-                self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = self.statsmodel_result.params
-                self.linear_rsquared = self.statsmodel_result.rsquared
-                self.linear_rsquared_adj = self.statsmodel_result.rsquared_adj
-
-                t_zero = np.median(primary_times)
-
-                if self.linear_rsquared > 0.25:
-                    print("linear fit")
-                    drift_correction_coef = float(self.drift_coefficient[ratio])
-                    drift_correction_intercept = self.drift_y_intercept[ratio]
-                    for sample in self.samples_by_name.values():
-                        for spot in sample.spots:
-                            [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                            timestamp = time.mktime(spot.datetime.timetuple())
-                            spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(x=timestamp, y=delta,
-                                                                                             dy=uncertainty,
-                                                                                             drift_coefficient=drift_correction_coef,
-                                                                                             zero_time=t_zero)
-                else:
-                    print("no fit")
-                    for sample in self.samples_by_name.values():
-                        for spot in sample.spots:
-                            spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
-
+            self.characterise_linear_drift(ratio, primary_rm.spots)
+            if ratio.name == "36S/32S":
+                self.characterise_curvilinear_drift(ratio, primary_rm.spots)
             else:
-                self.drift_y_intercept[ratio], self.drift_coefficient[ratio] = None, None
+                self.characterise_curvilinear_drift(ratio, None)
+
+            self.characterise_multiple_linear_regression(ratio, primary_rm.spots, factors=["dtfa-x", "time"])
+
+            if self.linear_rsquared > 0.25:
+                print("linear fit")
+                drift_correction_coef = float(self.drift_coefficient_by_ratio[ratio])
+                drift_correction_intercept = self.drift_y_intercept_by_ratio[ratio]
+                for sample in self.samples_by_name.values():
+                    for spot in sample.spots:
+                        [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                        timestamp = time.mktime(spot.datetime.timetuple())
+                        spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(
+                            x=timestamp, y=delta,
+                            dy=uncertainty,
+                            drift_coefficient=drift_correction_coef,
+                            zero_time=self.t_zero)
+            else:
+                print("no fit")
                 for sample in self.samples_by_name.values():
                     for spot in sample.spots:
                         spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+
+    def characterise_linear_drift(self, ratio, spots):
+        primary_times = []
+        primary_time_uncertainties = []
+        primary_deltas = []
+        primary_delta_uncertainties = []
+        for spot in spots:
+            if any(spot.not_corrected_deltas[ratio.delta_name]) and spot.is_flagged is False:
+                timestamp = time.mktime(spot.datetime.timetuple())
+                primary_times.append(timestamp)
+                primary_time_uncertainties.append(0.1)
+                [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                primary_deltas.append(delta)
+                primary_delta_uncertainties.append(uncertainty)
+
+            self.primary_rm_deltas_by_ratio[ratio] = primary_deltas
+
+        if self.primary_rm_deltas_by_ratio[ratio]:
+            X = sm.add_constant(primary_times)
+
+            self.statsmodel_result = sm.OLS(self.primary_rm_deltas_by_ratio[ratio], X).fit()
+            print(self.statsmodel_result.summary())
+            self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
+                ratio] = self.statsmodel_result.params
+            self.linear_rsquared = self.statsmodel_result.rsquared
+            self.linear_rsquared_adj = self.statsmodel_result.rsquared_adj
+
+            self.t_zero = np.median(primary_times)
+
+        else:
+            self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[ratio] = None, None
+            for sample in self.samples_by_name.values():
+                for spot in sample.spots:
+                    spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+
+    def characterise_curvilinear_drift(self, ratio, spots):
+        return
+
+    def characterise_multiple_linear_regression(self, ratio, spots, factors):
+        return
 
     def SIMS_correction_process(self):
         # This correction method is described fully in  Kita et al., 2009
@@ -224,7 +245,7 @@ class SidrsModel:
                     primary_rm = sample
 
             primary_rm_spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
-                         not spot.is_flagged and spot.drift_corrected_deltas[ratio.delta_name][0]]
+                                    not spot.is_flagged and spot.drift_corrected_deltas[ratio.delta_name][0]]
 
             if primary_rm_spot_data:
                 primary_rm_mean = np.mean(primary_rm_spot_data)
@@ -239,7 +260,7 @@ class SidrsModel:
                     data = spot.drift_corrected_deltas[ratio.delta_name]
                     if data[0]:
                         spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
-                                                                                                primary_uncertainty)
+                                                                                                 primary_uncertainty)
                     else:
                         spot.alpha_corrected_data[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
@@ -264,11 +285,13 @@ class SidrsModel:
 
         # TODO refactor this bit
 
-        self.primary_rm_values_by_ratio = reference_material_dictionary[(self.element, self.material, primary_reference_material)]
+        self.primary_rm_values_by_ratio = reference_material_dictionary[
+            (self.element, self.material, primary_reference_material)]
         if self.secondary_reference_material == "No secondary reference material":
             self.secondary_rm_values_by_ratio = None
         else:
-            self.secondary_rm_values_by_ratio = reference_material_dictionary[(self.element, self.material, primary_reference_material)]
+            self.secondary_rm_values_by_ratio = reference_material_dictionary[
+                (self.element, self.material, primary_reference_material)]
 
     def create_method_dictionary_from_isotopes(self, isotopes):
         for method in list_of_methods:
