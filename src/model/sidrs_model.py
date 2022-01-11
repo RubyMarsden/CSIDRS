@@ -6,7 +6,8 @@ import numpy as np
 # from ltsfit.lts_linefit import lts_linefit
 import statsmodels.api as sm
 
-from src.model.get_data_from_import import get_block_number_from_old_asc
+from src.model.get_data_from_import import get_block_number_from_old_asc, \
+    get_analytical_conditions_data_from_old_asc_file
 from src.model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction, \
     calculate_probability_one_outlier
 from src.model.sample import Sample
@@ -20,6 +21,7 @@ class SidrsModel:
     def __init__(self, signals):
         self.spots = []
         self.data = {}
+        self.analytical_condition_data = None
         self.samples_by_name = {}
         self.signals = signals
         self.list_of_sample_names = []
@@ -57,6 +59,10 @@ class SidrsModel:
             self.spots.append(spot)
             self.imported_files.append(filename)
 
+        filename_for_analytical_conditions = filenames[0]
+        self.analytical_condition_data = self._parse_asc_file_into_analytical_conditions_data(
+            filename_for_analytical_conditions)
+
     def _parse_asc_file_into_data(self, filename):
         with open(filename) as file:
             csv_data = csv.reader(file, delimiter='\t')
@@ -71,6 +77,20 @@ class SidrsModel:
         # In the asc file cycles are labelled blocks
         self.number_of_cycles = get_block_number_from_old_asc(data_for_spot)
         return spot
+
+    def _parse_asc_file_into_analytical_conditions_data(self, filename):
+        with open(filename) as file:
+            csv_data = csv.reader(file, delimiter='\t')
+            count = 0
+            data = []
+            for line in csv_data:
+                count += 1
+                for i in line:
+                    line[line.index(i)] = str.strip(i)
+                data.append(line)
+
+        analytical_condition_data = get_analytical_conditions_data_from_old_asc_file(data)
+        return analytical_condition_data
 
     def sample_names_from_filenames(self, filenames):
         full_sample_names = []

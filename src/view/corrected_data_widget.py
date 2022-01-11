@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem, QFileDialog
 
-from src.utils.make_csv_file import write_csv_output
+from src.utils.make_csv_file import write_csv_output, get_output_file
 from src.view.cycle_data_dialog import CycleDataDialog
 
 
@@ -33,7 +33,12 @@ class CorrectedDataWidget(QWidget):
 
         data_output_button = QPushButton("Export corrected data")
         data_output_button.clicked.connect(self.on_data_output_button_pushed)
+
+        analytical_conditions_button = QPushButton("Export analytical conditions file")
+        analytical_conditions_button.clicked.connect(self.on_analytical_conditions_button_pushed)
+
         button_layout.addWidget(data_output_button)
+        button_layout.addWidget(analytical_conditions_button)
 
         layout.addWidget(self.basic_data_table)
         layout.addLayout(button_layout)
@@ -49,7 +54,7 @@ class CorrectedDataWidget(QWidget):
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
-        output_file_name = self.get_output_file()
+        output_file_name = get_output_file()
 
         method = self.data_processing_dialog.method
 
@@ -81,12 +86,14 @@ class CorrectedDataWidget(QWidget):
             write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
             print("Exported")
 
-    def get_output_file(self):
-        return QFileDialog.getSaveFileName(self,
-                                           caption='Save CSV file',
-                                           directory="home/ruby/Documents/Programming/UWA/CSIDRS/data",
-                                           options=QFileDialog.DontUseNativeDialog
-                                           )[0]
+    def on_analytical_conditions_button_pushed(self):
+        output_file_name = get_output_file()
+        column_headers = []
+        rows = [row for row in self.data_processing_dialog.model.analytical_condition_data if row]
+
+        if output_file_name:
+            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
+            print("Exported")
 
     #############
     ### Table ###

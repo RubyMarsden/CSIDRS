@@ -2,7 +2,9 @@
 ### Getting data from old asc file ###
 ######################################
 
+ACQUISITION_PARAMETERS_LINE = 13
 DETECTOR_LINE = 25
+ANALYTICAL_PARAMETERS_LINE = 30
 DETECTOR_PARAMETERS_LINE = 62
 
 
@@ -84,6 +86,7 @@ def get_dtfa_x_and_y_from_old_asc(spot_data):
 
     return dtfa_x, dtfa_y
 
+
 def get_block_number_from_old_asc(spot_data):
     # Finding the number of blocks - this is actually the number of cycles, but is labelled blocks in the asc file.
     line_number = 113
@@ -97,3 +100,12 @@ def get_block_number_from_old_asc(spot_data):
 
     return block_number
 
+
+def get_analytical_conditions_data_from_old_asc_file(data):
+    start_line_number = ACQUISITION_PARAMETERS_LINE
+    end_line_number = 112
+    analytical_conditions_data = []
+    for i in range(start_line_number, end_line_number):
+        analytical_conditions_data.append(data[i])
+
+    return analytical_conditions_data
