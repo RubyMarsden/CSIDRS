@@ -23,6 +23,7 @@ class BasicDataCheckWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
+        self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
 
         layout = QHBoxLayout()
 
@@ -64,6 +65,8 @@ class BasicDataCheckWidget(QWidget):
     ###############
     ### Actions ###
     ###############
+    def on_sample_tree_item_changed(self, current_item, previous_tree_item):
+        self.highlight_selected_ratio_data_point(current_item, previous_tree_item)
 
     def on_cycle_data_button_pushed(self):
         dialog = CycleDataDialog(self.data_processing_dialog)
@@ -98,6 +101,40 @@ class BasicDataCheckWidget(QWidget):
                 rows.append(row)
 
         write_csv_output(headers=column_headers, rows=rows, output_file="raw_data.csv")
+
+    def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
+        if current_item is None or current_item.is_sample:
+            self.create_ion_yield_time_plot()
+            self.create_ion_distance_data_plot()
+        else:
+            current_spot = current_item.spot
+            if previous_tree_item is None or previous_tree_item.is_sample:
+                self.create_ion_yield_time_plot()
+                self.create_ion_distance_data_plot()
+                previous_spot = None
+            else:
+                previous_spot = previous_tree_item.spot
+            xs = []
+            ys = []
+            for sample in self.data_processing_dialog.samples:
+                for spot in sample.spots:
+                    ys.append(spot.secondary_ion_yield)
+                    xs.append(spot)
+
+            for x, y in zip(xs, ys):
+                sample = self.data_processing_dialog.model.samples_by_name[x.sample_name]
+                if x == current_spot:
+                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", color="yellow")
+                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", color="yellow")
+
+                if x == previous_spot:
+                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", color=sample.colour)
+                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", color=sample.colour)
+
+
+        self.canvas.draw()
+
+
 
     #############
     ### Table ###
@@ -201,15 +238,17 @@ class BasicDataCheckWidget(QWidget):
         self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[2])
 
-        self.create_ion_yield_time_plot(self.data_processing_dialog.samples, self.ion_yield_time_axis)
-        self.create_ion_distance_data_plot(self.data_processing_dialog.samples, self.ion_yield_distance_axis)
+        self.create_ion_yield_time_plot()
+        self.create_ion_distance_data_plot()
         self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
 
         widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
         return widget
 
-    def create_ion_yield_time_plot(self, samples, axis):
+    def create_ion_yield_time_plot(self):
+        axis = self.ion_yield_time_axis
+        samples = self.data_processing_dialog.samples
         axis.clear()
 
         axis.spines['top'].set_visible(False)
@@ -228,7 +267,9 @@ class BasicDataCheckWidget(QWidget):
         axis.set_ylabel("Relative secondary \n ion yield")
         plt.tight_layout()
 
-    def create_ion_distance_data_plot(self, samples, axis):
+    def create_ion_distance_data_plot(self):
+        axis = self.ion_yield_distance_axis
+        samples = self.data_processing_dialog.samples
         axis.clear()
 
         axis.spines['top'].set_visible(False)

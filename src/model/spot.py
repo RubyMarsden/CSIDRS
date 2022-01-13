@@ -20,6 +20,8 @@ class Spot:
         self.filename = filename
         parts = re.split('@|\\.|/', self.filename)
         self.full_sample_name, self.id = parts[-3], parts[-2]
+        split_sample_name = re.split('-|_', self.full_sample_name)
+        self.sample_name = split_sample_name[-1]
         # TODO change how this works - currently doesn't update
         self.mass_peak_names = mass_peak_names
 
