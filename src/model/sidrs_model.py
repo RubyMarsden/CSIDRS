@@ -34,8 +34,11 @@ class SidrsModel:
         self.cycle_outlier_probability_list = []
         self.primary_rm_outlier_probability_list = []
         self.primary_rm_deltas_by_ratio = {}
+        self.statsmodel_result_by_ratio = {}
+        self.t_zero = None
         self.drift_coefficient_by_ratio = {}
         self.drift_y_intercept_by_ratio = {}
+        self.drift_correction_type_by_ratio = {}
 
         self.method = None
 
@@ -177,52 +180,62 @@ class SidrsModel:
 
             self.characterise_multiple_linear_regression(ratio, primary_rm.spots, factors=["dtfa-x", "time"])
 
-            if self.linear_rsquared > 0.25:
-                print("linear fit")
-                drift_correction_coef = float(self.drift_coefficient_by_ratio[ratio])
-                drift_correction_intercept = self.drift_y_intercept_by_ratio[ratio]
-                for sample in self.samples_by_name.values():
-                    for spot in sample.spots:
-                        [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                        timestamp = time.mktime(spot.datetime.timetuple())
-                        spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(
-                            x=timestamp, y=delta,
-                            dy=uncertainty,
-                            drift_coefficient=drift_correction_coef,
-                            zero_time=self.t_zero)
+            if self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.NONE:
+                self.calculate_data_not_drift_corrected(ratio)
+            elif self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
+                self.correct_data_for_drift(ratio)
+            elif self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.QUAD:
+                print("Not yet it's not")
             else:
-                print("no fit")
-                for sample in self.samples_by_name.values():
-                    for spot in sample.spots:
-                        spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+                raise Exception("There is not an input valid drift type.")
+
+    def correct_data_for_drift(self, ratio):
+        drift_correction_coef = float(self.drift_coefficient_by_ratio[ratio])
+        drift_correction_intercept = self.drift_y_intercept_by_ratio[ratio]
+        for sample in self.samples_by_name.values():
+            for spot in sample.spots:
+                [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                timestamp = time.mktime(spot.datetime.timetuple())
+                spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(
+                    x=timestamp, y=delta,
+                    dy=uncertainty,
+                    drift_coefficient=drift_correction_coef,
+                    zero_time=self.t_zero)
+
+    def calculate_data_not_drift_corrected(self, ratio):
+        for sample in self.samples_by_name.values():
+            for spot in sample.spots:
+                spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
     def characterise_linear_drift(self, ratio, spots):
-        primary_times = []
-        primary_time_uncertainties = []
-        primary_deltas = []
-        primary_delta_uncertainties = []
+        times = []
+        deltas = []
+        delta_uncertainties = []
         for spot in spots:
-            if any(spot.not_corrected_deltas[ratio.delta_name]) and spot.is_flagged is False:
-                timestamp = time.mktime(spot.datetime.timetuple())
-                primary_times.append(timestamp)
-                primary_time_uncertainties.append(0.1)
+            timestamp = time.mktime(spot.datetime.timetuple())
+            if spot.standard_ratios[ratio] and spot.is_flagged is False:
                 [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                primary_deltas.append(delta)
-                primary_delta_uncertainties.append(uncertainty)
+                times.append(timestamp)
+                deltas.append(delta)
+                delta_uncertainties.append(uncertainty)
 
-            self.primary_rm_deltas_by_ratio[ratio] = primary_deltas
+            elif not spot.standard_ratios[ratio] and spot.is_flagged is False:
+                [delta, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                times.append(timestamp)
+                deltas.append(delta)
+                delta_uncertainties.append(uncertainty)
+
+        self.primary_rm_deltas_by_ratio[ratio] = deltas
 
         if self.primary_rm_deltas_by_ratio[ratio]:
-            X = sm.add_constant(primary_times)
+            X = sm.add_constant(times)
 
-            self.statsmodel_result = sm.OLS(self.primary_rm_deltas_by_ratio[ratio], X).fit()
-            print(self.statsmodel_result.summary())
+            self.statsmodel_result_by_ratio[ratio] = sm.OLS(self.primary_rm_deltas_by_ratio[ratio], X).fit()
+            print(self.statsmodel_result_by_ratio[ratio].summary())
             self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
-                ratio] = self.statsmodel_result.params
-            self.linear_rsquared = self.statsmodel_result.rsquared
-            self.linear_rsquared_adj = self.statsmodel_result.rsquared_adj
+                ratio] = self.statsmodel_result_by_ratio[ratio].params
 
-            self.t_zero = np.median(primary_times)
+            self.t_zero = np.median(times)
 
         else:
             self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[ratio] = None, None
@@ -272,6 +285,8 @@ class SidrsModel:
         self.isotopes = isotopes
         self.element = enum
         self.method = self.create_method_dictionary_from_isotopes(self.isotopes)
+        for ratio in self.method.ratios:
+            self.drift_correction_type_by_ratio[ratio] = DriftCorrectionType.NONE
 
     def _material_input(self, material):
         self.material = material

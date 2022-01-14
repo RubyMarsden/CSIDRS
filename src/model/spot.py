@@ -51,6 +51,7 @@ class Spot:
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
         self.cycle_flagging_information = {}
+        self.standard_ratios = None
         self.not_corrected_deltas = {}
         self.drift_corrected_deltas = {}
         self.alpha_corrected_data = {}
@@ -107,18 +108,18 @@ class Spot:
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet
         if element == Element.OXY:
-            standard_ratios = oxygen_isotope_reference[DeltaReferenceMaterial.VSMOW]
+            self.standard_ratios = oxygen_isotope_reference[DeltaReferenceMaterial.VSMOW]
         elif element == Element.SUL:
-            standard_ratios = sulphur_isotope_reference[DeltaReferenceMaterial.VCDT]
+            self.standard_ratios = sulphur_isotope_reference[DeltaReferenceMaterial.VCDT]
         elif element == Element.CAR:
-            standard_ratios = carbon_isotope_reference[DeltaReferenceMaterial.VPDB]
+            self.standard_ratios = carbon_isotope_reference[DeltaReferenceMaterial.VPDB]
         elif element == Element.CHL:
-            standard_ratios = chlorine_isotope_reference[DeltaReferenceMaterial.SMOC]
+            self.standard_ratios = chlorine_isotope_reference[DeltaReferenceMaterial.SMOC]
         else:
             raise Exception
 
         for ratio, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
-            standard_ratio = standard_ratios[ratio]
+            standard_ratio = self.standard_ratios[ratio]
             if standard_ratio:
                 delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
             else:
