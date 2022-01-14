@@ -18,4 +18,5 @@ class Signals(QObject):
     spotAndCycleFlagged = pyqtSignal(Spot, int, bool, Ratio)
     recalculateNewCycleData = pyqtSignal()
     recalculateNewSpotData = pyqtSignal()
+    driftCorrectionChanged = pyqtSignal(Ratio, str)
     replotAndTabulateRecalculatedData = pyqtSignal()
