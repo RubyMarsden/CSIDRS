@@ -6,6 +6,7 @@ import numpy as np
 # from ltsfit.lts_linefit import lts_linefit
 import statsmodels.api as sm
 
+from src.model.drift_correction_type import DriftCorrectionType
 from src.model.get_data_from_import import get_block_number_from_old_asc, \
     get_analytical_conditions_data_from_old_asc_file
 from src.model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction, \
@@ -49,6 +50,7 @@ class SidrsModel:
         self.signals.spotAndCycleFlagged.connect(self._remove_cycle_from_spot)
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
         self.signals.recalculateNewSpotData.connect(self.recalculate_data_with_spots_excluded)
+        self.signals.driftCorrectionChanged.connect(self.recalculate_data_with_drift_correction_changed)
 
     #################
     ### Importing ###
@@ -330,6 +332,12 @@ class SidrsModel:
         spot.exclude_cycle_information_update(cycle_number, is_flagged, ratio)
 
     def recalculate_data_with_spots_excluded(self):
+        self.drift_correction_process()
+        self.SIMS_correction_process()
+        self.signals.replotAndTabulateRecalculatedData.emit()
+
+    def recalculate_data_with_drift_correction_changed(self, ratio, drift_correction_type):
+        self.drift_correction_type_by_ratio[ratio] = drift_correction_type
         self.drift_correction_process()
         self.SIMS_correction_process()
         self.signals.replotAndTabulateRecalculatedData.emit()

@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 import matplotlib.dates as mdates
 
+from src.model.drift_correction_type import DriftCorrectionType
 from src.utils import gui_utils
 from src.view.further_MLR_dialog import FurtherMultipleLinearRegressionDialog
 from src.view.ratio_box_widget import RatioBoxWidget
@@ -44,6 +45,7 @@ class DriftCorrectionWidget(QWidget):
         self.graph_widget = self._create_graph_widget(self.ratio)
 
         self.linear_regression_widget = self._create_linear_regression_widget()
+        self.no_drift_radio_button.setChecked(True)
         more_information_button_layout = self._create_more_information_buttons_layout()
 
         self.layout.addWidget(self.linear_regression_widget)
@@ -64,10 +66,10 @@ class DriftCorrectionWidget(QWidget):
 
         layout = QHBoxLayout()
 
-        linear_r_squared = self.data_processing_dialog.model.linear_rsquared
-        linear_adj_r_squared = self.data_processing_dialog.model.linear_rsquared_adj
+        linear_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].rsquared
+        linear_adj_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].rsquared_adj
         linear_gradient = self.data_processing_dialog.model.drift_coefficient_by_ratio[self.ratio]
-        linear_gradient_st_error = self.data_processing_dialog.model.statsmodel_result.bse[1]
+        linear_gradient_st_error = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].bse[1]
 
         info_layout = QVBoxLayout()
 
@@ -109,8 +111,9 @@ class DriftCorrectionWidget(QWidget):
         linear_gradient_standard_error_text.setWordWrap(True)
         linear_gradient_standard_error_text.setFont(font)
         self.no_drift_radio_button = QRadioButton("Drift correction off")
+        self.no_drift_radio_button.toggled.connect(self.drift_type_changed)
         self.drift_radio_button = QRadioButton("Linear drift correction on")
-
+        self.drift_radio_button.toggled.connect(self.drift_type_changed)
         info_layout.addWidget(self.ratio_selection_widget)
         info_layout.addWidget(explanation_text, alignment=Qt.AlignTop)
         info_layout.addWidget(citation_text, alignment=Qt.AlignTop)
@@ -174,6 +177,12 @@ class DriftCorrectionWidget(QWidget):
     def change_ratio(self, ratio):
         self.ratio = ratio
         self.update_graphs(ratio)
+        if self.data_processing_dialog.model.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
+            self.drift_radio_button.setChecked(True)
+            self.no_drift_radio_button.setChecked(False)
+        else:
+            self.drift_radio_button.setChecked(False)
+            self.no_drift_radio_button.setChecked(True)
 
     def update_widget_contents(self):
         updated_linear_regression_widget = self._create_linear_regression_widget()
@@ -189,6 +198,16 @@ class DriftCorrectionWidget(QWidget):
     def on_operators_button_pushed(self):
         dialog = FurtherMultipleLinearRegressionDialog(self.data_processing_dialog)
         result = dialog.exec()
+
+    def drift_type_changed(self):
+        print("hi")
+        # if self.drift_radio_button.isChecked():
+        #     drift_correction_type = DriftCorrectionType.LIN
+        # else:
+        #     drift_correction_type = DriftCorrectionType.NONE
+        #
+        # self.data_processing_dialog.model.signals.driftCorrectionChanged.emit(self.ratio, drift_correction_type)
+
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         if current_item is None or current_item.is_sample:
