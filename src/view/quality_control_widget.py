@@ -2,7 +2,6 @@ import matplotlib
 import matplotlib.dates as mdates
 import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
 from src.utils import gui_utils
@@ -21,12 +20,12 @@ class QualityControlWidget(QWidget):
         self.samples = data_processing_dialog.samples
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
-
+        self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_graph_tabs)
 
         layout = QVBoxLayout()
 
-        graph_widget = self._create_graph_tab_widget(self.ratio)
+        graph_widget = self._create_graph_tab_widget()
         self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                     self.data_processing_dialog.model.signals)
 
@@ -37,7 +36,7 @@ class QualityControlWidget(QWidget):
 
         self.setLayout(layout)
 
-    def _create_graph_tab_widget(self, ratio):
+    def _create_graph_tab_widget(self):
         # self.fig = plt.figure()
         #
         # self.delta_vs_time_axis = self.fig.add_subplot()
@@ -281,6 +280,8 @@ class QualityControlWidget(QWidget):
     ###############
     ### Actions ###
     ###############
+    def on_sample_tree_item_changed(self, current_item, previous_tree_item):
+        self.highlight_selected_ratio_data_point(current_item, previous_tree_item)
 
     def change_ratio(self, ratio):
         self.ratio = ratio
@@ -300,3 +301,6 @@ class QualityControlWidget(QWidget):
         self.distance_canvas.draw()
         self.dtfa_x_canvas.draw()
         self.dtfa_y_canvas.draw()
+
+    def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
+        return
