@@ -52,6 +52,7 @@ class Spot:
         self.outlier_bounds = {}
         self.cycle_flagging_information = {}
         self.standard_ratios = None
+        self.drift_corrected_ratio_values_by_ratio = {}
         self.not_corrected_deltas = {}
         self.drift_corrected_deltas = {}
         self.alpha_corrected_data = {}

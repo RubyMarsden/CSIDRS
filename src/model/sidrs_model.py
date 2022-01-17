@@ -49,7 +49,7 @@ class SidrsModel:
         self.signals.referenceMaterialsInput.connect(self._reference_material_tag_samples)
         self.signals.spotAndCycleFlagged.connect(self._remove_cycle_from_spot)
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
-        self.signals.recalculateNewSpotData.connect(self.recalculate_data_with_spots_excluded)
+        self.signals.recalculateNewSpotData.connect(self.recalculate_data)
         self.signals.driftCorrectionChanged.connect(self.recalculate_data_with_drift_correction_changed)
 
     #################
@@ -196,13 +196,23 @@ class SidrsModel:
         drift_correction_intercept = self.drift_y_intercept_by_ratio[ratio]
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
-                [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                timestamp = time.mktime(spot.datetime.timetuple())
-                spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(
-                    x=timestamp, y=delta,
-                    dy=uncertainty,
-                    drift_coefficient=drift_correction_coef,
-                    zero_time=self.t_zero)
+                if spot.standard_ratios[ratio]:
+                    [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                    timestamp = time.mktime(spot.datetime.timetuple())
+                    spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(
+                        x=timestamp, y=delta,
+                        dy=uncertainty,
+                        drift_coefficient=drift_correction_coef,
+                        zero_time=self.t_zero)
+                else:
+                    [ratio_value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                    timestamp = time.mktime(spot.datetime.timetuple())
+                    spot.drift_corrected_ratio_values_by_ratio[ratio] = drift_correction(
+                        x=timestamp,
+                        y=ratio_value,
+                        dy=uncertainty,
+                        drift_coefficient=drift_correction_coef,
+                        zero_time=self.t_zero)
 
     def calculate_data_not_drift_corrected(self, ratio):
         for sample in self.samples_by_name.values():
@@ -260,7 +270,7 @@ class SidrsModel:
                     primary_rm = sample
 
             primary_rm_spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
-                                    not spot.is_flagged and spot.drift_corrected_deltas[ratio.delta_name][0]]
+                                    not spot.is_flagged and spot.standard_ratios[ratio]]
 
             if primary_rm_spot_data:
                 primary_rm_mean = np.mean(primary_rm_spot_data)
@@ -331,13 +341,11 @@ class SidrsModel:
     def _remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
         spot.exclude_cycle_information_update(cycle_number, is_flagged, ratio)
 
-    def recalculate_data_with_spots_excluded(self):
+    def recalculate_data(self):
         self.drift_correction_process()
         self.SIMS_correction_process()
         self.signals.replotAndTabulateRecalculatedData.emit()
 
     def recalculate_data_with_drift_correction_changed(self, ratio, drift_correction_type):
         self.drift_correction_type_by_ratio[ratio] = drift_correction_type
-        self.drift_correction_process()
-        self.SIMS_correction_process()
-        self.signals.replotAndTabulateRecalculatedData.emit()
+        self.recalculate_data()

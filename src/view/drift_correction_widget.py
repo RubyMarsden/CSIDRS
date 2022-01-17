@@ -185,10 +185,11 @@ class DriftCorrectionWidget(QWidget):
             self.no_drift_radio_button.setChecked(True)
 
     def update_widget_contents(self):
+        print("Drift correction widget")
         updated_linear_regression_widget = self._create_linear_regression_widget()
-        self.layout.replaceWidget(self.linear_regression_widget, updated_linear_regression_widget)
-        self.layout.removeWidget(self.linear_regression_widget)
-        self.linear_regression_widget = updated_linear_regression_widget
+        #self.layout.replaceWidget(self.linear_regression_widget, updated_linear_regression_widget)
+        #self.layout.removeWidget(self.linear_regression_widget)
+        #self.linear_regression_widget = updated_linear_regression_widget
         self.update_graphs(self.ratio)
 
     def on_residual_button_pushed(self):
@@ -200,14 +201,12 @@ class DriftCorrectionWidget(QWidget):
         result = dialog.exec()
 
     def drift_type_changed(self):
-        print("hi")
-        # if self.drift_radio_button.isChecked():
-        #     drift_correction_type = DriftCorrectionType.LIN
-        # else:
-        #     drift_correction_type = DriftCorrectionType.NONE
-        #
-        # self.data_processing_dialog.model.signals.driftCorrectionChanged.emit(self.ratio, drift_correction_type)
+        if self.drift_radio_button.isChecked():
+            drift_correction_type = DriftCorrectionType.LIN
+        else:
+            drift_correction_type = DriftCorrectionType.NONE
 
+        self.data_processing_dialog.model.signals.driftCorrectionChanged.emit(self.ratio, drift_correction_type)
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         if current_item is None or current_item.is_sample:
