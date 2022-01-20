@@ -288,7 +288,6 @@ class QualityControlWidget(QWidget):
         self.update_graph_tabs()
 
     def update_graph_tabs(self):
-        print("Quality control")
         self._create_delta_vs_time_graph(self.ratio)
         self._create_x_y_position_graph()
         self._create_delta_vs_secondary_ion_yield_graph(self.ratio)

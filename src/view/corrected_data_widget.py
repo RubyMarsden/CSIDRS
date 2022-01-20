@@ -188,6 +188,5 @@ class CorrectedDataWidget(QWidget):
         self.basic_data_table.resizeColumnsToContents()
 
     def update_basic_table(self):
-        print("Corrected data")
         self.basic_data_table.clearContents()
         self._populate_basic_table()

@@ -77,7 +77,7 @@ class ResidualsDialog(QDialog):
 
         layout.addWidget(summary_explanation_text)
 
-        summary = self.data_processing_dialog.model.statsmodel_result_by_ratio.summary()
+        summary = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].summary()
         summary_iterable = str(summary).splitlines()
 
         for line in summary_iterable:
@@ -103,7 +103,7 @@ class ResidualsDialog(QDialog):
         self.residuals_axis.set_title("Residuals", loc="left")
         self.residuals_axis.spines['top'].set_visible(False)
         self.residuals_axis.spines['right'].set_visible(False)
-        predicted_values = self.data_processing_dialog.model.statsmodel_result_by_ratio.predict()
+        predicted_values = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].predict()
         true_values = self.data_processing_dialog.model.primary_rm_deltas_by_ratio[self.ratio]
         residuals = true_values - predicted_values
 
