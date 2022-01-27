@@ -12,7 +12,8 @@ from src.model.get_data_from_import import get_data_from_old_asc, get_primary_be
     get_dtfa_x_and_y_from_old_asc
 from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
     carbon_isotope_reference, chlorine_isotope_reference
-from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time
+from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
+    convert_to_twenty_four_hour_time_am
 
 
 class Spot:
@@ -30,9 +31,9 @@ class Spot:
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
         # TODO - what happens at midnight?
         if self.twelve_hr_data == "AM":
-            self.twenty_four_hour_time = self.time
+            self.twenty_four_hour_time = convert_to_twenty_four_hour_time_am(self.time)
         elif self.twelve_hr_data == "PM":
-            self.twenty_four_hour_time = convert_to_twenty_four_hour_time(self.time)
+            self.twenty_four_hour_time = convert_to_twenty_four_hour_time_pm(self.time)
         self.datetime = datetime.strptime(self.date + " " + self.twenty_four_hour_time, "%d/%m/%Y %H:%M")
 
         self.x_position = int(spot_data[X_POSITION_INDEX[0]][X_POSITION_INDEX[1]])
