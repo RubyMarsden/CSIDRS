@@ -109,13 +109,11 @@ class SidrsModel:
         split_names = [re.split('-|_', full_sample_name) for full_sample_name in full_sample_names]
 
         # TODO - at the end remove the self
-        print(split_names)
         self.sample_names = []
         for i in range(len(split_names)):
             if split_names[i - 1][-1] != split_names[i][-1]:
                 self.sample_names.append(split_names[i][-1])
         self.signals.sampleNamesUpdated.emit(self.sample_names)
-        print(self.sample_names)
 
     def _create_samples_from_sample_names(self, spots):
         for sample_name in self.list_of_sample_names:
