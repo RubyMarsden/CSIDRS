@@ -134,7 +134,7 @@ class CycleDataDialog(QDialog):
         self.data_processing_dialog.model.signals.recalculateNewCycleData.emit()
 
     def on_export_cycle_data_button_pushed(self):
-        output_file_name = get_output_file()
+        output_file_name = get_output_file("cycle_data")
 
         method = self.data_processing_dialog.method
 

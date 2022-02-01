@@ -54,7 +54,7 @@ class CorrectedDataWidget(QWidget):
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
-        output_file_name = get_output_file()
+        output_file_name = get_output_file("corrected_data")
 
         method = self.data_processing_dialog.method
 
@@ -101,7 +101,7 @@ class CorrectedDataWidget(QWidget):
             print("Exported")
 
     def on_analytical_conditions_button_pushed(self):
-        output_file_name = get_output_file()
+        output_file_name = get_output_file("analytical_data")
         column_headers = []
         rows = [row for row in self.data_processing_dialog.model.analytical_condition_data if row]
 

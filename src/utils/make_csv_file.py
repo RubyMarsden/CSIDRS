@@ -1,5 +1,6 @@
 import csv
 
+from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import QFileDialog
 
 CSV_DELIMITER = ","
@@ -12,8 +13,10 @@ def write_csv_output(headers, rows, output_file) -> None:
         for row in rows:
             writer.writerow(row)
 
-def get_output_file():
+def get_output_file(save_filename):
+    directory = QDir.currentPath()
     return QFileDialog.getSaveFileName(caption='Save CSV file',
-                                       directory="home/ruby/Documents/Programming/UWA/CSIDRS/data",
+                                       directory=str(directory + "/" + save_filename + ".csv"),
+                                       filter=".csv",
                                        options=QFileDialog.DontUseNativeDialog
                                        )[0]

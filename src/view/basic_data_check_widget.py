@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTab
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
-from src.utils.make_csv_file import write_csv_output
+from src.utils.make_csv_file import write_csv_output, get_output_file
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
@@ -75,6 +75,8 @@ class BasicDataCheckWidget(QWidget):
     def on_data_output_button_pushed(self):
         method = self.data_processing_dialog.method
 
+        output_file_name = get_output_file("raw_data")
+
         column_headers = ["Sample name"]
         for ratio in method.ratios:
             column_headers.append(ratio.delta_name)
@@ -100,7 +102,8 @@ class BasicDataCheckWidget(QWidget):
 
                 rows.append(row)
 
-        write_csv_output(headers=column_headers, rows=rows, output_file="raw_data.csv")
+        if output_file_name:
+            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         if current_item is None or current_item.is_sample:
