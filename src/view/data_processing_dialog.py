@@ -12,7 +12,6 @@ class DataProcessingDialog(QDialog):
         QDialog.__init__(self)
 
         self.model = model
-
         self.samples = model.samples_by_name.values()
         self.sample_tree = SampleTreeWidget(self)
 
@@ -31,7 +30,6 @@ class DataProcessingDialog(QDialog):
 
     def _create_right_layout(self):
         layout = QVBoxLayout()
-        button_layout = QHBoxLayout()
 
         self.sample_tree.set_samples(self.samples)
         self.sample_tree.select_first_spot()
