@@ -1,8 +1,7 @@
-from PyQt5.QtWidgets import QDialog, QLayout, QVBoxLayout, QPushButton, QHBoxLayout, QTreeWidget, QTabWidget
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTabWidget
 
 from src.view.basic_data_check_widget import BasicDataCheckWidget
 from src.view.corrected_data_widget import CorrectedDataWidget
-from src.view.cycle_data_dialog import CycleDataDialog
 from src.view.drift_correction_widget import DriftCorrectionWidget
 from src.view.quality_control_widget import QualityControlWidget
 from src.view.sample_tree import SampleTreeWidget
@@ -37,14 +36,7 @@ class DataProcessingDialog(QDialog):
         self.sample_tree.set_samples(self.samples)
         self.sample_tree.select_first_spot()
 
-        next_button = QPushButton("Next")
-        back_button = QPushButton("Back")
-
-        button_layout.addWidget(back_button)
-        button_layout.addWidget(next_button)
-
         layout.addWidget(self.sample_tree)
-        layout.addLayout(button_layout)
         return layout
 
     def _create_left_layout(self):
