@@ -19,6 +19,8 @@ class ResidualsDialog(QDialog):
         # Create the ratio selection button here - because the button must exist before ratio can change.
         self.ratio_selection_widget = self._create_ratio_selection_widget()
 
+        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+
         layout = QVBoxLayout()
         layout.addWidget(self.ratio_selection_widget)
 
@@ -79,13 +81,14 @@ class ResidualsDialog(QDialog):
 
         summary = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].summary()
         summary_iterable = str(summary).splitlines()
-
+        self.summary_line_labels = []
         for line in summary_iterable:
             print(line)
             h_layout = QHBoxLayout()
             for item in line.split():
                 q_item = QLabel(item)
                 q_item.setFont(font)
+                self.summary_line_labels.append(q_item)
                 h_layout.addWidget(q_item)
             h_layout.setAlignment(Qt.AlignCenter)
             layout.addLayout(h_layout)
@@ -113,3 +116,14 @@ class ResidualsDialog(QDialog):
         self.residuals_axis.set_ylabel("Residuals")
 
         plt.tight_layout()
+
+
+    ###############
+    ### Actions ###
+    ###############
+
+    def change_ratio(self, ratio):
+        self.ratio = ratio
+        self._create_residuals_graph()
+        self.canvas.draw()
+        print("Change how the text works")
