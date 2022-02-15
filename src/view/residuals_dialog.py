@@ -83,11 +83,16 @@ class ResidualsDialog(QDialog):
         summary_iterable = str(summary).splitlines()
         self.summary_line_labels = []
         for line in summary_iterable:
-            print(line)
             h_layout = QHBoxLayout()
             for item in line.split():
-                q_item = QLabel(item)
-                q_item.setFont(font)
+                if item[0] == "=":
+                    q_item = QFrame()
+                    q_item.setFrameShape(QFrame.HLine)
+                    q_item.setLineWidth(1)
+                    q_item.setMinimumWidth(150)
+                else:
+                    q_item = QLabel(item)
+                    q_item.setFont(font)
                 self.summary_line_labels.append(q_item)
                 h_layout.addWidget(q_item)
             h_layout.setAlignment(Qt.AlignCenter)
@@ -116,7 +121,6 @@ class ResidualsDialog(QDialog):
         self.residuals_axis.set_ylabel("Residuals")
 
         plt.tight_layout()
-
 
     ###############
     ### Actions ###
