@@ -98,7 +98,6 @@ class CorrectedDataWidget(QWidget):
                 rows.append(row)
         if output_file_name:
             write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
-            print("Exported")
 
     def on_analytical_conditions_button_pushed(self):
         output_file_name = get_output_file("analytical_data")
@@ -107,7 +106,6 @@ class CorrectedDataWidget(QWidget):
 
         if output_file_name:
             write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
-            print("Exported")
 
     #############
     ### Table ###

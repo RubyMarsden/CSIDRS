@@ -1,3 +1,5 @@
+import time
+
 import matplotlib
 import matplotlib.dates as mdates
 import numpy as np
@@ -29,7 +31,7 @@ class QualityControlWidget(QWidget):
         self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                     self.data_processing_dialog.model.signals)
 
-        self.ratio_radiobox_widget.set_ratio(self.ratio)
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(graph_widget)
@@ -285,6 +287,7 @@ class QualityControlWidget(QWidget):
 
     def change_ratio(self, ratio):
         self.ratio = ratio
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
         self.update_graph_tabs()
 
     def update_graph_tabs(self):

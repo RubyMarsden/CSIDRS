@@ -68,7 +68,7 @@ class DriftCorrectionWidget(QWidget):
     def _create_ratio_selection_widget(self):
         self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                     self.data_processing_dialog.model.signals)
-        self.ratio_radiobox_widget.set_ratio(self.ratio)
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         return self.ratio_radiobox_widget
 
@@ -183,9 +183,7 @@ class DriftCorrectionWidget(QWidget):
 
     def change_ratio(self, ratio):
         self.ratio = ratio
-        self.ratio_radiobox_widget.blockSignals(True)
-        self.ratio_radiobox_widget.set_ratio(self.ratio)
-        self.ratio_radiobox_widget.blockSignals(False)
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
 
         self.update_widget_contents()
         if self.data_processing_dialog.model.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:

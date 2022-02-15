@@ -152,8 +152,6 @@ class SidrsModel:
 
         self.cycle_outlier_probability_list = [calculate_probability_one_outlier(self.number_of_cycles)]
         self.primary_rm_outlier_probability_list = [calculate_probability_one_outlier(number_of_primary_rm_spots)]
-        print(self.cycle_outlier_probability_list)
-        print(self.primary_rm_outlier_probability_list)
 
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
@@ -242,7 +240,6 @@ class SidrsModel:
             X = sm.add_constant(times)
 
             self.statsmodel_result_by_ratio[ratio] = sm.OLS(self.primary_rm_deltas_by_ratio[ratio], X).fit()
-            print(self.statsmodel_result_by_ratio[ratio].summary())
             self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
                 ratio] = self.statsmodel_result_by_ratio[ratio].params
 

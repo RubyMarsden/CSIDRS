@@ -1,3 +1,5 @@
+import time
+
 import matplotlib
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QTreeWidgetItem, QTreeWidget, \
     QPushButton, QDialogButtonBox
@@ -54,7 +56,7 @@ class CycleDataDialog(QDialog):
         self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                self.data_processing_dialog.model.signals)
 
-        self.ratio_box_widget.set_ratio(self.ratio)
+        self.ratio_box_widget.set_ratio(self.ratio, block_signal=False)
 
         layout.addLayout(self._create_title_bar())
         layout.addWidget(self.ratio_box_widget)
@@ -172,7 +174,6 @@ class CycleDataDialog(QDialog):
 
         if output_file_name:
             write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
-            print("Exported")
 
     ################
     ### Plotting ###

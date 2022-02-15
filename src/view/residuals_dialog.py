@@ -1,3 +1,5 @@
+import time
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QWidget, QLabel, QVBoxLayout, QFrame
@@ -36,7 +38,7 @@ class ResidualsDialog(QDialog):
     def _create_ratio_selection_widget(self):
         self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                     self.data_processing_dialog.model.signals)
-        self.ratio_radiobox_widget.set_ratio(self.ratio)
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         return self.ratio_radiobox_widget
 
@@ -130,4 +132,3 @@ class ResidualsDialog(QDialog):
         self.ratio = ratio
         self._create_residuals_graph()
         self.canvas.draw()
-        print("Change how the text works")
