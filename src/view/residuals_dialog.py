@@ -85,20 +85,18 @@ class ResidualsDialog(QDialog):
         summary_iterable = str(summary).splitlines()
         self.summary_line_labels = []
         for line in summary_iterable:
-            h_layout = QHBoxLayout()
-            for item in line.split():
-                if item[0] == "=":
-                    q_item = QFrame()
-                    q_item.setFrameShape(QFrame.HLine)
-                    q_item.setLineWidth(1)
-                    q_item.setMinimumWidth(150)
-                else:
-                    q_item = QLabel(item)
-                    q_item.setFont(font)
-                self.summary_line_labels.append(q_item)
-                h_layout.addWidget(q_item)
-            h_layout.setAlignment(Qt.AlignCenter)
-            layout.addLayout(h_layout)
+            if line and line[0] == "=":
+                q_item = QFrame()
+                q_item.setFrameShape(QFrame.HLine)
+                q_item.setLineWidth(1)
+                q_item.setMinimumWidth(150)
+            else:
+                q_item = QLabel(line)
+                q_item.setFont(font)
+                q_item.setAlignment(Qt.AlignCenter)
+
+            self.summary_line_labels.append(q_item)
+            layout.addWidget(q_item)
 
         regression_results_widget.setLayout(layout)
 
@@ -132,3 +130,12 @@ class ResidualsDialog(QDialog):
         self.ratio = ratio
         self._create_residuals_graph()
         self.canvas.draw()
+        self.reallocate_label_text()
+
+    def reallocate_label_text(self):
+        summary = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].summary()
+        summary_iterable = str(summary).splitlines()
+
+        for (q_widget, line) in zip(self.summary_line_labels, summary_iterable):
+            if line and line[0] != "=":
+                q_widget.setText(line)

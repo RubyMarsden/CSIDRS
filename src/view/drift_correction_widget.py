@@ -25,7 +25,7 @@ class DriftCorrectionWidget(QWidget):
         self.ratio = self.data_processing_dialog.method.ratios[0]
 
         # Create the ratio selection button here - because the button must exist before ratio can change.
-        self.ratio_selection_widget = self._create_ratio_selection_widget()
+        self._create_ratio_selection_widget()
 
         self.drift_coefficient = self.data_processing_dialog.model.drift_coefficient_by_ratio
         self.drift_intercept = self.data_processing_dialog.model.drift_y_intercept_by_ratio
@@ -56,7 +56,7 @@ class DriftCorrectionWidget(QWidget):
         self.no_drift_radio_button.setChecked(True)
         more_information_button_layout = self._create_more_information_buttons_layout()
 
-        self.layout.addWidget(self.ratio_selection_widget)
+        self.layout.addWidget(self.ratio_radiobox_widget)
         self.layout.addLayout(self.linear_regression_layout)
         self.layout.addWidget(self.no_drift_radio_button)
         self.layout.addWidget(self.drift_radio_button)
