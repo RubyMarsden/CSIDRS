@@ -242,11 +242,30 @@ class DriftCorrectionWidget(QWidget):
                 primary_ys.append(spot.not_corrected_deltas[self.ratio.delta_name][0])
                 primary_xs.append(spot)
 
-            secondary_xs = []
-            secondary_ys = []
-            for spot in self.secondary_sample.spots:
-                secondary_ys.append(spot.not_corrected_deltas[self.ratio.delta_name][0])
-                secondary_xs.append(spot)
+            if self.secondary_sample:
+                secondary_xs = []
+                secondary_ys = []
+                for spot in self.secondary_sample.spots:
+                    secondary_ys.append(spot.not_corrected_deltas[self.ratio.delta_name][0])
+                    secondary_xs.append(spot)
+
+                for secondary_x, secondary_y in zip(secondary_xs, secondary_ys):
+                    if secondary_x == current_spot:
+                        if current_spot.is_flagged:
+                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                                                               markerfacecolor=None, markeredgecolor="yellow")
+                        else:
+                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                                                               color="yellow")
+
+                    if secondary_x == previous_spot:
+                        if current_spot.is_flagged:
+                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                                                               markerfacecolor=None,
+                                                               markeredgecolor=self.secondary_sample.colour)
+                        else:
+                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                                                               color=self.secondary_sample.colour)
 
             for primary_x, primary_y in zip(primary_xs, primary_ys):
                 if primary_x == current_spot:
@@ -255,24 +274,6 @@ class DriftCorrectionWidget(QWidget):
                 if primary_x == previous_spot:
                     self.primary_drift_axis.errorbar(primary_x.datetime, primary_y, ls="", marker="o",
                                                      color=self.primary_sample.colour)
-
-            for secondary_x, secondary_y in zip(secondary_xs, secondary_ys):
-                if secondary_x == current_spot:
-                    if current_spot.is_flagged:
-                        self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
-                                                           markerfacecolor=None, markeredgecolor="yellow")
-                    else:
-                        self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
-                                                           color="yellow")
-
-                if secondary_x == previous_spot:
-                    if current_spot.is_flagged:
-                        self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
-                                                           markerfacecolor=None,
-                                                           markeredgecolor=self.secondary_sample.colour)
-                    else:
-                        self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
-                                                           color=self.secondary_sample.colour)
 
         self.canvas.draw()
 
@@ -401,5 +402,6 @@ class DriftCorrectionWidget(QWidget):
 
             self.secondary_check_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
-        self.secondary_check_axis.legend(loc="upper right", bbox_to_anchor=(1, 1.7))
+        if self.secondary_sample:
+            self.secondary_check_axis.legend(loc="upper right", bbox_to_anchor=(1, 1.7))
         plt.tight_layout()
