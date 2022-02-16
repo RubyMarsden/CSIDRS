@@ -127,17 +127,16 @@ class BasicDataCheckWidget(QWidget):
             for x, y in zip(xs, ys):
                 sample = self.data_processing_dialog.model.samples_by_name[x.sample_name]
                 if x == current_spot:
-                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", color="yellow")
-                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", color="yellow")
+                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", markersize=4,
+                                                      color="yellow")
+                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color="yellow")
 
                 if x == previous_spot:
-                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", color=sample.colour)
-                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", color=sample.colour)
-
+                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", markersize=4,
+                                                      color=sample.colour)
+                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color=sample.colour)
 
         self.canvas.draw()
-
-
 
     #############
     ### Table ###
