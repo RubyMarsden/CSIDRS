@@ -38,12 +38,12 @@ class CycleDataDialog(QDialog):
 
         layout = QHBoxLayout()
         right_layout = self._create_right_widget()
-        layout.addLayout(self._create_left_widget())
+        left_layout = self._create_left_widget()
+        layout.addLayout(left_layout)
         layout.addLayout(right_layout)
 
         self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.update_graphs(
-            self.sample_tree.current_spot(),
-            self.ratio))
+            self.sample_tree.current_spot()))
         self.sample_tree.tree.currentItemChanged.connect(
             lambda x, y: self.cycle_tree.set_cycles(self.sample_tree.current_spot(), self.ratio))
 
@@ -51,12 +51,12 @@ class CycleDataDialog(QDialog):
 
         self.setLayout(layout)
 
+        self.ratio_box_widget.set_ratio(self.ratio, block_signal=True)
+
     def _create_left_widget(self):
         layout = QVBoxLayout()
         self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                self.data_processing_dialog.model.signals)
-
-        self.ratio_box_widget.set_ratio(self.ratio, block_signal=False)
 
         layout.addLayout(self._create_title_bar())
         layout.addWidget(self.ratio_box_widget)
@@ -109,24 +109,20 @@ class CycleDataDialog(QDialog):
     ### Actions ###
     ###############
 
-    def update_graphs(self, spot, ratio):
-        try:
-            self.counts_axis.clear()
-            self.counts_axis2.clear()
-            self.ratios_axis.clear()
-        except AttributeError:
-            pass
-        else:
+    def update_graphs(self, spot):
+        self.counts_axis.clear()
+        self.counts_axis2.clear()
+        self.ratio_axis.clear()
 
-            if spot is not None:
-                self.create_counts_plot(spot, self.counts_axis, self.counts_axis2, ratio)
-                self.create_ratio_plot(spot, self.ratios_axis, ratio)
+        if spot:
+            self.create_counts_plot(spot)
+            self.create_ratio_plot(spot)
 
-            self.canvas.draw()
+        self.canvas.draw()
 
     def change_ratio(self, ratio):
         self.ratio = ratio
-        self.update_graphs(self.sample_tree.current_spot(), ratio)
+        self.update_graphs(self.sample_tree.current_spot())
 
     def on_cycle_flagged(self, cycle_number, is_flagged):
         self.data_processing_dialog.model.signals.spotAndCycleFlagged.emit(self.sample_tree.current_spot(),
@@ -188,101 +184,90 @@ class CycleDataDialog(QDialog):
         self.spot_visible_grid_spec = GridSpec(2, 1)
         self.counts_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.counts_axis2 = self.counts_axis.twinx()
-        self.ratios_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
-
-        self.create_counts_plot(self.sample_tree.current_spot(), self.counts_axis, self.counts_axis2, self.ratio)
-        self.create_ratio_plot(self.sample_tree.current_spot(), self.ratios_axis, self.ratio)
+        self.ratio_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
-
         layout.addWidget(graph_widget)
-
         graph.setLayout(layout)
+
+        current_spot = self.sample_tree.current_spot()
+        self.create_counts_plot(current_spot)
+        self.create_ratio_plot(current_spot)
 
         return graph
 
-    def create_counts_plot(self, spot, axis, axis2, ratio):
-        plt.cla()
-        axis.clear()
-        axis2.clear()
+    def create_counts_plot(self, spot):
+        # self.counts_axis.spines['top'].set_visible(False)
+        # self.counts_axis.spines['right'].set_visible(False)
 
-        axis.spines['top'].set_visible(False)
-        axis.spines['right'].set_visible(False)
-
-        y1s = spot.mass_peaks[ratio.numerator].detector_corrected_cps_data
-        y2s = spot.mass_peaks[ratio.denominator].detector_corrected_cps_data
+        y1s = spot.mass_peaks[self.ratio.numerator].detector_corrected_cps_data
+        y2s = spot.mass_peaks[self.ratio.denominator].detector_corrected_cps_data
 
         x1s = range(1, 1 + len(y1s))
         x2s = range(1, 1 + len(y2s))
 
-        axis.plot(x1s, y1s, ls="", marker="x", color="red")
-        axis2.plot(x2s, y2s, ls="", marker="+", color="black")
+        self.counts_axis.plot(x1s, y1s, ls="", marker="x", color="red")
+        self.counts_axis2.plot(x2s, y2s, ls="", marker="+", color="black")
 
-        axis.set_xlabel("Cycle")
-        axis.set_ylabel("Counts per second")
-        plt.xticks(x1s, x1s)
-        axis.set_xticks(x1s)
-        plt.setp(axis.get_xticklabels(), visible=True)
-        plt.autoscale(enable=True, axis='y')
-        plt.tight_layout()
+        self.counts_axis.set_xlabel("Cycle")
+        self.counts_axis.set_ylabel("Counts per second")
+        # self.counts_axis.set_xticks(x1s)
+        # self.counts_axis.autoscale(enable=True, axis='y')
+        self.fig.tight_layout()
 
-    def create_ratio_plot(self, spot, ratio_axis, ratio):
-        # TODO - add method to this section
-        ratio_axis.clear()
-        ratio_axis.spines['top'].set_visible(False)
-        ratio_axis.spines['right'].set_visible(False)
+    def create_ratio_plot(self, spot):
+        # self.ratio_axis.spines['top'].set_visible(False)
+        # self.ratio_axis.spines['right'].set_visible(False)
 
-        ratio_axis.set_ylabel(ratio.name)
-        ys = spot.raw_isotope_ratios[ratio]
+        self.ratio_axis.set_ylabel(self.ratio.name)
+        self.ratio_axis.set_xlabel("Cycle")
+
+        ys = spot.raw_isotope_ratios[self.ratio]
         xs = list(range(1, 1 + len(ys)))
 
         for x, y in zip(xs, ys):
-            if y in spot.outliers_removed_from_raw_data[ratio]:
-                ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
+            if y in spot.outliers_removed_from_raw_data[self.ratio]:
+                self.ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
             else:
-                ratio_axis.plot(x, y, ls="", marker="o", color="navy")
-        ratio_axis.set_xlabel("Cycle")
+                self.ratio_axis.plot(x, y, ls="", marker="o", color="navy")
 
-        mean, two_st_error = spot.mean_two_st_error_isotope_ratios[ratio]
-        plt.axhline(y=mean)
+        # mean, two_st_error = spot.mean_two_st_error_isotope_ratios[self.ratio]
+        # self.ratio_axis.axhline(y=mean)
+        #
+        # (outlier_minimum, outlier_maximum) = spot.outlier_bounds[self.ratio]
+        # outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
+        # outlier_rectangle.set_color("lightblue")
+        # self.ratio_axis.add_patch(outlier_rectangle)
+        #
+        # st_error_rectangle = Rectangle((0, mean - two_st_error), len(xs) + 1, 2 * two_st_error)
+        # st_error_rectangle.set_color("cornflowerblue")
+        # self.ratio_axis.add_patch(st_error_rectangle)
 
-        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[ratio]
-        outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
-
-        outlier_rectangle.set_color("lightblue")
-
-        ratio_axis.add_patch(outlier_rectangle)
-
-        st_error_rectangle = Rectangle((0, mean - two_st_error), len(xs) + 1, 2 * two_st_error)
-        st_error_rectangle.set_color("cornflowerblue")
-
-        ratio_axis.add_patch(st_error_rectangle)
-
-        plt.xticks(xs, xs)
-        plt.tight_layout()
+        # self.ratio_axis.set_xticks(xs)
+        self.fig.tight_layout()
 
     ###############
     ### Actions ###
     ###############
 
     def on_cycle_tree_item_changed(self, cycle_number, previous_cycle_number):
-        self.highlight_selected_ratio_data_point(self.sample_tree.current_spot(), self.ratios_axis, self.ratio,
-                                                 cycle_number, previous_cycle_number)
+        # self.highlight_selected_ratio_data_point(self.sample_tree.current_spot(), cycle_number, previous_cycle_number)
+        pass
 
-    def highlight_selected_ratio_data_point(self, spot, ratio_axis, ratio, cycle_number, previous_cycle_number):
-        ys = spot.raw_isotope_ratios[ratio]
+    def highlight_selected_ratio_data_point(self, spot, cycle_number, previous_cycle_number):
+        ys = spot.raw_isotope_ratios[self.ratio]
         xs = list(range(1, 1 + len(ys)))
 
         for x, y in zip(xs, ys):
             if x == cycle_number:
-                if y in spot.outliers_removed_from_raw_data[ratio]:
-                    ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="yellow")
+                if y in spot.outliers_removed_from_raw_data[self.ratio]:
+                    self.ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="yellow")
                 else:
-                    ratio_axis.plot(x, y, ls="", marker="o", color="yellow")
+                    self.ratio_axis.plot(x, y, ls="", marker="o", color="yellow")
 
             if x == previous_cycle_number:
-                if y in spot.outliers_removed_from_raw_data[ratio]:
-                    ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
+                if y in spot.outliers_removed_from_raw_data[self.ratio]:
+                    self.ratio_axis.plot(x, y, ls="", marker="o", markerfacecolor="none", markeredgecolor="navy")
                 else:
-                    ratio_axis.plot(x, y, ls="", marker="o", color="navy")
+                    self.ratio_axis.plot(x, y, ls="", marker="o", color="navy")
         self.canvas.draw()

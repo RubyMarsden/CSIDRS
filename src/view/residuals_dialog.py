@@ -45,7 +45,7 @@ class ResidualsDialog(QDialog):
     def _create_graph_widget(self):
         self.fig = plt.figure()
 
-        self.residuals_axis = plt.axes()
+        self.residuals_axis = self.fig.add_subplot()
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
@@ -120,7 +120,7 @@ class ResidualsDialog(QDialog):
         self.residuals_axis.set_xlabel("Fitted values")
         self.residuals_axis.set_ylabel("Residuals")
 
-        plt.tight_layout()
+        self.fig.tight_layout()
 
     ###############
     ### Actions ###

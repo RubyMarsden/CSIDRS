@@ -337,11 +337,13 @@ class DriftCorrectionWidget(QWidget):
             self.primary_drift_axis.plot(xs, y_line, marker="", label=y_line_label)
 
         self.primary_drift_axis.set_xlabel("Time")
-        plt.setp(self.primary_drift_axis.get_xticklabels(), rotation=30, horizontalalignment='right')
+        for x_tick_label in self.primary_drift_axis.get_xticklabels():
+            x_tick_label.set_rotation(30)
+            x_tick_label.set_horizontalalignment('right')
 
         self.primary_drift_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
-        plt.tight_layout()
+        self.fig.tight_layout()
         self.primary_drift_axis.legend(loc="upper right", bbox_to_anchor=(1, 1.7))
 
     def _create_secondary_check_graph(self, sample, ratio):
@@ -398,10 +400,13 @@ class DriftCorrectionWidget(QWidget):
                                                markerfacecolor="none")
             self.secondary_check_axis.set_xlabel("Time")
             self.secondary_check_axis.set_ylabel(ratio.delta_name)
-            plt.setp(self.secondary_check_axis.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+            for x_tick_label in self.secondary_check_axis.get_xticklabels():
+                x_tick_label.set_rotation(30)
+                x_tick_label.set_horizontalalignment('right')
 
             self.secondary_check_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         if self.secondary_sample:
             self.secondary_check_axis.legend(loc="upper right", bbox_to_anchor=(1, 1.7))
-        plt.tight_layout()
+        self.fig.tight_layout()

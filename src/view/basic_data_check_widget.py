@@ -263,11 +263,13 @@ class BasicDataCheckWidget(QWidget):
             axis.plot(xs, ys, marker="o", ls="", markersize=4, color=colour)
 
         axis.set_xlabel("Time")
-        plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
+        for x_tick_label in axis.get_xticklabels():
+            x_tick_label.set_rotation(30)
+            x_tick_label.set_horizontalalignment('right')
         axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         axis.set_ylabel("Relative secondary \n ion yield")
-        plt.tight_layout()
+        self.fig.tight_layout()
 
     def create_ion_distance_data_plot(self):
         axis = self.ion_yield_distance_axis
@@ -283,7 +285,7 @@ class BasicDataCheckWidget(QWidget):
 
         axis.set_xlabel("Distance from centre of mount")
         axis.set_ylabel("Relative secondary \n ion yield")
-        plt.tight_layout()
+        self.fig.tight_layout()
 
     def create_all_samples_x_y_positions_plot(self, samples, axis):
         axis.clear()
@@ -307,5 +309,5 @@ class BasicDataCheckWidget(QWidget):
         axis.set_xlabel("X position")
         axis.set_ylabel("Y position")
         axis.set(xlim=(-9000, 9000), ylim=(-9000, 9000))
-        plt.axis('scaled')
-        plt.tight_layout()
+        axis.set_aspect('equal')
+        self.fig.tight_layout()
