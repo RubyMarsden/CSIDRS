@@ -197,8 +197,8 @@ class CycleDataDialog(QDialog):
         return graph
 
     def create_counts_plot(self, spot):
-        # self.counts_axis.spines['top'].set_visible(False)
-        # self.counts_axis.spines['right'].set_visible(False)
+        self.counts_axis.spines['top'].set_visible(False)
+        self.counts_axis.spines['right'].set_visible(False)
 
         y1s = spot.mass_peaks[self.ratio.numerator].detector_corrected_cps_data
         y2s = spot.mass_peaks[self.ratio.denominator].detector_corrected_cps_data
@@ -211,13 +211,13 @@ class CycleDataDialog(QDialog):
 
         self.counts_axis.set_xlabel("Cycle")
         self.counts_axis.set_ylabel("Counts per second")
-        # self.counts_axis.set_xticks(x1s)
+        self.counts_axis.set_xticks(x1s)
         # self.counts_axis.autoscale(enable=True, axis='y')
         self.fig.tight_layout()
 
     def create_ratio_plot(self, spot):
-        # self.ratio_axis.spines['top'].set_visible(False)
-        # self.ratio_axis.spines['right'].set_visible(False)
+        self.ratio_axis.spines['top'].set_visible(False)
+        self.ratio_axis.spines['right'].set_visible(False)
 
         self.ratio_axis.set_ylabel(self.ratio.name)
         self.ratio_axis.set_xlabel("Cycle")
@@ -231,19 +231,19 @@ class CycleDataDialog(QDialog):
             else:
                 self.ratio_axis.plot(x, y, ls="", marker="o", color="navy")
 
-        # mean, two_st_error = spot.mean_two_st_error_isotope_ratios[self.ratio]
-        # self.ratio_axis.axhline(y=mean)
-        #
-        # (outlier_minimum, outlier_maximum) = spot.outlier_bounds[self.ratio]
-        # outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
-        # outlier_rectangle.set_color("lightblue")
-        # self.ratio_axis.add_patch(outlier_rectangle)
-        #
-        # st_error_rectangle = Rectangle((0, mean - two_st_error), len(xs) + 1, 2 * two_st_error)
-        # st_error_rectangle.set_color("cornflowerblue")
-        # self.ratio_axis.add_patch(st_error_rectangle)
+        mean, two_st_error = spot.mean_two_st_error_isotope_ratios[self.ratio]
+        self.ratio_axis.axhline(y=mean)
 
-        # self.ratio_axis.set_xticks(xs)
+        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[self.ratio]
+        outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
+        outlier_rectangle.set_color("lightblue")
+        self.ratio_axis.add_patch(outlier_rectangle)
+
+        st_error_rectangle = Rectangle((0, mean - two_st_error), len(xs) + 1, 2 * two_st_error)
+        st_error_rectangle.set_color("cornflowerblue")
+        self.ratio_axis.add_patch(st_error_rectangle)
+
+        self.ratio_axis.set_xticks(xs)
         self.fig.tight_layout()
 
     ###############
@@ -251,8 +251,7 @@ class CycleDataDialog(QDialog):
     ###############
 
     def on_cycle_tree_item_changed(self, cycle_number, previous_cycle_number):
-        # self.highlight_selected_ratio_data_point(self.sample_tree.current_spot(), cycle_number, previous_cycle_number)
-        pass
+        self.highlight_selected_ratio_data_point(self.sample_tree.current_spot(), cycle_number, previous_cycle_number)
 
     def highlight_selected_ratio_data_point(self, spot, cycle_number, previous_cycle_number):
         ys = spot.raw_isotope_ratios[self.ratio]
