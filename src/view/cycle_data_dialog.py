@@ -1,8 +1,5 @@
-import time
-
 import matplotlib
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QTreeWidgetItem, QTreeWidget, \
-    QPushButton, QDialogButtonBox
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QPushButton, QDialogButtonBox
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 

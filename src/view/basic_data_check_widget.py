@@ -4,8 +4,7 @@ import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QCheckBox, \
-    QTableWidgetItem
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 

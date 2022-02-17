@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QDialog
 from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton
 
 from src.view.data_processing_dialog import DataProcessingDialog
-from src.view.isotope_button_widget import IsotopeButtonWidget
 from src.view.file_entry_widget import FileEntryWidget
+from src.view.isotope_button_widget import IsotopeButtonWidget
 from src.view.reference_material_dialog import ReferenceMaterialSelectionDialog
 
 

@@ -1,12 +1,12 @@
 import time
 
+import matplotlib.dates as mdates
 import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTableWidget, QRadioButton, QPushButton
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QPushButton
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
-import matplotlib.dates as mdates
 
 from src.model.drift_correction_type import DriftCorrectionType
 from src.utils import gui_utils

@@ -1,5 +1,3 @@
-import time
-
 import matplotlib
 import matplotlib.dates as mdates
 import numpy as np
