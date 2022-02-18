@@ -2,6 +2,7 @@ import csv
 import re
 import time
 
+import matplotlib
 import numpy as np
 # from ltsfit.lts_linefit import lts_linefit
 import statsmodels.api as sm
