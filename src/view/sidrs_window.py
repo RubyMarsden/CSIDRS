@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QHBoxLayout
 
 from src.view.data_processing_dialog import DataProcessingDialog
 from src.view.file_entry_widget import FileEntryWidget
@@ -13,6 +13,8 @@ class SidrsWindow(QMainWindow):
 
         self.model = model
 
+        self.signals = self.model.signals
+
         self.setMinimumSize(QSize(640, 480))
         self.setWindowTitle("CSIDRS v-0.0")
 
@@ -20,30 +22,42 @@ class SidrsWindow(QMainWindow):
 
         self.setCentralWidget(self.create_main_widget())
 
+        self.signals.dataCleared.connect(self.on_data_cleared)
+
     def create_main_widget(self):
         main_widget = QWidget()
         title = QLabel("Stable Isotope Data Reduction for CAMECA data")
         title.setAlignment(Qt.AlignCenter)
         self.next_button = QPushButton("Next")
         self.next_button.clicked.connect(self.next_button_clicked)
+
+        self.clear_data_button = QPushButton("Clear all data and methods")
+        self.clear_data_button.clicked.connect(self.clear_data_button_clicked)
         main_layout = QVBoxLayout()
         main_widget.setLayout(main_layout)
 
+        button_layout = QHBoxLayout()
+
         self.file_entry_widget.setDisabled(True)
         self.next_button.setDisabled(True)
+        self.clear_data_button.setDisabled(True)
 
         self.model.signals.materialInput.connect(self.enable_widgets)
+
+        button_layout.addWidget(self.clear_data_button, alignment=Qt.AlignLeft)
+        button_layout.addWidget(self.next_button, alignment=Qt.AlignRight)
 
         main_layout.addWidget(title)
         main_layout.addWidget(IsotopeButtonWidget(self.model))
         main_layout.addWidget(self.file_entry_widget)
-        main_layout.addWidget(self.next_button, alignment=Qt.AlignRight)
+        main_layout.addLayout(button_layout)
 
         return main_widget
 
     def enable_widgets(self):
         self.file_entry_widget.setEnabled(True)
         self.next_button.setEnabled(True)
+        self.clear_data_button.setEnabled(True)
 
     def next_button_clicked(self):
         dialog = ReferenceMaterialSelectionDialog(self.model)
@@ -61,3 +75,11 @@ class SidrsWindow(QMainWindow):
         self.model.SIMS_correction_process()
         dialog = DataProcessingDialog(self.model)
         result = dialog.exec()
+
+    def clear_data_button_clicked(self):
+        self.signals.clearAllData.emit()
+
+    def on_data_cleared(self):
+        self.file_entry_widget.setDisabled(True)
+        self.next_button.setDisabled(True)
+        self.clear_data_button.setDisabled(True)

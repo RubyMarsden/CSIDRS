@@ -21,3 +21,5 @@ class Signals(QObject):
     recalculateNewSpotData = pyqtSignal()
     driftCorrectionChanged = pyqtSignal(Ratio, DriftCorrectionType)
     replotAndTabulateRecalculatedData = pyqtSignal()
+    clearAllData = pyqtSignal()
+    dataCleared = pyqtSignal()
