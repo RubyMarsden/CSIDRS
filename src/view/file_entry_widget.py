@@ -10,6 +10,8 @@ class FileEntryWidget(QWidget):
     def __init__(self, model):
         QWidget.__init__(self)
         self.model = model
+        self.filenames = []
+
         layout = QHBoxLayout()
         self.setLayout(layout)
 
@@ -49,16 +51,16 @@ class FileEntryWidget(QWidget):
         #############
 
     def on_file_entry_button_clicked(self):
-        filenames, _ = QFileDialog.getOpenFileNames(self,
+        self.filenames, _ = QFileDialog.getOpenFileNames(self,
                                                     "Select files",
                                                     "home/ruby/Documents/Programming/UWA/CSIDRS/data",
                                                     "ASCII files (*.asc)"
                                                     )
-        self.model.import_all_files(filenames)
+        self.model.sample_names_from_filenames(self.filenames)
         self.on_filenames_updated()
 
     def on_filenames_updated(self):
-        for filename in self.model.imported_files:
+        for filename in self.filenames:
             filename_item = QTreeWidgetItem(self.filename_list)
             filename_item.setText(0, filename)
 
