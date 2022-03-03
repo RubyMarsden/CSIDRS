@@ -60,7 +60,8 @@ class SidrsModel:
     #################
 
     def import_all_files(self, filenames):
-        self.sample_names_from_filenames(filenames)
+        print("import all files")
+        # self.sample_names_from_filenames(filenames)
         for filename in filenames:
             if filename in self.imported_files:
                 raise Exception("The file: " + filename + " has already been imported")
@@ -115,7 +116,9 @@ class SidrsModel:
         self.sample_names = []
         for i in range(len(split_names)):
             if split_names[i - 1][-1] != split_names[i][-1]:
-                self.sample_names.append(split_names[i][-1])
+                if split_names[i][-1] not in self.list_of_sample_names:
+                    self.sample_names.append(split_names[i][-1])
+        print("sampleNamesUpdated")
         self.signals.sampleNamesUpdated.emit(self.sample_names)
 
     def _create_samples_from_sample_names(self, spots):
