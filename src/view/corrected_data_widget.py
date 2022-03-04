@@ -124,7 +124,7 @@ class CorrectedDataWidget(QWidget):
             ratio_uncertainty_name = "uncertainty"
             column_headers.append(ratio_uncertainty_name)
 
-        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
+        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Distance to centre (um)"])
 
         for sample in self.data_processing_dialog.samples:
             for spot in sample.spots:
