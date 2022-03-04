@@ -10,6 +10,8 @@ class FileEntryWidget(QWidget):
     def __init__(self, model):
         QWidget.__init__(self)
         self.model = model
+        self.filenames = []
+
         layout = QHBoxLayout()
         self.setLayout(layout)
 
@@ -22,10 +24,17 @@ class FileEntryWidget(QWidget):
         self.sample_name_list = QTreeWidget()
         self.sample_name_list.setHeaderLabel("Sample names")
 
+        self.remove_single_file_button = QPushButton("Remove file")
+        self.remove_single_file_button.clicked.connect(self.on_remove_single_file_button_clicked)
+
         self.manual_sample_names_button = QPushButton("Change sample names")
         self.manual_sample_names_button.clicked.connect(self.on_change_sample_names_button_clicked)
 
-        layout.addWidget(self.filename_list)
+        lhs_layout = QVBoxLayout()
+        lhs_layout.addWidget(self.filename_list)
+        lhs_layout.addWidget(self.remove_single_file_button)
+
+        layout.addLayout(lhs_layout)
 
         rhs_layout = QVBoxLayout()
 
@@ -35,21 +44,23 @@ class FileEntryWidget(QWidget):
 
         layout.addLayout(rhs_layout)
 
+        self.model.signals.dataCleared.connect(self.on_data_cleared)
+
         #############
         ## Actions ##
         #############
 
     def on_file_entry_button_clicked(self):
-        filenames, _ = QFileDialog.getOpenFileNames(self,
+        self.filenames, _ = QFileDialog.getOpenFileNames(self,
                                                     "Select files",
                                                     "home/ruby/Documents/Programming/UWA/CSIDRS/data",
                                                     "ASCII files (*.asc)"
                                                     )
-        self.model.import_all_files(filenames)
+        self.model.sample_names_from_filenames(self.filenames)
         self.on_filenames_updated()
 
     def on_filenames_updated(self):
-        for filename in self.model.imported_files:
+        for filename in self.filenames:
             filename_item = QTreeWidgetItem(self.filename_list)
             filename_item.setText(0, filename)
 
@@ -69,3 +80,10 @@ class FileEntryWidget(QWidget):
             sample_names = dialog.sample_names
             self.model.signals.sampleNamesUpdated.emit(sample_names)
         return sample_names
+
+    def on_remove_single_file_button_clicked(self):
+        print("remove file")
+
+    def on_data_cleared(self):
+        self.filename_list.clear()
+        self.sample_name_list.clear()

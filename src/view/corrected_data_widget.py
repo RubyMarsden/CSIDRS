@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem, QFileDialog
 
-from src.utils.make_csv_file import write_csv_output
+from src.utils.make_csv_file import write_csv_output, get_output_file
 from src.view.cycle_data_dialog import CycleDataDialog
 
 
@@ -33,7 +33,12 @@ class CorrectedDataWidget(QWidget):
 
         data_output_button = QPushButton("Export corrected data")
         data_output_button.clicked.connect(self.on_data_output_button_pushed)
+
+        analytical_conditions_button = QPushButton("Export analytical conditions file")
+        analytical_conditions_button.clicked.connect(self.on_analytical_conditions_button_pushed)
+
         button_layout.addWidget(data_output_button)
+        button_layout.addWidget(analytical_conditions_button)
 
         layout.addWidget(self.basic_data_table)
         layout.addLayout(button_layout)
@@ -49,14 +54,18 @@ class CorrectedDataWidget(QWidget):
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
-        output_file_name = self.get_output_file()
+        output_file_name = get_output_file("corrected_data")
 
         method = self.data_processing_dialog.method
 
-        column_headers = ["Sample name"]
+        column_headers = ["Sample name", "Spot excluded"]
         for ratio in method.ratios:
             column_headers.append("corrected " + ratio.delta_name)
             ratio_uncertainty_name = "uncertainty"
+            column_headers.append(ratio_uncertainty_name)
+            column_headers.append("uncorrected " + ratio.delta_name)
+            column_headers.append(ratio_uncertainty_name)
+            column_headers.append("uncorrected " + ratio.name)
             column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
@@ -64,12 +73,22 @@ class CorrectedDataWidget(QWidget):
         rows = []
         for sample in self.data_processing_dialog.samples:
             for spot in sample.spots:
-                row = [str(sample.name + " " + spot.id)]
+                if spot.is_flagged:
+                    spot_excluded = "x"
+                else:
+                    spot_excluded = ""
+                row = [str(sample.name + "-" + spot.id), spot_excluded]
 
                 for ratio in method.ratios:
                     [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio.delta_name]
+                    [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
                     row.append(delta)
                     row.append(delta_uncertainty)
+                    row.append(uncorrected_delta)
+                    row.append(uncorrected_delta_uncertainty)
+                    row.append(uncorrected_ratio)
+                    row.append(uncorrected_ratio_uncertainty)
 
                 row.append(spot.dtfa_x)
                 row.append(spot.dtfa_y)
@@ -79,14 +98,14 @@ class CorrectedDataWidget(QWidget):
                 rows.append(row)
         if output_file_name:
             write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
-            print("Exported")
 
-    def get_output_file(self):
-        return QFileDialog.getSaveFileName(self,
-                                           caption='Save CSV file',
-                                           directory="home/ruby/Documents/Programming/UWA/CSIDRS/data",
-                                           options=QFileDialog.DontUseNativeDialog
-                                           )[0]
+    def on_analytical_conditions_button_pushed(self):
+        output_file_name = get_output_file("analytical_data")
+        column_headers = []
+        rows = [row for row in self.data_processing_dialog.model.analytical_condition_data if row]
+
+        if output_file_name:
+            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
 
     #############
     ### Table ###

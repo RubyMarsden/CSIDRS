@@ -1,5 +1,6 @@
 from PyQt5.QtCore import pyqtSignal, QObject
 
+from src.model.drift_correction_type import DriftCorrectionType
 from src.model.elements import Element
 from src.model.ratio import Ratio
 from src.model.settings.material_lists import Material
@@ -18,4 +19,7 @@ class Signals(QObject):
     spotAndCycleFlagged = pyqtSignal(Spot, int, bool, Ratio)
     recalculateNewCycleData = pyqtSignal()
     recalculateNewSpotData = pyqtSignal()
+    driftCorrectionChanged = pyqtSignal(Ratio, DriftCorrectionType)
     replotAndTabulateRecalculatedData = pyqtSignal()
+    clearAllData = pyqtSignal()
+    dataCleared = pyqtSignal()

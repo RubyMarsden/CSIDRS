@@ -3,9 +3,9 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from model.sidrs_model import SidrsModel
+from src.model.sidrs_model import SidrsModel
 from src.controllers.signals import Signals
-from view.sidrs_window import SidrsWindow
+from src.view.sidrs_window import SidrsWindow
 
 def set_except_hook(window):
     def except_hook(cls, exception, traceback):

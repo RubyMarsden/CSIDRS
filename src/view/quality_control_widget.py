@@ -2,7 +2,6 @@ import matplotlib
 import matplotlib.dates as mdates
 import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
 from src.utils import gui_utils
@@ -21,27 +20,23 @@ class QualityControlWidget(QWidget):
         self.samples = data_processing_dialog.samples
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
-
+        self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_graph_tabs)
 
         layout = QVBoxLayout()
 
-        graph_widget = self._create_graph_tab_widget(self.ratio)
+        graph_widget = self._create_graph_tab_widget()
         self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
                                                     self.data_processing_dialog.model.signals)
 
-        self.ratio_radiobox_widget.set_ratio(self.ratio)
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(graph_widget)
 
         self.setLayout(layout)
 
-    def _create_graph_tab_widget(self, ratio):
-        # self.fig = plt.figure()
-        #
-        # self.delta_vs_time_axis = self.fig.add_subplot()
-
+    def _create_graph_tab_widget(self):
         delta_vs_time_graph_widget = self._create_delta_vs_time_graph_widget()
         x_y_position_graph_widget = self._create_x_y_position_graph_widget()
         delta_vs_secondary_ion_yield_graph_widget = self._create_delta_vs_secondary_ion_yield_graph_widget()
@@ -60,50 +55,50 @@ class QualityControlWidget(QWidget):
         return graph_tab_widget
 
     def _create_delta_vs_time_graph_widget(self):
-        fig = plt.figure()
+        self.delta_vs_time_fig = plt.figure()
 
-        self.delta_vs_time_axis = fig.add_subplot()
-        graph_widget, self.time_canvas = gui_utils.create_figure_widget(fig, self)
+        self.delta_vs_time_axis = self.delta_vs_time_fig.add_subplot()
+        graph_widget, self.time_canvas = gui_utils.create_figure_widget(self.delta_vs_time_fig, self)
 
         return graph_widget
 
     def _create_x_y_position_graph_widget(self):
-        fig = plt.figure()
+        self.x_y_position_fig = plt.figure()
 
-        self.x_and_y_position_axis = fig.add_subplot()
-        graph_widget, self.x_y_canvas = gui_utils.create_figure_widget(fig, self)
+        self.x_and_y_position_axis = self.x_y_position_fig.add_subplot()
+        graph_widget, self.x_y_canvas = gui_utils.create_figure_widget(self.x_y_position_fig, self)
 
         return graph_widget
 
     def _create_delta_vs_secondary_ion_yield_graph_widget(self):
-        fig = plt.figure()
+        self.delta_vs_secondary_ion_fig = plt.figure()
 
-        self.delta_vs_secondary_ion_yield_axis = fig.add_subplot()
-        graph_widget, self.secondary_canvas = gui_utils.create_figure_widget(fig, self)
+        self.delta_vs_secondary_ion_yield_axis = self.delta_vs_secondary_ion_fig.add_subplot()
+        graph_widget, self.secondary_canvas = gui_utils.create_figure_widget(self.delta_vs_secondary_ion_fig, self)
 
         return graph_widget
 
     def _create_delta_vs_distance_from_mount_centre_graph_widget(self):
-        fig = plt.figure()
+        self.delta_vs_distance_fig = plt.figure()
 
-        self.delta_vs_distance_from_mount_centre_axis = fig.add_subplot()
-        graph_widget, self.distance_canvas = gui_utils.create_figure_widget(fig, self)
+        self.delta_vs_distance_from_mount_centre_axis = self.delta_vs_distance_fig.add_subplot()
+        graph_widget, self.distance_canvas = gui_utils.create_figure_widget(self.delta_vs_distance_fig, self)
 
         return graph_widget
 
     def _create_delta_vs_dtfa_x_graph_widget(self):
-        fig = plt.figure()
+        self.delta_vs_dtfa_x_fig = plt.figure()
 
-        self.delta_vs_dtfa_x_axis = fig.add_subplot()
-        graph_widget, self.dtfa_x_canvas = gui_utils.create_figure_widget(fig, self)
+        self.delta_vs_dtfa_x_axis = self.delta_vs_dtfa_x_fig.add_subplot()
+        graph_widget, self.dtfa_x_canvas = gui_utils.create_figure_widget(self.delta_vs_dtfa_x_fig, self)
 
         return graph_widget
 
     def _create_delta_vs_dtfa_y_graph_widget(self):
-        fig = plt.figure()
+        self.delta_vs_dtfa_y_fig = plt.figure()
 
-        self.delta_vs_dtfa_y_axis = fig.add_subplot()
-        graph_widget, self.dtfa_y_canvas = gui_utils.create_figure_widget(fig, self)
+        self.delta_vs_dtfa_y_axis = self.delta_vs_dtfa_y_fig.add_subplot()
+        graph_widget, self.dtfa_y_canvas = gui_utils.create_figure_widget(self.delta_vs_dtfa_y_fig, self)
 
         return graph_widget
 
@@ -135,7 +130,7 @@ class QualityControlWidget(QWidget):
         self.delta_vs_time_axis.set_xlabel("Time")
         self.delta_vs_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
-        plt.tight_layout()
+        self.delta_vs_time_fig.tight_layout()
 
     def _create_x_y_position_graph(self):
         self.x_and_y_position_axis.clear()
@@ -159,8 +154,8 @@ class QualityControlWidget(QWidget):
         self.x_and_y_position_axis.set_xlabel("X position")
         self.x_and_y_position_axis.set_ylabel("Y position")
         self.x_and_y_position_axis.set(xlim=(-9000, 9000), ylim=(-9000, 9000))
-        plt.axis('scaled')
-        plt.tight_layout()
+        self.x_and_y_position_axis.set_aspect('equal')
+        self.x_y_position_fig.tight_layout()
 
     def _create_delta_vs_secondary_ion_yield_graph(self, ratio):
         self.delta_vs_secondary_ion_yield_axis.clear()
@@ -186,7 +181,7 @@ class QualityControlWidget(QWidget):
 
             self.delta_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_secondary_ion_yield_axis.set_xlabel("Secondary ion yield")
-        plt.tight_layout()
+        self.delta_vs_secondary_ion_fig.tight_layout()
 
     def _create_delta_vs_distance_from_mount_centre_graph(self, ratio):
         self.delta_vs_distance_from_mount_centre_axis.clear()
@@ -213,7 +208,7 @@ class QualityControlWidget(QWidget):
             self.delta_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_distance_from_mount_centre_axis.set_xlabel("Distance from mount centre")
 
-        plt.tight_layout()
+        self.delta_vs_distance_fig.tight_layout()
 
     def _create_delta_vs_dtfa_x_graph(self, ratio):
         self.delta_vs_dtfa_x_axis.clear()
@@ -240,7 +235,7 @@ class QualityControlWidget(QWidget):
             self.delta_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_dtfa_x_axis.set_xlabel("dtfa-x")
 
-        plt.tight_layout()
+        self.delta_vs_dtfa_x_fig.tight_layout()
 
     def _create_delta_vs_dtfa_y_graph(self, ratio):
         self.delta_vs_dtfa_y_axis.clear()
@@ -274,16 +269,18 @@ class QualityControlWidget(QWidget):
         self.delta_vs_dtfa_y_axis.set_xlabel("dtfa-y")
         self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name)
         self.delta_vs_dtfa_y_axis.set(xlim=(x_minimum, x_maximum))
-        # plt.xlim([x_minimum, x_maximum])
 
-        plt.tight_layout()
+        self.delta_vs_dtfa_y_fig.tight_layout()
 
     ###############
     ### Actions ###
     ###############
+    def on_sample_tree_item_changed(self, current_item, previous_tree_item):
+        self.highlight_selected_ratio_data_point(current_item, previous_tree_item)
 
     def change_ratio(self, ratio):
         self.ratio = ratio
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
         self.update_graph_tabs()
 
     def update_graph_tabs(self):
@@ -300,3 +297,6 @@ class QualityControlWidget(QWidget):
         self.distance_canvas.draw()
         self.dtfa_x_canvas.draw()
         self.dtfa_y_canvas.draw()
+
+    def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
+        return

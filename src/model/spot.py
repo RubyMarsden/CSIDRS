@@ -10,8 +10,10 @@ from src.model.maths import vector_length_from_origin, calculate_outlier_resista
 from src.model.settings.asc_file_settings_general import *
 from src.model.get_data_from_import import get_data_from_old_asc, get_primary_beam_current_data_old_asc, \
     get_dtfa_x_and_y_from_old_asc
-from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, carbon_isotope_reference, chlorine_isotope_reference
-from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time
+from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
+    carbon_isotope_reference, chlorine_isotope_reference
+from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
+    convert_to_twenty_four_hour_time_am
 
 
 class Spot:
@@ -19,6 +21,8 @@ class Spot:
         self.filename = filename
         parts = re.split('@|\\.|/', self.filename)
         self.full_sample_name, self.id = parts[-3], parts[-2]
+        split_sample_name = re.split('-|_', self.full_sample_name)
+        self.sample_name = split_sample_name[-1]
         # TODO change how this works - currently doesn't update
         self.mass_peak_names = mass_peak_names
 
@@ -27,9 +31,9 @@ class Spot:
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
         # TODO - what happens at midnight?
         if self.twelve_hr_data == "AM":
-            self.twenty_four_hour_time = self.time
+            self.twenty_four_hour_time = convert_to_twenty_four_hour_time_am(self.time)
         elif self.twelve_hr_data == "PM":
-            self.twenty_four_hour_time = convert_to_twenty_four_hour_time(self.time)
+            self.twenty_four_hour_time = convert_to_twenty_four_hour_time_pm(self.time)
         self.datetime = datetime.strptime(self.date + " " + self.twenty_four_hour_time, "%d/%m/%Y %H:%M")
 
         self.x_position = int(spot_data[X_POSITION_INDEX[0]][X_POSITION_INDEX[1]])
@@ -48,6 +52,8 @@ class Spot:
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
         self.cycle_flagging_information = {}
+        self.standard_ratios = None
+        self.drift_corrected_ratio_values_by_ratio = {}
         self.not_corrected_deltas = {}
         self.drift_corrected_deltas = {}
         self.alpha_corrected_data = {}
@@ -104,18 +110,18 @@ class Spot:
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet
         if element == Element.OXY:
-            standard_ratios = oxygen_isotope_reference[DeltaReferenceMaterial.VSMOW]
+            self.standard_ratios = oxygen_isotope_reference[DeltaReferenceMaterial.VSMOW]
         elif element == Element.SUL:
-            standard_ratios = sulphur_isotope_reference[DeltaReferenceMaterial.VCDT]
+            self.standard_ratios = sulphur_isotope_reference[DeltaReferenceMaterial.VCDT]
         elif element == Element.CAR:
-            standard_ratios = carbon_isotope_reference[DeltaReferenceMaterial.VPDB]
+            self.standard_ratios = carbon_isotope_reference[DeltaReferenceMaterial.VPDB]
         elif element == Element.CHL:
-            standard_ratios = chlorine_isotope_reference[DeltaReferenceMaterial.SMOC]
+            self.standard_ratios = chlorine_isotope_reference[DeltaReferenceMaterial.SMOC]
         else:
             raise Exception
 
         for ratio, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
-            standard_ratio = standard_ratios[ratio]
+            standard_ratio = self.standard_ratios[ratio]
             if standard_ratio:
                 delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
             else:

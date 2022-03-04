@@ -4,12 +4,11 @@ import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QCheckBox, \
-    QTableWidgetItem
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
-from src.utils.make_csv_file import write_csv_output
+from src.utils.make_csv_file import write_csv_output, get_output_file
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
@@ -23,6 +22,7 @@ class BasicDataCheckWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
+        self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
 
         layout = QHBoxLayout()
 
@@ -64,6 +64,8 @@ class BasicDataCheckWidget(QWidget):
     ###############
     ### Actions ###
     ###############
+    def on_sample_tree_item_changed(self, current_item, previous_tree_item):
+        self.highlight_selected_ratio_data_point(current_item, previous_tree_item)
 
     def on_cycle_data_button_pushed(self):
         dialog = CycleDataDialog(self.data_processing_dialog)
@@ -71,6 +73,8 @@ class BasicDataCheckWidget(QWidget):
 
     def on_data_output_button_pushed(self):
         method = self.data_processing_dialog.method
+
+        output_file_name = get_output_file("raw_data")
 
         column_headers = ["Sample name"]
         for ratio in method.ratios:
@@ -97,7 +101,41 @@ class BasicDataCheckWidget(QWidget):
 
                 rows.append(row)
 
-        write_csv_output(headers=column_headers, rows=rows, output_file="raw_data.csv")
+        if output_file_name:
+            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
+
+    def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
+        if current_item is None or current_item.is_sample:
+            self.create_ion_yield_time_plot()
+            self.create_ion_distance_data_plot()
+        else:
+            current_spot = current_item.spot
+            if previous_tree_item is None or previous_tree_item.is_sample:
+                self.create_ion_yield_time_plot()
+                self.create_ion_distance_data_plot()
+                previous_spot = None
+            else:
+                previous_spot = previous_tree_item.spot
+            xs = []
+            ys = []
+            for sample in self.data_processing_dialog.samples:
+                for spot in sample.spots:
+                    ys.append(spot.secondary_ion_yield)
+                    xs.append(spot)
+
+            for x, y in zip(xs, ys):
+                sample = self.data_processing_dialog.model.samples_by_name[x.sample_name]
+                if x == current_spot:
+                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", markersize=4,
+                                                      color="yellow")
+                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color="yellow")
+
+                if x == previous_spot:
+                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", markersize=4,
+                                                      color=sample.colour)
+                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color=sample.colour)
+
+        self.canvas.draw()
 
     #############
     ### Table ###
@@ -201,15 +239,17 @@ class BasicDataCheckWidget(QWidget):
         self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[2])
 
-        self.create_ion_yield_time_plot(self.data_processing_dialog.samples, self.ion_yield_time_axis)
-        self.create_ion_distance_data_plot(self.data_processing_dialog.samples, self.ion_yield_distance_axis)
+        self.create_ion_yield_time_plot()
+        self.create_ion_distance_data_plot()
         self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
 
         widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
         return widget
 
-    def create_ion_yield_time_plot(self, samples, axis):
+    def create_ion_yield_time_plot(self):
+        axis = self.ion_yield_time_axis
+        samples = self.data_processing_dialog.samples
         axis.clear()
 
         axis.spines['top'].set_visible(False)
@@ -222,13 +262,17 @@ class BasicDataCheckWidget(QWidget):
             axis.plot(xs, ys, marker="o", ls="", markersize=4, color=colour)
 
         axis.set_xlabel("Time")
-        plt.setp(axis.get_xticklabels(), rotation=30, horizontalalignment='right')
+        for x_tick_label in axis.get_xticklabels():
+            x_tick_label.set_rotation(30)
+            x_tick_label.set_horizontalalignment('right')
         axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         axis.set_ylabel("Relative secondary \n ion yield")
-        plt.tight_layout()
+        self.fig.tight_layout()
 
-    def create_ion_distance_data_plot(self, samples, axis):
+    def create_ion_distance_data_plot(self):
+        axis = self.ion_yield_distance_axis
+        samples = self.data_processing_dialog.samples
         axis.clear()
 
         axis.spines['top'].set_visible(False)
@@ -240,7 +284,7 @@ class BasicDataCheckWidget(QWidget):
 
         axis.set_xlabel("Distance from centre of mount")
         axis.set_ylabel("Relative secondary \n ion yield")
-        plt.tight_layout()
+        self.fig.tight_layout()
 
     def create_all_samples_x_y_positions_plot(self, samples, axis):
         axis.clear()
@@ -264,5 +308,5 @@ class BasicDataCheckWidget(QWidget):
         axis.set_xlabel("X position")
         axis.set_ylabel("Y position")
         axis.set(xlim=(-9000, 9000), ylim=(-9000, 9000))
-        plt.axis('scaled')
-        plt.tight_layout()
+        axis.set_aspect('equal')
+        self.fig.tight_layout()
