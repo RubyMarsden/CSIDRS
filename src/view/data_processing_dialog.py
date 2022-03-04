@@ -51,8 +51,8 @@ class DataProcessingDialog(QDialog):
         self.tabs = QTabWidget()
         self.tabs.addTab(BasicDataCheckWidget(self), "1. Basic data check")
         self.tabs.addTab(DriftCorrectionWidget(self), "2. Drift correction")
-        self.tabs.addTab(CorrectedDataWidget(self), "3. Corrected data")
-        self.tabs.addTab(QualityControlWidget(self), "4. Quality control")
+        self.tabs.addTab(QualityControlWidget(self), "3. Quality control")
+        self.tabs.addTab(CorrectedDataWidget(self), "4. Corrected data")
 
         layout = QVBoxLayout()
 

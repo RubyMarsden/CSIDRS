@@ -39,7 +39,7 @@ class DriftCorrectionWidget(QWidget):
             elif self.data_processing_dialog.model.secondary_reference_material == "No secondary reference material":
                 self.secondary_sample = None
 
-        self._create_linear_regression_widget()
+        ratio_selection_widget = self._create_linear_regression_widget()
         linear_regression_widget = self.linear_regression_widget
         more_information_button_layout = self._create_more_information_button_layout()
 
