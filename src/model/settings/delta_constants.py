@@ -11,7 +11,7 @@ class DeltaReferenceMaterial(Enum):
 
 
 oxygen_isotope_reference = {
-    DeltaReferenceMaterial.VSMOW : {O18_O16: 0.002005, O17_O16: 0.0003799, O16H1_O16: None}
+    DeltaReferenceMaterial.VSMOW : {O18_O16: 0.0020052, O17_O16: 0.0003799, O16H1_O16: None}
 }
 
 sulphur_isotope_reference = {
