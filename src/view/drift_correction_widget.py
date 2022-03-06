@@ -334,7 +334,7 @@ class DriftCorrectionWidget(QWidget):
             y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
             y_line_label = "y = " + "{:.3e}".format(drift_coefficient) + "x + " + format(drift_intercept, ".1f")
 
-            self.primary_drift_axis.plot(xs, y_line, marker="", label=y_line_label)
+            self.primary_drift_axis.plot(xs, y_line, marker="", label=y_line_label, color=sample.colour)
 
         self.primary_drift_axis.set_xlabel("Time")
         for x_tick_label in self.primary_drift_axis.get_xticklabels():

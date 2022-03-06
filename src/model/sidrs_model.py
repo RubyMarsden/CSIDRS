@@ -6,6 +6,7 @@ import matplotlib
 import numpy as np
 # from ltsfit.lts_linefit import lts_linefit
 import statsmodels.api as sm
+from PyQt5.QtGui import QColor
 
 from src.model.drift_correction_type import DriftCorrectionType
 from src.model.get_data_from_import import get_block_number_from_old_asc, \
@@ -141,14 +142,18 @@ class SidrsModel:
         self._create_samples_from_sample_names(self.spots)
         primary_reference_material_exists = False
         secondary_reference_material_accounted_for = False
-        for sample in self.samples_by_name.values():
+        for i, sample in enumerate(self.samples_by_name.values()):
             if sample.name == self.primary_reference_material:
                 sample.is_primary_reference_material = True
                 primary_reference_material_exists = True
                 number_of_primary_rm_spots = len(sample.spots)
+                sample.colour = "black"
+                sample.q_colour = QColor(0, 0, 0, 100)
             elif sample.name == self.secondary_reference_material:
                 sample.is_secondary_reference_material = True
                 secondary_reference_material_accounted_for = True
+                sample.colour = "grey"
+                sample.q_colour = QColor(128, 128, 128, 100)
 
             if self.secondary_reference_material == "No secondary reference material":
                 secondary_reference_material_accounted_for = True

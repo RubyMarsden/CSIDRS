@@ -11,7 +11,6 @@ colour_list = [
     "sienna",
     "forestgreen",
     "aquamarine",
-    "grey",
     "khaki",
     "darkslategrey",
     "mediumblue",
