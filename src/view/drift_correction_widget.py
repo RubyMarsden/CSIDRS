@@ -154,11 +154,13 @@ class DriftCorrectionWidget(QWidget):
     def _create_graph_widget(self, ratio):
         self.fig = plt.figure()
 
-        self.spot_visible_grid_spec = GridSpec(2, 1)
-        self.primary_drift_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
-        self.secondary_check_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
+        self.grid_spec = GridSpec(3, 1)
+        self.primary_drift_axis = self.fig.add_subplot(self.grid_spec[0])
+        self.primary_drift_corrected_axis = self.fig.add_subplot(self.grid_spec[1])
+        self.secondary_check_axis = self.fig.add_subplot(self.grid_spec[2])
 
         self._create_primary_drift_graph(self.primary_sample, ratio)
+        self._create_primary_drift_corrected_graph(self.primary_sample, ratio)
         self._create_secondary_check_graph(self.secondary_sample, ratio)
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
@@ -174,9 +176,11 @@ class DriftCorrectionWidget(QWidget):
 
     def update_graphs(self, ratio):
         self.primary_drift_axis.clear()
+        self.primary_drift_corrected_axis.clear()
         self.secondary_check_axis.clear()
 
         self._create_primary_drift_graph(self.primary_sample, ratio)
+        self._create_primary_drift_corrected_graph(self.primary_sample, ratio)
         self._create_secondary_check_graph(self.secondary_sample, ratio)
 
         self.canvas.draw()
@@ -345,6 +349,59 @@ class DriftCorrectionWidget(QWidget):
 
         self.fig.tight_layout()
         self.primary_drift_axis.legend(loc="upper right", bbox_to_anchor=(1, 1.7))
+
+    def _create_primary_drift_corrected_graph(self, sample, ratio):
+        self.primary_drift_corrected_axis.clear()
+        self.primary_drift_corrected_axis.set_title("Primary ref. material: " + sample.name + "\ndrift corrected delta",
+                                                    loc="left")
+        self.primary_drift_corrected_axis.spines['top'].set_visible(False)
+        self.primary_drift_corrected_axis.spines['right'].set_visible(False)
+
+        xs = []
+        ys = []
+        yerrors = []
+        xs_removed = []
+        ys_removed = []
+        yerrors_removed = []
+
+        for spot in sample.spots:
+            if spot.drift_corrected_deltas[ratio.delta_name][0]:
+                if not spot.is_flagged:
+                    xs.append(spot.datetime)
+                    ys.append(spot.drift_corrected_deltas[ratio.delta_name][0])
+                    yerrors.append(spot.drift_corrected_deltas[ratio.delta_name][1])
+
+                else:
+                    xs_removed.append(spot.datetime)
+                    ys_removed.append(spot.drift_corrected_deltas[ratio.delta_name][0])
+                    yerrors_removed.append(spot.drift_corrected_deltas[ratio.delta_name][1])
+
+                self.primary_drift_corrected_axis.set_ylabel(ratio.delta_name)
+            else:
+                if not spot.is_flagged:
+                    xs.append(spot.datetime)
+                    ys.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
+                    yerrors.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
+
+                else:
+                    xs_removed.append(spot.datetime)
+                    ys_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
+                    yerrors_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
+
+                self.primary_drift_corrected_axis.set_ylabel(ratio.name)
+        self.primary_drift_corrected_axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
+        self.primary_drift_corrected_axis.errorbar(xs_removed, ys_removed, yerr=yerrors_removed, ls="", marker="o",
+                                                   markeredgecolor=sample.colour,
+                                                   markerfacecolor="none")
+
+        self.primary_drift_corrected_axis.set_xlabel("Time")
+        for x_tick_label in self.primary_drift_corrected_axis.get_xticklabels():
+            x_tick_label.set_rotation(30)
+            x_tick_label.set_horizontalalignment('right')
+
+        self.primary_drift_corrected_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+        self.fig.tight_layout()
 
     def _create_secondary_check_graph(self, sample, ratio):
         self.secondary_check_axis.clear()
