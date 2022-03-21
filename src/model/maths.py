@@ -49,7 +49,6 @@ def vector_length_from_origin(x: int, y: int):
 def drift_correction(x, y, dy, drift_coefficient, zero_time):
     correction = (zero_time - x) * drift_coefficient
     y_corrected = y + correction
-
     return y_corrected, dy
 
 

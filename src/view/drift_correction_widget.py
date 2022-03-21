@@ -308,7 +308,7 @@ class DriftCorrectionWidget(QWidget):
         yerrors_removed = []
 
         for spot in sample.spots:
-            if spot.not_corrected_deltas[ratio.delta_name][0]:
+            if ratio in spot.standard_ratios:
                 if not spot.is_flagged:
                     xs.append(spot.datetime)
                     ys.append(spot.not_corrected_deltas[ratio.delta_name][0])
@@ -374,7 +374,7 @@ class DriftCorrectionWidget(QWidget):
         yerrors_removed = []
 
         for spot in sample.spots:
-            if spot.drift_corrected_deltas[ratio.delta_name][0]:
+            if ratio in spot.standard_ratios:
                 if not spot.is_flagged:
                     xs.append(spot.datetime)
                     ys.append(spot.drift_corrected_deltas[ratio.delta_name][0])
@@ -433,7 +433,7 @@ class DriftCorrectionWidget(QWidget):
             yerrors_removed = []
 
             for spot in sample.spots:
-                if spot.drift_corrected_deltas[ratio.delta_name][0]:
+                if ratio.delta_name in spot.drift_corrected_deltas:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
                         ys.append(spot.drift_corrected_deltas[ratio.delta_name][0])
