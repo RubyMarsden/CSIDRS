@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QFileDialog, QTreeWidget, QTreeWidgetItem, \
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QTreeWidget, QTreeWidgetItem, \
     QVBoxLayout
 
 from src.view.change_sample_names_dialog import ChangeSampleNamesDialog
@@ -87,3 +87,4 @@ class FileEntryWidget(QWidget):
     def on_data_cleared(self):
         self.filename_list.clear()
         self.sample_name_list.clear()
+        self.filenames.clear()

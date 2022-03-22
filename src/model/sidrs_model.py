@@ -6,6 +6,7 @@ import matplotlib
 import numpy as np
 # from ltsfit.lts_linefit import lts_linefit
 import statsmodels.api as sm
+from PyQt5.QtGui import QColor
 
 from src.model.drift_correction_type import DriftCorrectionType
 from src.model.get_data_from_import import get_block_number_from_old_asc, \
@@ -141,14 +142,18 @@ class SidrsModel:
         self._create_samples_from_sample_names(self.spots)
         primary_reference_material_exists = False
         secondary_reference_material_accounted_for = False
-        for sample in self.samples_by_name.values():
+        for i, sample in enumerate(self.samples_by_name.values()):
             if sample.name == self.primary_reference_material:
                 sample.is_primary_reference_material = True
                 primary_reference_material_exists = True
                 number_of_primary_rm_spots = len(sample.spots)
+                sample.colour = "black"
+                sample.q_colour = QColor(0, 0, 0, 100)
             elif sample.name == self.secondary_reference_material:
                 sample.is_secondary_reference_material = True
                 secondary_reference_material_accounted_for = True
+                sample.colour = "grey"
+                sample.q_colour = QColor(128, 128, 128, 100)
 
             if self.secondary_reference_material == "No secondary reference material":
                 secondary_reference_material_accounted_for = True
@@ -199,9 +204,9 @@ class SidrsModel:
         drift_correction_intercept = self.drift_y_intercept_by_ratio[ratio]
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
-                if spot.standard_ratios[ratio]:
+                timestamp = time.mktime(spot.datetime.timetuple())
+                if ratio in spot.standard_ratios:
                     [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                    timestamp = time.mktime(spot.datetime.timetuple())
                     spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(
                         x=timestamp, y=delta,
                         dy=uncertainty,
@@ -209,7 +214,6 @@ class SidrsModel:
                         zero_time=self.t_zero)
                 else:
                     [ratio_value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
-                    timestamp = time.mktime(spot.datetime.timetuple())
                     spot.drift_corrected_ratio_values_by_ratio[ratio] = drift_correction(
                         x=timestamp,
                         y=ratio_value,
@@ -220,7 +224,10 @@ class SidrsModel:
     def calculate_data_not_drift_corrected(self, ratio):
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
-                spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+                if ratio in spot.standard_ratios:
+                    spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+                else:
+                    spot.drift_corrected_ratio_values_by_ratio[ratio] = spot.mean_two_st_error_isotope_ratios[ratio]
 
     def characterise_linear_drift(self, ratio, spots):
         times = []
@@ -228,13 +235,13 @@ class SidrsModel:
         delta_uncertainties = []
         for spot in spots:
             timestamp = time.mktime(spot.datetime.timetuple())
-            if spot.standard_ratios[ratio] and spot.is_flagged is False:
+            if ratio in spot.standard_ratios and not spot.is_flagged:
                 [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
                 times.append(timestamp)
                 deltas.append(delta)
                 delta_uncertainties.append(uncertainty)
 
-            elif not spot.standard_ratios[ratio] and spot.is_flagged is False:
+            elif ratio not in spot.standard_ratios and not spot.is_flagged:
                 [delta, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
                 times.append(timestamp)
                 deltas.append(delta)
@@ -242,7 +249,7 @@ class SidrsModel:
 
         self.primary_rm_deltas_by_ratio[ratio] = deltas
 
-        if self.primary_rm_deltas_by_ratio[ratio]:
+        if ratio in self.primary_rm_deltas_by_ratio:
             X = sm.add_constant(times)
 
             self.statsmodel_result_by_ratio[ratio] = sm.OLS(self.primary_rm_deltas_by_ratio[ratio], X).fit()
@@ -272,7 +279,7 @@ class SidrsModel:
                     primary_rm = sample
 
             primary_rm_spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
-                                    not spot.is_flagged and spot.standard_ratios[ratio]]
+                                    not spot.is_flagged and ratio in spot.standard_ratios]
 
             if primary_rm_spot_data:
                 primary_rm_mean = np.mean(primary_rm_spot_data)
@@ -284,12 +291,13 @@ class SidrsModel:
 
             for sample in self.samples_by_name.values():
                 for spot in sample.spots:
-                    data = spot.drift_corrected_deltas[ratio.delta_name]
-                    if data[0]:
+
+                    if ratio in spot.standard_ratios:
+                        data = spot.drift_corrected_deltas[ratio.delta_name]
                         spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
                                                                                                  primary_uncertainty)
                     else:
-                        spot.alpha_corrected_data[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+                        spot.alpha_corrected_data[ratio.name] = spot.drift_corrected_ratio_values_by_ratio[ratio]
 
     ###############
     ### Signals ###

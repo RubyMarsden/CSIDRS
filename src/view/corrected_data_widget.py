@@ -162,8 +162,8 @@ class CorrectedDataWidget(QWidget):
 
                 for ratio in method.ratios:
                     j += 1
-                    [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio.delta_name]
-                    if delta:
+                    if ratio in spot.standard_ratios:
+                        delta, delta_uncertainty = spot.alpha_corrected_data[ratio.delta_name]
                         delta_text = format(delta, ".3f")
                     else:
                         delta_text = "No delta calculated"
@@ -171,7 +171,8 @@ class CorrectedDataWidget(QWidget):
                     delta_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_item)
                     j += 1
-                    if delta_uncertainty:
+                    if ratio in spot.standard_ratios:
+                        delta, delta_uncertainty = spot.alpha_corrected_data[ratio.delta_name]
                         delta_uncertainty_text = format(delta_uncertainty, ".4f")
                     else:
                         delta_uncertainty_text = "No delta calculated"

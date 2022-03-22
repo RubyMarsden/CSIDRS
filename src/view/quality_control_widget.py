@@ -114,7 +114,7 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                if ratio in spot.standard_ratios:
                     ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
                     dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
 
@@ -168,7 +168,7 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                if ratio in spot.standard_ratios:
                     ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
                     dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
 
@@ -194,7 +194,7 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                if ratio in spot.standard_ratios:
                     ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
                     dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
 
@@ -221,7 +221,7 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                if ratio in spot.standard_ratios:
                     ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
                     dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
 
@@ -249,7 +249,7 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if spot.alpha_corrected_data[ratio.delta_name][0]:
+                if ratio in spot.standard_ratios:
                     ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
                     dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
 

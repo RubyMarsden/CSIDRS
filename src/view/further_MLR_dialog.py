@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
+import matplotlib.dates as mdates
 
 from src.utils import gui_utils
 from src.view.ratio_box_widget import RatioBoxWidget
@@ -107,9 +108,12 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         colour = self.primary_reference_material_sample.colour
         self.time_axis.errorbar(xs, self.ys, yerr=self.yerrors, marker="o", ls="", color=colour)
 
+        self.time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
         for x_tick_label in self.time_axis.get_xticklabels():
             x_tick_label.set_rotation(30)
             x_tick_label.set_horizontalalignment('right')
+
+        self.fig.tight_layout()
 
     def _create_dtfa_x_graph(self):
         xs = []

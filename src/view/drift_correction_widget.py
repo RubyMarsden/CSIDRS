@@ -19,7 +19,7 @@ class DriftCorrectionWidget(QWidget):
     def __init__(self, data_processing_dialog):
         QWidget.__init__(self)
 
-        self.linear_regression_layout = None
+        self.rhs_layout = None
         self.linear_regression_text_widget = None
         self.data_processing_dialog = data_processing_dialog
         self.ratio = self.data_processing_dialog.method.ratios[0]
@@ -33,7 +33,7 @@ class DriftCorrectionWidget(QWidget):
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
         self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_widget_contents)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
-        self.layout = QVBoxLayout()
+        self.layout = QHBoxLayout()
 
         for sample in self.data_processing_dialog.samples:
             if sample.is_primary_reference_material:
@@ -52,16 +52,12 @@ class DriftCorrectionWidget(QWidget):
         self.drift_radio_button = QRadioButton("Linear drift correction on")
         self.drift_radio_button.toggled.connect(self.drift_type_changed)
 
-        self.linear_regression_layout = self._create_linear_regression_layout()
+        self.rhs_layout = self._create_rhs_layout()
+        self.lhs_layout = self._create_lhs_layout()
         self.no_drift_radio_button.setChecked(True)
-        more_information_button_layout = self._create_more_information_buttons_layout()
 
-        self.layout.addWidget(self.ratio_radiobox_widget)
-        self.layout.addLayout(self.linear_regression_layout)
-        self.layout.addWidget(self.no_drift_radio_button)
-        self.layout.addWidget(self.drift_radio_button)
-        self.layout.addLayout(more_information_button_layout)
-        more_information_button_layout.setAlignment(Qt.AlignLeft)
+        self.layout.addLayout(self.lhs_layout, 4)
+        self.layout.addLayout(self.rhs_layout, 6)
 
         self.setLayout(self.layout)
 
@@ -72,12 +68,25 @@ class DriftCorrectionWidget(QWidget):
 
         return self.ratio_radiobox_widget
 
-    def _create_linear_regression_layout(self):
-        linear_regression_layout = QHBoxLayout()
-        linear_regression_layout.addWidget(self.linear_regression_text_widget, 4)
-        linear_regression_layout.addWidget(self.graph_widget, 6)
+    def _create_rhs_layout(self):
+        rhs_layout = QHBoxLayout()
+        rhs_layout.addWidget(self.graph_widget)
 
-        return linear_regression_layout
+        return rhs_layout
+
+    def _create_lhs_layout(self):
+        lhs_layout = QVBoxLayout()
+        lhs_layout.addWidget(self.ratio_radiobox_widget)
+        lhs_layout.addWidget(self.linear_regression_text_widget)
+        lhs_layout.addWidget(self.drift_radio_button)
+
+        lhs_layout.addWidget(self.no_drift_radio_button)
+
+        more_information_button_layout = self._create_more_information_buttons_layout()
+        lhs_layout.addLayout(more_information_button_layout)
+        more_information_button_layout.setAlignment(Qt.AlignLeft)
+
+        return lhs_layout
 
     def _create_linear_text_widget(self, ratio):
         widget = QWidget()
@@ -141,7 +150,7 @@ class DriftCorrectionWidget(QWidget):
 
     def _create_more_information_buttons_layout(self):
         layout = QHBoxLayout()
-        residuals_button = QPushButton("Residual graph and statsmodels summary")
+        residuals_button = QPushButton("Residual graph")
         residuals_button.clicked.connect(self.on_residual_button_pushed)
 
         operators_button = QPushButton("Developers - MLR")
@@ -154,11 +163,13 @@ class DriftCorrectionWidget(QWidget):
     def _create_graph_widget(self, ratio):
         self.fig = plt.figure()
 
-        self.spot_visible_grid_spec = GridSpec(2, 1)
-        self.primary_drift_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
-        self.secondary_check_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
+        self.grid_spec = GridSpec(3, 1)
+        self.primary_drift_axis = self.fig.add_subplot(self.grid_spec[0])
+        self.primary_drift_corrected_axis = self.fig.add_subplot(self.grid_spec[1])
+        self.secondary_check_axis = self.fig.add_subplot(self.grid_spec[2])
 
         self._create_primary_drift_graph(self.primary_sample, ratio)
+        self._create_primary_drift_corrected_graph(self.primary_sample, ratio)
         self._create_secondary_check_graph(self.secondary_sample, ratio)
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
@@ -174,9 +185,11 @@ class DriftCorrectionWidget(QWidget):
 
     def update_graphs(self, ratio):
         self.primary_drift_axis.clear()
+        self.primary_drift_corrected_axis.clear()
         self.secondary_check_axis.clear()
 
         self._create_primary_drift_graph(self.primary_sample, ratio)
+        self._create_primary_drift_corrected_graph(self.primary_sample, ratio)
         self._create_secondary_check_graph(self.secondary_sample, ratio)
 
         self.canvas.draw()
@@ -295,7 +308,7 @@ class DriftCorrectionWidget(QWidget):
         yerrors_removed = []
 
         for spot in sample.spots:
-            if spot.not_corrected_deltas[ratio.delta_name][0]:
+            if ratio in spot.standard_ratios:
                 if not spot.is_flagged:
                     xs.append(spot.datetime)
                     ys.append(spot.not_corrected_deltas[ratio.delta_name][0])
@@ -334,7 +347,7 @@ class DriftCorrectionWidget(QWidget):
             y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
             y_line_label = "y = " + "{:.3e}".format(drift_coefficient) + "x + " + format(drift_intercept, ".1f")
 
-            self.primary_drift_axis.plot(xs, y_line, marker="", label=y_line_label)
+            self.primary_drift_axis.plot(xs, y_line, marker="", label=y_line_label, color=sample.colour)
 
         self.primary_drift_axis.set_xlabel("Time")
         for x_tick_label in self.primary_drift_axis.get_xticklabels():
@@ -345,6 +358,59 @@ class DriftCorrectionWidget(QWidget):
 
         self.fig.tight_layout()
         self.primary_drift_axis.legend(loc="upper right", bbox_to_anchor=(1, 1.7))
+
+    def _create_primary_drift_corrected_graph(self, sample, ratio):
+        self.primary_drift_corrected_axis.clear()
+        self.primary_drift_corrected_axis.set_title("Primary ref. material: " + sample.name + "\ndrift corrected delta",
+                                                    loc="left")
+        self.primary_drift_corrected_axis.spines['top'].set_visible(False)
+        self.primary_drift_corrected_axis.spines['right'].set_visible(False)
+
+        xs = []
+        ys = []
+        yerrors = []
+        xs_removed = []
+        ys_removed = []
+        yerrors_removed = []
+
+        for spot in sample.spots:
+            if ratio in spot.standard_ratios:
+                if not spot.is_flagged:
+                    xs.append(spot.datetime)
+                    ys.append(spot.drift_corrected_deltas[ratio.delta_name][0])
+                    yerrors.append(spot.drift_corrected_deltas[ratio.delta_name][1])
+
+                else:
+                    xs_removed.append(spot.datetime)
+                    ys_removed.append(spot.drift_corrected_deltas[ratio.delta_name][0])
+                    yerrors_removed.append(spot.drift_corrected_deltas[ratio.delta_name][1])
+
+                self.primary_drift_corrected_axis.set_ylabel(ratio.delta_name)
+            else:
+                if not spot.is_flagged:
+                    xs.append(spot.datetime)
+                    ys.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
+                    yerrors.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
+
+                else:
+                    xs_removed.append(spot.datetime)
+                    ys_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
+                    yerrors_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
+
+                self.primary_drift_corrected_axis.set_ylabel(ratio.name)
+        self.primary_drift_corrected_axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
+        self.primary_drift_corrected_axis.errorbar(xs_removed, ys_removed, yerr=yerrors_removed, ls="", marker="o",
+                                                   markeredgecolor=sample.colour,
+                                                   markerfacecolor="none")
+
+        self.primary_drift_corrected_axis.set_xlabel("Time")
+        for x_tick_label in self.primary_drift_corrected_axis.get_xticklabels():
+            x_tick_label.set_rotation(30)
+            x_tick_label.set_horizontalalignment('right')
+
+        self.primary_drift_corrected_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+        self.fig.tight_layout()
 
     def _create_secondary_check_graph(self, sample, ratio):
         self.secondary_check_axis.clear()
@@ -367,7 +433,7 @@ class DriftCorrectionWidget(QWidget):
             yerrors_removed = []
 
             for spot in sample.spots:
-                if spot.drift_corrected_deltas[ratio.delta_name][0]:
+                if ratio.delta_name in spot.drift_corrected_deltas:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
                         ys.append(spot.drift_corrected_deltas[ratio.delta_name][0])

@@ -78,8 +78,10 @@ class BasicDataCheckWidget(QWidget):
 
         column_headers = ["Sample name"]
         for ratio in method.ratios:
-            column_headers.append(ratio.delta_name)
             ratio_uncertainty_name = "uncertainty"
+            column_headers.append(ratio.name)
+            column_headers.append(ratio_uncertainty_name)
+            column_headers.append(ratio.delta_name)
             column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
@@ -90,9 +92,17 @@ class BasicDataCheckWidget(QWidget):
                 row = [str(sample.name + " " + spot.id)]
 
                 for ratio in method.ratios:
-                    [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                    ratio_value, ratio_uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
+                    if ratio in spot.standard_ratios:
+                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio.delta_name]
+                    else:
+                        delta, delta_uncertainty = "No delta", ""
+                    row.append(ratio_value)
+                    row.append(ratio_uncertainty)
                     row.append(delta)
                     row.append(delta_uncertainty)
+
+
 
                 row.append(spot.dtfa_x)
                 row.append(spot.dtfa_y)
@@ -192,15 +202,16 @@ class BasicDataCheckWidget(QWidget):
 
                 for ratio in method.ratios:
                     j += 1
-                    [delta, delta_uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                    if delta:
+                    if ratio in spot.standard_ratios:
+                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio.delta_name]
                         delta_item = QTableWidgetItem(format(delta, ".3f"))
                     else:
                         delta_item = QTableWidgetItem("No delta calculated")
                     delta_item.setFont(font)
                     self.basic_data_table.setItem(i, j, delta_item)
                     j += 1
-                    if delta_uncertainty:
+                    if ratio in spot.standard_ratios:
+                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio.delta_name]
                         delta_uncertainty_item = QTableWidgetItem(format(delta_uncertainty, ".4f"))
                     else:
                         delta_uncertainty_item = QTableWidgetItem("No delta calculated")

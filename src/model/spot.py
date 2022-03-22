@@ -121,12 +121,11 @@ class Spot:
             raise Exception
 
         for ratio, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
-            standard_ratio = self.standard_ratios[ratio]
-            if standard_ratio:
-                delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio)
-            else:
-                delta, delta_uncertainty = None, None
-            self.not_corrected_deltas[ratio.delta_name] = [delta, delta_uncertainty]
+
+            if ratio in self.standard_ratios:
+                standard_ratio_value = self.standard_ratios[ratio]
+                delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio_value)
+                self.not_corrected_deltas[ratio.delta_name] = (delta, delta_uncertainty)
 
     def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(self):
         for ratio in self.raw_isotope_ratios.keys():
