@@ -37,7 +37,9 @@ def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed
 
 def calculate_delta_from_ratio(mean, two_st_error, standard_ratio):
     delta = ((mean / standard_ratio) - 1) * 1000
-    delta_uncertainty = delta * two_st_error / mean
+    # Currently the calculation of uncertainty propagation uses a 'fixed' standard ratio, i.e. it ignores the
+    # uncertainty in the standard ratio
+    delta_uncertainty = two_st_error * 1000/standard_ratio
     return delta, delta_uncertainty
 
 
