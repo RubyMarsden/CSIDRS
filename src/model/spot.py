@@ -12,6 +12,7 @@ from src.model.get_data_from_import import get_data_from_old_asc, get_primary_be
     get_dtfa_x_and_y_from_old_asc
 from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
     carbon_isotope_reference, chlorine_isotope_reference
+from src.utils.convert_date_format_from_new_asci import standardise_date_format
 from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
     convert_to_twenty_four_hour_time_am
 
@@ -27,7 +28,7 @@ class Spot:
         self.mass_peak_names = mass_peak_names
 
         self.spot_data = spot_data
-        self.date = self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]]
+        self.date = standardise_date_format(self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]])
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
         # TODO - what happens at midnight?
         if self.twelve_hr_data == "AM":
