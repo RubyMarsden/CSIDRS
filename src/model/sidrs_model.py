@@ -9,8 +9,8 @@ import statsmodels.api as sm
 from PyQt5.QtGui import QColor
 
 from src.model.drift_correction_type import DriftCorrectionType
-from src.model.get_data_from_import import get_block_number_from_old_asc, \
-    get_analytical_conditions_data_from_old_asc_file
+from src.model.get_data_from_import import get_block_number_from_asc, \
+    get_analytical_conditions_data_from_asc_file
 from src.model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction, \
     calculate_probability_one_outlier
 from src.model.sample import Sample
@@ -86,7 +86,8 @@ class SidrsModel:
                 data_for_spot.append(line)
         spot = Spot(filename, data_for_spot, self.isotopes)
         # In the asc file cycles are labelled blocks
-        self.number_of_cycles = get_block_number_from_old_asc(data_for_spot)
+        self.number_of_cycles = get_block_number_from_asc(data_for_spot)
+        print(spot.datetime)
         return spot
 
     def _parse_asc_file_into_analytical_conditions_data(self, filename):
@@ -100,7 +101,7 @@ class SidrsModel:
                     line[line.index(i)] = str.strip(i)
                 data.append(line)
 
-        analytical_condition_data = get_analytical_conditions_data_from_old_asc_file(data)
+        analytical_condition_data = get_analytical_conditions_data_from_asc_file(data)
         return analytical_condition_data
 
     def sample_names_from_filenames(self, filenames):

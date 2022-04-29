@@ -8,8 +8,8 @@ from src.model.mass_peak import MassPeak
 from src.model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev, \
     calculate_delta_from_ratio
 from src.model.settings.asc_file_settings_general import *
-from src.model.get_data_from_import import get_data_from_old_asc, get_primary_beam_current_data_old_asc, \
-    get_dtfa_x_and_y_from_old_asc
+from src.model.get_data_from_import import get_data_from_asc, get_primary_beam_current_data_asc, \
+    get_dtfa_x_and_y_from_asc
 from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
     carbon_isotope_reference, chlorine_isotope_reference
 from src.utils.convert_date_format_from_new_asci import standardise_date_format
@@ -41,9 +41,9 @@ class Spot:
         self.y_position = int(spot_data[Y_POSITION_INDEX[0]][Y_POSITION_INDEX[1]])
         self.distance_from_mount_centre = vector_length_from_origin(self.x_position, self.y_position)
 
-        self.dtfa_x, self.dtfa_y = get_dtfa_x_and_y_from_old_asc(self.spot_data)
+        self.dtfa_x, self.dtfa_y = get_dtfa_x_and_y_from_asc(self.spot_data)
 
-        self.primary_beam_current = get_primary_beam_current_data_old_asc(self.spot_data)
+        self.primary_beam_current = get_primary_beam_current_data_asc(self.spot_data)
 
         self.is_flagged = False
         self.secondary_ion_yield = None
@@ -60,7 +60,7 @@ class Spot:
         self.alpha_corrected_data = {}
 
         for mass_peak_name in self.mass_peak_names:
-            raw_cps_data, detector_data = get_data_from_old_asc(self.spot_data, mass_peak_name)
+            raw_cps_data, detector_data = get_data_from_asc(self.spot_data, mass_peak_name)
             mass_peak = MassPeak(
                 self.full_sample_name,
                 self.id,
