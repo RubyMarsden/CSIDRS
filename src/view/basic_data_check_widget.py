@@ -9,6 +9,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
 from src.utils.make_csv_file import write_csv_output, get_output_file
+from src.view.ratio_box_widget import RatioBoxWidget
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
@@ -22,7 +23,18 @@ class BasicDataCheckWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
+
+        self.ratio = self.data_processing_dialog.method.ratios[0]
+        self.samples = data_processing_dialog.samples
+
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
+        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+
+        self.graph_widget = self._create_graphs_to_check_data()
+        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
+                                                    self.data_processing_dialog.model.signals)
+
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         layout = QHBoxLayout()
 
@@ -56,8 +68,9 @@ class BasicDataCheckWidget(QWidget):
 
     def _create_rhs_layout(self):
         layout = QVBoxLayout()
-        graphs = self._create_graphs_to_check_data()
-        layout.addWidget(graphs)
+
+        layout.addWidget(self.ratio_radiobox_widget)
+        layout.addWidget(self.graph_widget)
 
         return layout
 
@@ -70,6 +83,15 @@ class BasicDataCheckWidget(QWidget):
     def on_cycle_data_button_pushed(self):
         dialog = CycleDataDialog(self.data_processing_dialog)
         result = dialog.exec()
+
+    def change_ratio(self, ratio):
+        self.ratio = ratio
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
+        self.update_graphs()
+
+    def update_graphs(self):
+        self.create_raw_delta_time_plot(self.ratio)
+        self.canvas.draw()
 
     def on_data_output_button_pushed(self):
         method = self.data_processing_dialog.method
@@ -116,12 +138,12 @@ class BasicDataCheckWidget(QWidget):
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         if current_item is None or current_item.is_sample:
-            self.create_ion_yield_time_plot()
+            self.create_raw_delta_time_plot()
             self.create_ion_distance_data_plot()
         else:
             current_spot = current_item.spot
             if previous_tree_item is None or previous_tree_item.is_sample:
-                self.create_ion_yield_time_plot()
+                self.create_raw_delta_time_plot()
                 self.create_ion_distance_data_plot()
                 previous_spot = None
             else:
@@ -136,14 +158,10 @@ class BasicDataCheckWidget(QWidget):
             for x, y in zip(xs, ys):
                 sample = self.data_processing_dialog.model.samples_by_name[x.sample_name]
                 if x == current_spot:
-                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", markersize=4,
-                                                      color="yellow")
-                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color="yellow")
+                    self.raw_delta_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color="yellow")
 
                 if x == previous_spot:
-                    self.ion_yield_distance_axis.plot(x.distance_from_mount_centre, y, ls="", marker="o", markersize=4,
-                                                      color=sample.colour)
-                    self.ion_yield_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color=sample.colour)
+                    self.raw_delta_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color=sample.colour)
 
         self.canvas.draw()
 
@@ -245,57 +263,49 @@ class BasicDataCheckWidget(QWidget):
     def _create_graphs_to_check_data(self):
         self.fig = plt.figure()
 
-        self.spot_visible_grid_spec = GridSpec(3, 1, height_ratios=[1, 1, 2])
-        self.ion_yield_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
-        self.ion_yield_distance_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
-        self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[2])
+        self.spot_visible_grid_spec = GridSpec(2, 1, height_ratios=[1, 2])
+        self.raw_delta_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
+        self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
-        self.create_ion_yield_time_plot()
-        self.create_ion_distance_data_plot()
+        self.create_raw_delta_time_plot(self.ratio)
         self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
 
         widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
         return widget
 
-    def create_ion_yield_time_plot(self):
-        axis = self.ion_yield_time_axis
-        samples = self.data_processing_dialog.samples
-        axis.clear()
+    def create_raw_delta_time_plot(self, ratio):
+        self.raw_delta_time_axis.clear()
 
-        axis.spines['top'].set_visible(False)
-        axis.spines['right'].set_visible(False)
-        for sample in samples:
-            colour = sample.colour
+        self.raw_delta_time_axis.spines['top'].set_visible(False)
+        self.raw_delta_time_axis.spines['right'].set_visible(False)
+        for sample in self.samples:
             xs = [spot.datetime for spot in sample.spots]
-            ys = [spot.secondary_ion_yield for spot in sample.spots]
+            ys = []
+            dys = []
+            for spot in sample.spots:
+                if ratio in spot.standard_ratios:
+                    self.raw_delta_time_axis.set_title("Raw " + ratio.delta_name + " against time.")
+                    ys.append(spot.not_corrected_deltas[ratio.delta_name][0])
+                    dys.append(spot.not_corrected_deltas[ratio.delta_name][1])
 
-            axis.plot(xs, ys, marker="o", ls="", markersize=4, color=colour)
+                    self.raw_delta_time_axis.set_ylabel(ratio.delta_name)
 
-        axis.set_xlabel("Time")
-        for x_tick_label in axis.get_xticklabels():
-            x_tick_label.set_rotation(30)
-            x_tick_label.set_horizontalalignment('right')
-        axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+                else:
+                    self.raw_delta_time_axis.set_title("Raw " + ratio.name + " against time.")
+                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-        axis.set_ylabel("Relative secondary \n ion yield")
+                    self.raw_delta_time_axis.set_ylabel(ratio.name)
+                    self.raw_delta_time_axis.set_ylabel(ratio.name)
+
+            self.raw_delta_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", markersize=4, color=sample.colour)
+
+        self.raw_delta_time_axis.set_xlabel("Time")
+        self.raw_delta_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
         self.fig.tight_layout()
 
-    def create_ion_distance_data_plot(self):
-        axis = self.ion_yield_distance_axis
-        samples = self.data_processing_dialog.samples
-        axis.clear()
-
-        axis.spines['top'].set_visible(False)
-        axis.spines['right'].set_visible(False)
-        for sample in samples:
-            xs = [spot.distance_from_mount_centre for spot in sample.spots]
-            ys = [spot.secondary_ion_yield for spot in sample.spots]
-            axis.plot(xs, ys, marker="o", ls="", markersize=4, color=sample.colour)
-
-        axis.set_xlabel("Distance from centre of mount")
-        axis.set_ylabel("Relative secondary \n ion yield")
-        self.fig.tight_layout()
 
     def create_all_samples_x_y_positions_plot(self, samples, axis):
         axis.clear()

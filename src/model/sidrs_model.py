@@ -87,7 +87,6 @@ class SidrsModel:
         spot = Spot(filename, data_for_spot, self.isotopes)
         # In the asc file cycles are labelled blocks
         self.number_of_cycles = get_block_number_from_asc(data_for_spot)
-        print(spot.datetime)
         return spot
 
     def _parse_asc_file_into_analytical_conditions_data(self, filename):
