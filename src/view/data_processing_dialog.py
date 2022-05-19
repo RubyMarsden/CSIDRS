@@ -1,10 +1,12 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTabWidget
 
+from src.model.elements import Element
 from src.view.basic_data_check_widget import BasicDataCheckWidget
 from src.view.corrected_data_widget import CorrectedDataWidget
 from src.view.drift_correction_widget import DriftCorrectionWidget
 from src.view.quality_control_widget import QualityControlWidget
 from src.view.sample_tree import SampleTreeWidget
+from src.view.sulphur_CAP_widget import SulphurCAPWidget
 
 
 class DataProcessingDialog(QDialog):
@@ -16,6 +18,7 @@ class DataProcessingDialog(QDialog):
         self.sample_tree = SampleTreeWidget(self)
 
         self.method = model.method
+        self.element = model.element
 
         self.setWindowTitle("Data processing")
         self.setMinimumWidth(500)
@@ -43,6 +46,8 @@ class DataProcessingDialog(QDialog):
         self.tabs.addTab(DriftCorrectionWidget(self), "2. Drift correction")
         self.tabs.addTab(QualityControlWidget(self), "3. Quality control")
         self.tabs.addTab(CorrectedDataWidget(self), "4. Corrected data")
+        if self.element == Element.SUL:
+            self.tabs.addTab(SulphurCAPWidget(self), "5. Sulphur CAP graphs")
 
         layout = QVBoxLayout()
 
