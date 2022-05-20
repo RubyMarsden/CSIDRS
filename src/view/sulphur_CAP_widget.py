@@ -12,12 +12,14 @@ class SulphurCAPWidget(QWidget):
         self.data_processing_dialog = data_processing_dialog
         self.ratio = self.data_processing_dialog.method.ratios[0]
         self.samples = data_processing_dialog.samples
-        self.method = data_processing_dialog,method
+        self.method = data_processing_dialog.method
 
         layout = QVBoxLayout()
 
         graph_widget = self._create_graph_tab_widget()
         layout.addWidget(graph_widget)
+
+        self.update_graph_tabs()
 
         self.setLayout(layout)
 
@@ -83,15 +85,23 @@ class SulphurCAPWidget(QWidget):
         self.delta_four_vs_delta_three_axis.spines['right'].set_visible(False)
 
         for sample in self.samples:
-            delta_three = [spot.drift_corrected_deltas[self.method.ratios[0]] for spot in sample.spots]
-            ys = []
-            xs = []
-            dys = []
-            dxs = []
+            delta_three = [spot.drift_corrected_deltas[self.method.ratios[0].delta_name][0] for spot in sample.spots]
+            delta_three_errors = [spot.drift_corrected_deltas[self.method.ratios[0].delta_name][1] for spot in sample.spots]
+            delta_four = [spot.drift_corrected_deltas[self.method.ratios[1].delta_name][0] for spot in sample.spots]
+            delta_four_errors = [spot.drift_corrected_deltas[self.method.ratios[1].delta_name][1] for spot in sample.spots]
+
+            self.delta_four_vs_delta_three_axis.errorbar(delta_four, delta_three,xerr=delta_four_errors, yerr=delta_three_errors, ls="", marker="o", color=sample.colour)
 
     def _create_delta_four_vs_delta_six_graph(self):
+        return
 
     def _create_cap_three_vs_delta_four_graph(self):
-
+        return
 
     def _create_cap_three_vs_cap_six_graph(self):
+        return
+
+    def update_graph_tabs(self):
+        self._create_delta_four_vs_delta_three_graph()
+
+        self.delta_four_vs_delta_three_canvas.draw()
