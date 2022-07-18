@@ -1,3 +1,5 @@
+import math
+
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 from matplotlib import pyplot as plt
 
@@ -74,26 +76,50 @@ class SulphurCAPWidget(QWidget):
 
         return graph_widget
 
-################
-### PLOTTING ###
-################
+    ################
+    ### PLOTTING ###
+    ################
 
-    def _create_delta_four_vs_delta_three_graph(self):
-        self.delta_four_vs_delta_three_axis.clear()
-        self.delta_four_vs_delta_three_axis.set_title("delta33 vs delta34")
-        self.delta_four_vs_delta_three_axis.spines['top'].set_visible(False)
-        self.delta_four_vs_delta_three_axis.spines['right'].set_visible(False)
+    def _create_delta_graph(self, axis, ratio_x_index, ratio_y_index, MDF_factor):
+        ratio_y = self.method.ratios[ratio_y_index]
+        ratio_x = self.method.ratios[ratio_x_index]
+        axis.clear()
+        axis.set_title(ratio_y.delta_name + " vs " + ratio_x.delta_name)
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+
+        axis.set_xlabel(ratio_x.delta_name)
+        axis.set_ylabel(ratio_y.delta_name)
+
+        list_for_finding_minimum_and_maximum_x_values = [0]
+        list_for_finding_minimum_and_maximum_y_values = [0]
 
         for sample in self.samples:
-            delta_three = [spot.drift_corrected_deltas[self.method.ratios[0].delta_name][0] for spot in sample.spots]
-            delta_three_errors = [spot.drift_corrected_deltas[self.method.ratios[0].delta_name][1] for spot in sample.spots]
-            delta_four = [spot.drift_corrected_deltas[self.method.ratios[1].delta_name][0] for spot in sample.spots]
-            delta_four_errors = [spot.drift_corrected_deltas[self.method.ratios[1].delta_name][1] for spot in sample.spots]
+            delta_y_value = [spot.drift_corrected_deltas[ratio_y.delta_name][0] for spot in
+                             sample.spots]
+            delta_y_errors = [spot.drift_corrected_deltas[ratio_y.delta_name][1] for spot in
+                              sample.spots]
+            delta_x_value = [spot.drift_corrected_deltas[ratio_x.delta_name][0] for spot in
+                             sample.spots]
+            delta_x_errors = [spot.drift_corrected_deltas[ratio_x.delta_name][1] for spot in
+                              sample.spots]
+            list_for_finding_minimum_and_maximum_y_values.extend(delta_y_value)
+            list_for_finding_minimum_and_maximum_x_values.extend(delta_x_value)
+            axis.errorbar(delta_x_value, delta_y_value, xerr=delta_x_errors,
+                                                         yerr=delta_y_errors, ls="", marker="o",
+                                                         color=sample.colour, label=sample.name)
 
-            self.delta_four_vs_delta_three_axis.errorbar(delta_four, delta_three,xerr=delta_four_errors, yerr=delta_three_errors, ls="", marker="o", color=sample.colour)
+        list_for_finding_minimum_and_maximum_x_values.append(min(list_for_finding_minimum_and_maximum_y_values) / MDF_factor)
+        list_for_finding_minimum_and_maximum_x_values.append(max(list_for_finding_minimum_and_maximum_y_values) / MDF_factor)
+        minimum = min(list_for_finding_minimum_and_maximum_x_values)
+        maximum = max(list_for_finding_minimum_and_maximum_x_values)
+        round_down_minimum = math.floor(minimum)
+        round_up_maximum = math.ceil(maximum)
+        xs = range(round_down_minimum, round_up_maximum + 1, 1)
+        ys = [MDF_factor * x for x in xs]
 
-    def _create_delta_four_vs_delta_six_graph(self):
-        return
+        axis.plot(xs, ys, marker="", ls="-", color='lightgray', label='MDF')
+        axis.legend()
 
     def _create_cap_three_vs_delta_four_graph(self):
         return
@@ -102,6 +128,8 @@ class SulphurCAPWidget(QWidget):
         return
 
     def update_graph_tabs(self):
-        self._create_delta_four_vs_delta_three_graph()
+        self._create_delta_graph(self.delta_four_vs_delta_three_axis, 1, 0, 0.515)
+        self._create_delta_graph(self.delta_four_vs_delta_six_axis, 1, 2, 1.91)
 
         self.delta_four_vs_delta_three_canvas.draw()
+        self.delta_four_vs_delta_six_canvas.draw()
