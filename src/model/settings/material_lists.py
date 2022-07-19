@@ -12,6 +12,7 @@ class Material(Enum):
     PLT = "Pentlandite"
     APT = "Apatite"
 
+
 materials_by_element = {
     Element.OXY: [Material.ZIR, Material.QTZ],
     Element.SUL: [Material.PYR, Material.PRH, Material.CPT, Material.PLT, Material.APT],

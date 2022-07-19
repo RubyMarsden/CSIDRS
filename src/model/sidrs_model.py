@@ -285,7 +285,8 @@ class SidrsModel:
                 primary_rm_mean = np.mean(primary_rm_spot_data)
                 primary_uncertainty = np.std(primary_rm_spot_data)
 
-                alpha_sims = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
+                alpha_sims, alpha_sims_uncertainty = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
+                                                  primary_reference_material_st_dev=primary_uncertainty,
                                                   externally_measured_primary_reference_value_and_uncertainty=
                                                   self.primary_rm_values_by_ratio[ratio])
 
@@ -295,7 +296,7 @@ class SidrsModel:
                     if ratio in spot.standard_ratios:
                         data = spot.drift_corrected_deltas[ratio.delta_name]
                         spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
-                                                                                                 primary_uncertainty)
+                                                                                                 alpha_sims_uncertainty)
                     else:
                         spot.alpha_corrected_data[ratio.name] = spot.drift_corrected_ratio_values_by_ratio[ratio]
 

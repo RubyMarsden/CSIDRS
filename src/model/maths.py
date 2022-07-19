@@ -39,7 +39,7 @@ def calculate_delta_from_ratio(mean, two_st_error, standard_ratio):
     delta = ((mean / standard_ratio) - 1) * 1000
     # Currently the calculation of uncertainty propagation uses a 'fixed' standard ratio, i.e. it ignores the
     # uncertainty in the standard ratio
-    delta_uncertainty = two_st_error * 1000/standard_ratio
+    delta_uncertainty = two_st_error * 1000 / standard_ratio
     return delta, delta_uncertainty
 
 
@@ -86,21 +86,28 @@ def calculate_reduced_chi_squared():
     return
 
 
-def calculate_sims_alpha(primary_reference_material_mean_delta,
+def calculate_sims_alpha(primary_reference_material_mean_delta, primary_reference_material_st_dev,
                          externally_measured_primary_reference_value_and_uncertainty):
     externally_measured_rm_value, uncertainty = externally_measured_primary_reference_value_and_uncertainty
     alpha_sims = (1 + (primary_reference_material_mean_delta / 1000)) / \
                  (1 + (externally_measured_rm_value / 1000))
 
-    return alpha_sims
+    alpha_sims_uncertainty = math.sqrt(((1 / (1000 + externally_measured_rm_value)) ** 2) * (
+            primary_reference_material_st_dev ** 2) + ((((-1000 - primary_reference_material_mean_delta) / (
+            (1000 + externally_measured_rm_value) ** 2)) ** 2) * (uncertainty ** 2)))
+
+    print(externally_measured_rm_value, " ", alpha_sims, " ", alpha_sims_uncertainty)
+
+    return alpha_sims, alpha_sims_uncertainty
 
 
-def calculate_alpha_correction(data, alpha_sims, uncertainty_from_primary_st_dev):
+def calculate_alpha_correction(data, alpha_sims, alpha_sims_uncertainty):
     data_point, uncertainty = data
     alpha_corrected_data = (((1 + (data_point / 1000)) / alpha_sims) - 1) * 1000
-    uncertainty_propagated_relatively = alpha_corrected_data * uncertainty / data_point
+
     alpha_corrected_uncertainty = math.sqrt(
-        (uncertainty_propagated_relatively ** 2) + (uncertainty_from_primary_st_dev ** 2))
+        ((-1000 - data_point / (alpha_sims ** 2)) ** 2) * (alpha_sims_uncertainty ** 2) + ((1 / alpha_sims) ** 2) * (
+                    uncertainty ** 2))
     return alpha_corrected_data, alpha_corrected_uncertainty
 
 
