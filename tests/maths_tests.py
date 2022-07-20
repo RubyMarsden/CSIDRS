@@ -1,7 +1,8 @@
 import unittest
 import numpy as np
 
-from src.model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, calculate_alpha_correction
+from src.model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
+    calculate_alpha_correction
 from src.model.mass_peak import MassPeak
 
 
@@ -85,12 +86,25 @@ class MathsTests(unittest.TestCase):
         self.assertAlmostEqual(alpha_sims, 1.00231497650099000000)
         self.assertAlmostEqual(uncertainty, 0.0003223537519)
 
-    @unittest.skip
     def test_alpha_correction_no_uncertainty(self):
         alpha_corrected_data, uncertainty = calculate_alpha_correction((1, 0), 1, 0)
-
-        self.assertEqual(alpha_corrected_data, 1)
+        # is almost equal due to some floating point errors
+        self.assertAlmostEqual(alpha_corrected_data, 1)
         self.assertEqual(uncertainty, 0)
+
+    def test_alpha_correction_integers(self):
+        alpha_corrected_data, uncertainty = calculate_alpha_correction((10, 1), 2, 1)
+        # is almost equal due to some floating point errors
+        self.assertAlmostEqual(alpha_corrected_data, -495)
+        self.assertAlmostEqual(uncertainty, 252.50049504902)
+
+    def test_alpha_correction_S34_example(self):
+        alpha_corrected_data, uncertainty = calculate_alpha_correction((4.49, 0.16), alpha_sims=1.00231497650099000000,
+                                                                       alpha_sims_uncertainty=0.0003223537519)
+        # is almost equal due to some floating point errors
+        self.assertAlmostEqual(alpha_corrected_data, 2.17)
+        self.assertAlmostEqual(uncertainty, 0.35967174905)
+
 
 if __name__ == '__main__':
     unittest.main()
