@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from src.model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
-    calculate_alpha_correction
+    calculate_alpha_correction, calculate_cap_value_and_uncertainty
 from src.model.mass_peak import MassPeak
 
 
@@ -104,6 +104,40 @@ class MathsTests(unittest.TestCase):
         # is almost equal due to some floating point errors
         self.assertAlmostEqual(alpha_corrected_data, 2.17)
         self.assertAlmostEqual(uncertainty, 0.35967174905)
+
+    def test_calculate_cap_value_and_uncertainty_no_uncertainty(self):
+        cap_value, uncertainty = calculate_cap_value_and_uncertainty(delta_value_x=10,
+                                                                     uncertainty_x=0,
+                                                                     delta_value_relative=1,
+                                                                     uncertainty_relative=0,
+                                                                     MDF=1,
+                                                                     reference_material_covariance=0)
+
+        self.assertAlmostEqual(cap_value, 9)
+        self.assertEqual(uncertainty, 0)
+
+    def test_calculate_cap_value_and_uncertainty_integers(self):
+        cap_value, uncertainty = calculate_cap_value_and_uncertainty(delta_value_x=100,
+                                                                     uncertainty_x=1,
+                                                                     delta_value_relative=10,
+                                                                     uncertainty_relative=1,
+                                                                     MDF=1,
+                                                                     reference_material_covariance=1)
+
+        self.assertAlmostEqual(cap_value, 90)
+        self.assertEqual(uncertainty, 2)
+
+
+    def test_calculate_cap_value_and_uncertainty_Cap33_example(self):
+        cap_value, uncertainty = calculate_cap_value_and_uncertainty(delta_value_x=1.2,
+                                                                     uncertainty_x=0.09,
+                                                                     delta_value_relative=2.17,
+                                                                     uncertainty_relative=0.16,
+                                                                     MDF=0.515,
+                                                                     reference_material_covariance=0.0136)
+
+        self.assertAlmostEqual(cap_value, 0.083037451910)
+        self.assertAlmostEqual(uncertainty, 0.16990815079992)
 
 
 if __name__ == '__main__':

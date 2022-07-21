@@ -106,7 +106,7 @@ def calculate_alpha_correction(data, alpha_sims, alpha_sims_uncertainty):
 
     alpha_corrected_uncertainty = math.sqrt(
         (((-1000 - data_point) / (alpha_sims ** 2)) ** 2) * (alpha_sims_uncertainty ** 2) + ((1 / alpha_sims) ** 2) * (
-                    uncertainty ** 2))
+                uncertainty ** 2))
     return alpha_corrected_data, alpha_corrected_uncertainty
 
 
@@ -114,3 +114,21 @@ def calculate_probability_one_outlier(number_of_tests):
     # We define an outlier as having a 1% probability of occurring. (Approximately outside of the 1.5 IQR bounds)
     probability = 1 - (0.99 ** int(number_of_tests))
     return probability
+
+
+def calculate_cap_value_and_uncertainty(delta_value_x, uncertainty_x, delta_value_relative, uncertainty_relative, MDF,
+                                        reference_material_covariance):
+    # from LaFlamme et al, 2016 where delta_value_x is the delta value of interest (either 33S or 36S) and
+    # delta_value_relative is 34S which 33S and 36S are compared to. However, the maths formula does not specify
+    # which delta values are of interest as it could be used for other isotope systems in future.
+
+    cap = delta_value_x - 1000 * ((((delta_value_relative / 1000) + 1) ** MDF) - 1)
+
+    # This uncertainty calculation includes a covariance term as in LaFlamme et al, 2016, but otherwise is from
+    # Farquher et al, 2013.
+    cap_uncertainty = math.sqrt((uncertainty_x ** 2) + (
+                (uncertainty_relative ** 2) * ((MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF))) ** 2)) + (
+                                            2 * reference_material_covariance * (
+                                                MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF)))))
+
+    return cap, cap_uncertainty
