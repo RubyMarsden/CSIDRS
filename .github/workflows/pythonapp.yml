@@ -46,13 +46,13 @@ jobs:
 
           - os: ubuntu-latest
             OS_NAME: ubuntu
-            PYTHON_VERSION: 3.6.13
+            PYTHON_VERSION: 3.8.10
             EXTENSION:
             RESOURCES: resources:resources
 
           - os: windows-latest
             OS_NAME: windows
-            PYTHON_VERSION: 3.6.8
+            PYTHON_VERSION: 3.8.10
             EXTENSION: .exe
             RESOURCES: resources;resources
 
@@ -86,7 +86,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller==3.6
+          pip install pyinstaller==3.8
 
       - name: Build with pyinstaller
         shell: bash
