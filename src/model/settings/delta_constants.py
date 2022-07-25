@@ -1,5 +1,5 @@
 from enum import Enum
-from src.model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32, O17_O16, O18_O16, O16H1_O16, Cl37_Cl35, \
+from model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32, O17_O16, O18_O16, O16H1_O16, Cl37_Cl35, \
     F19_Cl37, C13_C12
 
 

@@ -1,6 +1,6 @@
-from src.model.isotopes import Isotope
-from src.model.method import Method
-from src.model.ratio import Ratio
+from model.isotopes import Isotope
+from model.method import Method
+from model.ratio import Ratio
 
 # Chlorine ratios
 Cl37_Cl35 = Ratio(Isotope.Cl37, Isotope.Cl35)

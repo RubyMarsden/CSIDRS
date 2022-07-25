@@ -1,7 +1,7 @@
-from src.model.settings.methods_from_isotopes import Cl37_Cl35, F19_Cl37, S33_S32, S34_S32, S36_S32, O17_O16, O18_O16, \
+from model.settings.methods_from_isotopes import Cl37_Cl35, F19_Cl37, S33_S32, S34_S32, S36_S32, O17_O16, O18_O16, \
     C13_C12
-from src.model.elements import Element
-from src.model.settings.material_lists import Material
+from model.elements import Element
+from model.settings.material_lists import Material
 
 reference_material_dictionary = {
     # key                                  # value

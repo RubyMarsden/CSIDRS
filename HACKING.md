@@ -116,7 +116,7 @@ e.g.:
 
 8. Add the delta reference material to the Spot class in `src/model/spot.py` and additionally import the reference required.
    ```python
-   from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, new_element_isotope_reference
+   from model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, new_element_isotope_reference
    ```
    ```python
    def calculate_raw_delta_for_isotope_ratio(self, element):

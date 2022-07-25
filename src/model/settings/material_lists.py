@@ -1,6 +1,6 @@
 from enum import Enum
 
-from src.model.elements import Element
+from model.elements import Element
 
 
 class Material(Enum):

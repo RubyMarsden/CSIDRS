@@ -8,14 +8,14 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTab
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
-from src.utils.make_csv_file import write_csv_output, get_output_file
-from src.view.ratio_box_widget import RatioBoxWidget
+from utils.make_csv_file import write_csv_output, get_output_file
+from view.ratio_box_widget import RatioBoxWidget
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
 
-from src.utils import gui_utils
-from src.view.cycle_data_dialog import CycleDataDialog
+from utils import gui_utils
+from view.cycle_data_dialog import CycleDataDialog
 
 
 class BasicDataCheckWidget(QWidget):

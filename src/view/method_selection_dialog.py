@@ -2,8 +2,8 @@
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox, \
     QRadioButton
 
-from src.model.settings.material_lists import materials_by_element
-from src.model.isotopes import isotopes_by_element
+from model.settings.material_lists import materials_by_element
+from model.isotopes import isotopes_by_element
 
 
 class MethodSelectionDialog(QDialog):

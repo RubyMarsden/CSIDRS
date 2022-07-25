@@ -2,18 +2,18 @@ import math
 import re
 from datetime import datetime
 
-from src.model.elements import Element
-from src.model.settings.delta_constants import DeltaReferenceMaterial
-from src.model.mass_peak import MassPeak
-from src.model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev, \
+from model.elements import Element
+from model.settings.delta_constants import DeltaReferenceMaterial
+from model.mass_peak import MassPeak
+from model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev, \
     calculate_delta_from_ratio
-from src.model.settings.asc_file_settings_general import *
-from src.model.get_data_from_import import get_data_from_asc, get_primary_beam_current_data_asc, \
+from model.settings.asc_file_settings_general import *
+from model.get_data_from_import import get_data_from_asc, get_primary_beam_current_data_asc, \
     get_dtfa_x_and_y_from_asc
-from src.model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
+from model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
     carbon_isotope_reference, chlorine_isotope_reference
-from src.utils.convert_date_format_from_new_asci import standardise_date_format
-from src.utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
+from utils.convert_date_format_from_new_asci import standardise_date_format
+from utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
     convert_to_twenty_four_hour_time_am
 
 

@@ -4,8 +4,8 @@ from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 import matplotlib.dates as mdates
 
-from src.utils import gui_utils
-from src.view.ratio_box_widget import RatioBoxWidget
+from utils import gui_utils
+from view.ratio_box_widget import RatioBoxWidget
 
 
 class FurtherMultipleLinearRegressionDialog(QDialog):

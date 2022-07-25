@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox
 
-from src.view.stats_dialog import StatsWarningDialog
+from view.stats_dialog import StatsWarningDialog
 
 
 class CycleTreeWidget(QWidget):

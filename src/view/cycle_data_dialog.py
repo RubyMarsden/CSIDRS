@@ -3,11 +3,11 @@ from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, 
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 
-from src.utils import gui_utils
-from src.utils.make_csv_file import get_output_file, write_csv_output
-from src.view.cycle_tree_widget import CycleTreeWidget
-from src.view.ratio_box_widget import RatioBoxWidget
-from src.view.sample_tree import SampleTreeWidget
+from utils import gui_utils
+from utils.make_csv_file import get_output_file, write_csv_output
+from view.cycle_tree_widget import CycleTreeWidget
+from view.ratio_box_widget import RatioBoxWidget
+from view.sample_tree import SampleTreeWidget
 
 matplotlib.use('QT5Agg')
 import matplotlib.pyplot as plt

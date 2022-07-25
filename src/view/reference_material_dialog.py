@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QRadioButton, \
     QGridLayout, QWidget, QFrame
 
-from src.model.settings.isotope_reference_materials import reference_material_dictionary
+from model.settings.isotope_reference_materials import reference_material_dictionary
 
 
 class ReferenceMaterialSelectionDialog(QDialog):

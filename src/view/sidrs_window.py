@@ -1,10 +1,10 @@
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QHBoxLayout
 
-from src.view.data_processing_dialog import DataProcessingDialog
-from src.view.file_entry_widget import FileEntryWidget
-from src.view.isotope_button_widget import IsotopeButtonWidget
-from src.view.reference_material_dialog import ReferenceMaterialSelectionDialog
+from view.data_processing_dialog import DataProcessingDialog
+from view.file_entry_widget import FileEntryWidget
+from view.isotope_button_widget import IsotopeButtonWidget
+from view.reference_material_dialog import ReferenceMaterialSelectionDialog
 
 
 class SidrsWindow(QMainWindow):

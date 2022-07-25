@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QTreeWidget, QTreeWidgetItem, \
     QVBoxLayout
 
-from src.view.change_sample_names_dialog import ChangeSampleNamesDialog
+from view.change_sample_names_dialog import ChangeSampleNamesDialog
 
 
 class FileEntryWidget(QWidget):

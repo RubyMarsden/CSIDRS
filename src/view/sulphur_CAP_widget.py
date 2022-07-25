@@ -3,8 +3,8 @@ import math
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 from matplotlib import pyplot as plt
 
-from src.model.isotopes import Isotope
-from src.utils import gui_utils
+from model.isotopes import Isotope
+from utils import gui_utils
 
 
 class SulphurCAPWidget(QWidget):

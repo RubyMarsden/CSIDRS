@@ -4,8 +4,8 @@ import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 from matplotlib.patches import Circle
 
-from src.utils import gui_utils
-from src.view.ratio_box_widget import RatioBoxWidget
+from utils import gui_utils
+from view.ratio_box_widget import RatioBoxWidget
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt

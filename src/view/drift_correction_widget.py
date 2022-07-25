@@ -8,11 +8,11 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QRadioBut
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from src.model.drift_correction_type import DriftCorrectionType
-from src.utils import gui_utils
-from src.view.further_MLR_dialog import FurtherMultipleLinearRegressionDialog
-from src.view.ratio_box_widget import RatioBoxWidget
-from src.view.residuals_dialog import ResidualsDialog
+from model.drift_correction_type import DriftCorrectionType
+from utils import gui_utils
+from view.further_MLR_dialog import FurtherMultipleLinearRegressionDialog
+from view.ratio_box_widget import RatioBoxWidget
+from view.residuals_dialog import ResidualsDialog
 
 
 class DriftCorrectionWidget(QWidget):

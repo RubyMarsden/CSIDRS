@@ -3,8 +3,8 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QWidget, QLabel, QVBoxLayout, QFrame
 from matplotlib import pyplot as plt
 
-from src.utils import gui_utils
-from src.view.ratio_box_widget import RatioBoxWidget
+from utils import gui_utils
+from view.ratio_box_widget import RatioBoxWidget
 
 
 class ResidualsDialog(QDialog):

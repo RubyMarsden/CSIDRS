@@ -1,10 +1,10 @@
 from PyQt5.QtCore import pyqtSignal, QObject
 
-from src.model.drift_correction_type import DriftCorrectionType
-from src.model.elements import Element
-from src.model.ratio import Ratio
-from src.model.settings.material_lists import Material
-from src.model.spot import Spot
+from model.drift_correction_type import DriftCorrectionType
+from model.elements import Element
+from model.ratio import Ratio
+from model.settings.material_lists import Material
+from model.spot import Spot
 
 
 class Signals(QObject):

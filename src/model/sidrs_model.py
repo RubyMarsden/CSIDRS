@@ -8,16 +8,16 @@ import numpy as np
 import statsmodels.api as sm
 from PyQt5.QtGui import QColor
 
-from src.model.drift_correction_type import DriftCorrectionType
-from src.model.get_data_from_import import get_block_number_from_asc, \
+from model.drift_correction_type import DriftCorrectionType
+from model.get_data_from_import import get_block_number_from_asc, \
     get_analytical_conditions_data_from_asc_file
-from src.model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction, \
+from model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction, \
     calculate_probability_one_outlier
-from src.model.sample import Sample
-from src.model.settings.colours import colour_list, q_colour_list
-from src.model.settings.isotope_reference_materials import reference_material_dictionary
-from src.model.settings.methods_from_isotopes import list_of_methods
-from src.model.spot import Spot
+from model.sample import Sample
+from model.settings.colours import colour_list, q_colour_list
+from model.settings.isotope_reference_materials import reference_material_dictionary
+from model.settings.methods_from_isotopes import list_of_methods
+from model.spot import Spot
 
 
 class SidrsModel:

@@ -3,8 +3,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem, QFileDialog
 
-from src.utils.make_csv_file import write_csv_output, get_output_file
-from src.view.cycle_data_dialog import CycleDataDialog
+from utils.make_csv_file import write_csv_output, get_output_file
+from view.cycle_data_dialog import CycleDataDialog
 
 
 class CorrectedDataWidget(QWidget):
