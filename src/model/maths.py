@@ -110,13 +110,6 @@ def calculate_alpha_correction(data, alpha_sims, alpha_sims_uncertainty):
                 uncertainty ** 2))
     return alpha_corrected_data, alpha_corrected_uncertainty
 
-
-def calculate_probability_one_outlier(number_of_tests):
-    # We define an outlier as having a 1% probability of occurring. (Approximately outside of the 1.5 IQR bounds)
-    probability = 1 - (0.99 ** int(number_of_tests))
-    return probability
-
-
 def calculate_binomial_distribution_probability(probability_of_success, number_of_successes, number_of_tests):
     probability_of_k_successful_tests = scipy.stats.binom.pmf(k=number_of_successes, n=number_of_tests,
                                                               p=probability_of_success, loc=0)

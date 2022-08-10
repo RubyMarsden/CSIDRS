@@ -6,12 +6,13 @@ from model.elements import Element
 from model.settings.delta_constants import DeltaReferenceMaterial
 from model.mass_peak import MassPeak
 from model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev, \
-    calculate_delta_from_ratio
+    calculate_delta_from_ratio, calculate_number_of_outliers_to_remove
 from model.settings.asc_file_settings_general import *
 from model.get_data_from_import import get_data_from_asc, get_primary_beam_current_data_asc, \
-    get_dtfa_x_and_y_from_asc
+    get_dtfa_x_and_y_from_asc, get_block_number_from_asc
 from model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
     carbon_isotope_reference, chlorine_isotope_reference
+from model.settings.statistics_values import PROBABILITY_CUTOFF, PROBABILITY_OF_SINGLE_OUTLIER
 from utils.convert_date_format_from_new_asci import standardise_date_format
 from utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
     convert_to_twenty_four_hour_time_am
@@ -27,6 +28,7 @@ class Spot:
         # TODO change how this works - currently doesn't update
         self.mass_peak_names = mass_peak_names
 
+
         self.spot_data = spot_data
         self.date = standardise_date_format(self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]])
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
@@ -39,9 +41,11 @@ class Spot:
 
         self.x_position = int(spot_data[X_POSITION_INDEX[0]][X_POSITION_INDEX[1]])
         self.y_position = int(spot_data[Y_POSITION_INDEX[0]][Y_POSITION_INDEX[1]])
+
         self.distance_from_mount_centre = vector_length_from_origin(self.x_position, self.y_position)
 
         self.dtfa_x, self.dtfa_y = get_dtfa_x_and_y_from_asc(self.spot_data)
+        self.number_of_cycles = get_block_number_from_asc(self.spot_data)
 
         self.primary_beam_current = get_primary_beam_current_data_asc(self.spot_data)
 
@@ -91,10 +95,12 @@ class Spot:
             self.raw_isotope_ratios[ratio] = ratios
 
     def calculate_mean_st_error_for_isotope_ratios(self):
+        number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(self.number_of_cycles, PROBABILITY_CUTOFF,
+                                                                              PROBABILITY_OF_SINGLE_OUTLIER)
         for ratio, raw_ratio_list in self.raw_isotope_ratios.items():
             # TODO fix number of outliers allowed
             mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
-                                                                                                        1)
+                                                                                                        number_of_outliers_to_remove)
             two_st_error = 2 * st_dev / math.sqrt(n)
             self.mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
             self.outliers_removed_from_raw_data[ratio] = removed_data

@@ -11,8 +11,7 @@ from PyQt5.QtGui import QColor
 from model.drift_correction_type import DriftCorrectionType
 from model.get_data_from_import import get_block_number_from_asc, \
     get_analytical_conditions_data_from_asc_file
-from model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction, \
-    calculate_probability_one_outlier
+from model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction
 from model.sample import Sample
 from model.settings.colours import colour_list, q_colour_list
 from model.settings.isotope_reference_materials import reference_material_dictionary
@@ -35,8 +34,6 @@ class SidrsModel:
         self.material = None
         self.primary_reference_material = None
         self.secondary_reference_material = None
-        self.cycle_outlier_probability_list = []
-        self.primary_rm_outlier_probability_list = []
         self.primary_rm_deltas_by_ratio = {}
         self.statsmodel_result_by_ratio = {}
         self.t_zero = None
@@ -70,6 +67,11 @@ class SidrsModel:
             self.spots.append(spot)
             self.imported_files.append(filename)
 
+        if len({spot.number_of_cycles for spot in self.spots}) != 1:
+            raise Exception("Spots have different numbers of cycles - you may have input two separate sessions")
+
+        self.number_of_cycles = self.spots[0].number_of_cycles
+
         filename_for_analytical_conditions = filenames[0]
         self.analytical_condition_data = self._parse_asc_file_into_analytical_conditions_data(
             filename_for_analytical_conditions)
@@ -85,8 +87,6 @@ class SidrsModel:
                     line[line.index(i)] = str.strip(i)
                 data_for_spot.append(line)
         spot = Spot(filename, data_for_spot, self.isotopes)
-        # In the asc file cycles are labelled blocks
-        self.number_of_cycles = get_block_number_from_asc(data_for_spot)
         return spot
 
     def _parse_asc_file_into_analytical_conditions_data(self, filename):
@@ -160,9 +160,6 @@ class SidrsModel:
 
         if not primary_reference_material_exists or not secondary_reference_material_accounted_for:
             raise Exception("The reference materials selected does not match your sample data")
-
-        self.cycle_outlier_probability_list = [calculate_probability_one_outlier(self.number_of_cycles)]
-        self.primary_rm_outlier_probability_list = [calculate_probability_one_outlier(number_of_primary_rm_spots)]
 
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
@@ -374,8 +371,6 @@ class SidrsModel:
         self.material = None
         self.primary_reference_material = None
         self.secondary_reference_material = None
-        self.cycle_outlier_probability_list = []
-        self.primary_rm_outlier_probability_list = []
         self.primary_rm_deltas_by_ratio.clear()
         self.statsmodel_result_by_ratio.clear()
         self.t_zero = None

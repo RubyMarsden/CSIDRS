@@ -139,7 +139,12 @@ def get_block_number_from_asc(spot_data):
     block_index = spot_data[line_number].index("Blocks")
     block_number = spot_data[line_number][block_index - 1]
 
-    return block_number
+    try:
+        integer_block_number = int(block_number)
+    except ValueError:
+        raise ValueError("The number of blocks read from the asc file cannot be converted into an integer.")
+
+    return integer_block_number
 
 
 def get_analytical_conditions_data_from_asc_file(data):
