@@ -1,9 +1,11 @@
 import unittest
 import numpy as np
 
-from model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
+from src.model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
     calculate_alpha_correction, calculate_cap_value_and_uncertainty
-from model.mass_peak import MassPeak
+from src.model.mass_peak import MassPeak
+
+from src.model.maths import calculate_binomial_distribution_probability
 
 
 class MathsTests(unittest.TestCase):
@@ -127,7 +129,6 @@ class MathsTests(unittest.TestCase):
         self.assertAlmostEqual(cap_value, 90)
         self.assertEqual(uncertainty, 2)
 
-
     def test_calculate_cap_value_and_uncertainty_Cap33_example(self):
         cap_value, uncertainty = calculate_cap_value_and_uncertainty(delta_value_x=1.2,
                                                                      uncertainty_x=0.09,
@@ -138,6 +139,76 @@ class MathsTests(unittest.TestCase):
 
         self.assertAlmostEqual(cap_value, 0.083037451910)
         self.assertAlmostEqual(uncertainty, 0.16990815079992)
+
+    def test_calculate_binomial_distribution_probability_simple(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.5,
+                                                                  number_of_successes=1,
+                                                                  number_of_tests=1)
+
+        self.assertEqual(probability, 0.5)
+
+    def test_calculate_binomial_distribution_probability_simple_two_tests_one_success(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.5,
+                                                                  number_of_successes=1,
+                                                                  number_of_tests=2)
+
+        self.assertAlmostEqual(probability, 0.5)
+
+    def test_calculate_binomial_distribution_probability_simple_two_tests_two_successes(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.5,
+                                                                  number_of_successes=2,
+                                                                  number_of_tests=2)
+
+        self.assertAlmostEqual(probability, 0.25)
+
+    def test_calculate_binomial_distribution_probability_simple_twenty_tests_one_success_outlier(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
+                                                                  number_of_successes=1,
+                                                                  number_of_tests=20)
+
+        self.assertAlmostEqual(probability, 0.12250780457)
+
+    def test_calculate_binomial_distribution_probability_simple_twenty_tests_two_successes_outlier(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
+                                                                  number_of_successes=2,
+                                                                  number_of_tests=20)
+
+        self.assertAlmostEqual(probability, 0.00820419839)
+
+    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_one_success_outlier(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
+                                                                  number_of_successes=1,
+                                                                  number_of_tests=100)
+
+        self.assertAlmostEqual(probability, 0.3491995224)
+
+    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_two_successes_outlier(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
+                                                                  number_of_successes=2,
+                                                                  number_of_tests=100)
+
+        self.assertAlmostEqual(probability, 0.12185058863)
+
+    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_three_successes_outlier(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
+                                                                  number_of_successes=3,
+                                                                  number_of_tests=100)
+
+        self.assertAlmostEqual(probability, 0.02805958502)
+
+    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_four_successes_outlier(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
+                                                                  number_of_successes=4,
+                                                                  number_of_tests=100)
+
+        self.assertAlmostEqual(probability, 0.00479669139)
+
+    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_five_successes_outlier(self):
+        probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
+                                                                  number_of_successes=5,
+                                                                  number_of_tests=100)
+
+        self.assertAlmostEqual(probability, 0.00064921986)
 
 
 if __name__ == '__main__':

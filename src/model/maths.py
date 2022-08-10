@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import statsmodels.stats.stattools as stattools
-
+import scipy
 
 def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed):
     medcouple = stattools.medcouple(data)
@@ -115,6 +115,10 @@ def calculate_probability_one_outlier(number_of_tests):
     probability = 1 - (0.99 ** int(number_of_tests))
     return probability
 
+def calculate_binomial_distribution_probability(probability_of_success, number_of_successes, number_of_tests):
+    probability_of_k_successful_tests = scipy.stats.binom.pmf(k=number_of_successes, n=number_of_tests, p=probability_of_success, loc=0)
+
+    return probability_of_k_successful_tests
 
 def calculate_cap_value_and_uncertainty(delta_value_x, uncertainty_x, delta_value_relative, uncertainty_relative, MDF,
                                         reference_material_covariance):
