@@ -3,6 +3,7 @@ import numpy as np
 import statsmodels.stats.stattools as stattools
 import scipy
 
+
 def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed):
     medcouple = stattools.medcouple(data)
     Q1 = np.percentile(data, 25, interpolation='midpoint')
@@ -115,10 +116,33 @@ def calculate_probability_one_outlier(number_of_tests):
     probability = 1 - (0.99 ** int(number_of_tests))
     return probability
 
+
 def calculate_binomial_distribution_probability(probability_of_success, number_of_successes, number_of_tests):
-    probability_of_k_successful_tests = scipy.stats.binom.pmf(k=number_of_successes, n=number_of_tests, p=probability_of_success, loc=0)
+    probability_of_k_successful_tests = scipy.stats.binom.pmf(k=number_of_successes, n=number_of_tests,
+                                                              p=probability_of_success, loc=0)
 
     return probability_of_k_successful_tests
+
+
+def calculate_number_of_outliers_to_remove(number_of_tests, probability_cutoff, probability_of_single_outlier):
+    if not (0 < probability_cutoff < 1):
+        raise ValueError("A probability cutoff of < 0 or > 1 is not mathematically valid.")
+    if not (0 < probability_of_single_outlier < 1):
+        raise ValueError("A probability of a single outlier of < 0 or > 1 is not mathematically valid.")
+    if type(number_of_tests) is not int or number_of_tests <= 0:
+        raise ValueError("The number of tests must be a positive integer")
+
+    outliers_allowed = 0
+    probability = 1
+    while probability > probability_cutoff and outliers_allowed < number_of_tests:
+        outliers_allowed += 1
+        probability = calculate_binomial_distribution_probability(probability_of_single_outlier, outliers_allowed,
+                                                                  number_of_tests)
+
+    number_of_outliers_to_automatically_remove = outliers_allowed - 1
+
+    return number_of_outliers_to_automatically_remove
+
 
 def calculate_cap_value_and_uncertainty(delta_value_x, uncertainty_x, delta_value_relative, uncertainty_relative, MDF,
                                         reference_material_covariance):
@@ -131,8 +155,8 @@ def calculate_cap_value_and_uncertainty(delta_value_x, uncertainty_x, delta_valu
     # This uncertainty calculation includes a covariance term as in LaFlamme et al, 2016, but otherwise is from
     # Farquher et al, 2013.
     cap_uncertainty = math.sqrt((uncertainty_x ** 2) + (
-                (uncertainty_relative ** 2) * ((MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF))) ** 2)) + (
-                                            2 * reference_material_covariance * (
-                                                MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF)))))
+            (uncertainty_relative ** 2) * ((MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF))) ** 2)) + (
+                                        2 * reference_material_covariance * (
+                                        MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF)))))
 
     return cap, cap_uncertainty

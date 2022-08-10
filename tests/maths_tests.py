@@ -2,10 +2,10 @@ import unittest
 import numpy as np
 
 from src.model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
-    calculate_alpha_correction, calculate_cap_value_and_uncertainty
-from src.model.mass_peak import MassPeak
+    calculate_alpha_correction, calculate_cap_value_and_uncertainty, calculate_number_of_outliers_to_remove, \
+    calculate_binomial_distribution_probability
 
-from src.model.maths import calculate_binomial_distribution_probability
+from src.model.mass_peak import MassPeak
 
 
 class MathsTests(unittest.TestCase):
@@ -147,69 +147,117 @@ class MathsTests(unittest.TestCase):
 
         self.assertEqual(probability, 0.5)
 
-    def test_calculate_binomial_distribution_probability_simple_two_tests_one_success(self):
+    def test_calculate_binomial_distribution_probability_two_tests_one_success(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.5,
                                                                   number_of_successes=1,
                                                                   number_of_tests=2)
 
         self.assertAlmostEqual(probability, 0.5)
 
-    def test_calculate_binomial_distribution_probability_simple_two_tests_two_successes(self):
+    def test_calculate_binomial_distribution_probability_two_tests_two_successes(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.5,
                                                                   number_of_successes=2,
                                                                   number_of_tests=2)
 
         self.assertAlmostEqual(probability, 0.25)
 
-    def test_calculate_binomial_distribution_probability_simple_twenty_tests_one_success_outlier(self):
+    def test_calculate_binomial_distribution_probability_twenty_tests_one_success_outlier(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
                                                                   number_of_successes=1,
                                                                   number_of_tests=20)
 
         self.assertAlmostEqual(probability, 0.12250780457)
 
-    def test_calculate_binomial_distribution_probability_simple_twenty_tests_two_successes_outlier(self):
+    def test_calculate_binomial_distribution_probability_twenty_tests_two_successes_outlier(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
                                                                   number_of_successes=2,
                                                                   number_of_tests=20)
 
         self.assertAlmostEqual(probability, 0.00820419839)
 
-    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_one_success_outlier(self):
+    def test_calculate_binomial_distribution_probability_one_hundred_tests_one_success_outlier(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
                                                                   number_of_successes=1,
                                                                   number_of_tests=100)
 
         self.assertAlmostEqual(probability, 0.3491995224)
 
-    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_two_successes_outlier(self):
+    def test_calculate_binomial_distribution_probability_one_hundred_tests_two_successes_outlier(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
                                                                   number_of_successes=2,
                                                                   number_of_tests=100)
 
         self.assertAlmostEqual(probability, 0.12185058863)
 
-    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_three_successes_outlier(self):
+    def test_calculate_binomial_distribution_probability_one_hundred_tests_three_successes_outlier(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
                                                                   number_of_successes=3,
                                                                   number_of_tests=100)
 
         self.assertAlmostEqual(probability, 0.02805958502)
 
-    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_four_successes_outlier(self):
+    def test_calculate_binomial_distribution_probability_one_hundred_tests_four_successes_outlier(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
                                                                   number_of_successes=4,
                                                                   number_of_tests=100)
 
         self.assertAlmostEqual(probability, 0.00479669139)
 
-    def test_calculate_binomial_distribution_probability_simple_one_hundred_tests_five_successes_outlier(self):
+    def test_calculate_binomial_distribution_probability_one_hundred_tests_five_successes_outlier(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.007,
                                                                   number_of_successes=5,
                                                                   number_of_tests=100)
 
         self.assertAlmostEqual(probability, 0.00064921986)
 
+    def test_calculate_number_of_outliers_removed_errors(self):
+        func = calculate_number_of_outliers_to_remove
+        # Number of tests errors
+        self.assertRaises(ValueError, lambda: func(number_of_tests=1.3,
+                                                   probability_cutoff=0.01,
+                                                   probability_of_single_outlier=0.007))
+        self.assertRaises(ValueError, lambda: func(number_of_tests=0,
+                                                   probability_cutoff=0.01,
+                                                   probability_of_single_outlier=0.007))
+        self.assertRaises(ValueError, lambda: func(number_of_tests=-1,
+                                                   probability_cutoff=0.01,
+                                                   probability_of_single_outlier=0.007))
+        # Probability cutoff errors
+        self.assertRaises(ValueError, lambda: func(number_of_tests=1,
+                                                   probability_cutoff=-0.01,
+                                                   probability_of_single_outlier=0.007))
+        self.assertRaises(ValueError, lambda: func(number_of_tests=1,
+                                                   probability_cutoff=1.01,
+                                                   probability_of_single_outlier=0.007))
+        # Probability of single outlier errors
+        self.assertRaises(ValueError, lambda: func(number_of_tests=1,
+                                                   probability_cutoff=0.01,
+                                                   probability_of_single_outlier=-0.007))
+        self.assertRaises(ValueError, lambda: func(number_of_tests=1,
+                                                   probability_cutoff=0.01,
+                                                   probability_of_single_outlier=1.007))
+
+
+    def test_calculate_number_of_outliers_removed_one_test(self):
+        number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(number_of_tests=1,
+                                                                              probability_cutoff=0.01,
+                                                                              probability_of_single_outlier=0.007)
+
+        self.assertEqual(number_of_outliers_to_remove, 0)
+
+    def test_calculate_number_of_outliers_removed_twenty_tests(self):
+        number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(number_of_tests=20,
+                                                                              probability_cutoff=0.01,
+                                                                              probability_of_single_outlier=0.007)
+
+        self.assertEqual(number_of_outliers_to_remove, 1)
+
+    def test_calculate_number_of_outliers_removed_one_hundred_tests(self):
+        number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(number_of_tests=100,
+                                                                              probability_cutoff=0.01,
+                                                                              probability_of_single_outlier=0.007)
+
+        self.assertEqual(number_of_outliers_to_remove, 3)
 
 if __name__ == '__main__':
     unittest.main()
