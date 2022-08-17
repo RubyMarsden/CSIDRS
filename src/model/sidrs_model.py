@@ -182,8 +182,6 @@ class SidrsModel:
             self.characterise_linear_drift(ratio, primary_rm.spots)
             if ratio.name == "36S/32S":
                 self.characterise_curvilinear_drift(ratio, primary_rm.spots)
-            else:
-                self.characterise_curvilinear_drift(ratio, None)
 
             self.characterise_multiple_linear_regression(ratio, primary_rm.spots, factors=["dtfa-x", "time"])
 
@@ -226,30 +224,38 @@ class SidrsModel:
                 else:
                     spot.drift_corrected_ratio_values_by_ratio[ratio] = spot.mean_two_st_error_isotope_ratios[ratio]
 
-    def characterise_linear_drift(self, ratio, spots):
+    def get_data_for_drift_characterisation_input(self, ratio, spots):
         times = []
-        deltas = []
-        delta_uncertainties = []
+        values = []
+        uncertainties = []
         for spot in spots:
             timestamp = time.mktime(spot.datetime.timetuple())
             if ratio in spot.standard_ratios and not spot.is_flagged:
-                [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                [value, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
                 times.append(timestamp)
-                deltas.append(delta)
-                delta_uncertainties.append(uncertainty)
+                values.append(value)
+                uncertainties.append(uncertainty)
 
             elif ratio not in spot.standard_ratios and not spot.is_flagged:
-                [delta, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                [value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
                 times.append(timestamp)
-                deltas.append(delta)
-                delta_uncertainties.append(uncertainty)
+                values.append(value)
+                uncertainties.append(uncertainty)
 
-        self.primary_rm_deltas_by_ratio[ratio] = deltas
+        return values, times
+
+    def characterise_linear_drift(self, ratio, spots):
+
+        values, times = self.get_data_for_drift_characterisation_input(ratio, spots)
+        self.primary_rm_deltas_by_ratio[ratio] = values
 
         if ratio in self.primary_rm_deltas_by_ratio:
-            X = sm.add_constant(times)
+            Y = values
+            X = times
+            #adding and array of '1s' for statsmodels
+            X = sm.add_constant(X)
 
-            self.statsmodel_result_by_ratio[ratio] = sm.OLS(self.primary_rm_deltas_by_ratio[ratio], X).fit()
+            self.statsmodel_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
             self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
                 ratio] = self.statsmodel_result_by_ratio[ratio].params
 
@@ -262,9 +268,21 @@ class SidrsModel:
                     spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
 
     def characterise_curvilinear_drift(self, ratio, spots):
+        values, times = self.get_data_for_drift_characterisation_input(ratio, spots)
+        Y = values
+        x1 = times
+        x2 = [t ** 2 for t in times]
+        # making the factors into an array and adding a constant
+        X = np.column_stack((x1, x2))
+        X = sm.add_constant(X)
+        self.statsmodel_curvilinear_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
         return
 
     def characterise_multiple_linear_regression(self, ratio, spots, factors):
+        factors
+        for spot in spots:
+            timestamp = time.mktime(spot.datetime.timetuple())
+
         return
 
     def SIMS_correction_process(self):
@@ -282,10 +300,11 @@ class SidrsModel:
                 primary_rm_mean = np.mean(primary_rm_spot_data)
                 primary_uncertainty = np.std(primary_rm_spot_data)
 
-                alpha_sims, alpha_sims_uncertainty = calculate_sims_alpha(primary_reference_material_mean_delta=primary_rm_mean,
-                                                  primary_reference_material_st_dev=primary_uncertainty,
-                                                  externally_measured_primary_reference_value_and_uncertainty=
-                                                  self.primary_rm_values_by_ratio[ratio])
+                alpha_sims, alpha_sims_uncertainty = calculate_sims_alpha(
+                    primary_reference_material_mean_delta=primary_rm_mean,
+                    primary_reference_material_st_dev=primary_uncertainty,
+                    externally_measured_primary_reference_value_and_uncertainty=
+                    self.primary_rm_values_by_ratio[ratio])
 
             for sample in self.samples_by_name.values():
                 for spot in sample.spots:
