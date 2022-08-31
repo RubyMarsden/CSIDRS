@@ -6,6 +6,8 @@ from matplotlib import pyplot as plt
 from model.isotopes import Isotope
 from utils import gui_utils
 
+from src.model.settings.methods_from_isotopes import S34_S32
+
 
 class SulphurCAPWidget(QWidget):
     def __init__(self, data_processing_dialog):
@@ -95,22 +97,24 @@ class SulphurCAPWidget(QWidget):
         list_for_finding_minimum_and_maximum_y_values = [0]
 
         for sample in self.samples:
-            delta_y_value = [spot.drift_corrected_deltas[ratio_y.delta_name][0] for spot in
+            delta_y_value = [spot.alpha_corrected_data[ratio_y.delta_name][0] for spot in
                              sample.spots]
-            delta_y_errors = [spot.drift_corrected_deltas[ratio_y.delta_name][1] for spot in
+            delta_y_errors = [spot.alpha_corrected_data[ratio_y.delta_name][1] for spot in
                               sample.spots]
-            delta_x_value = [spot.drift_corrected_deltas[ratio_x.delta_name][0] for spot in
+            delta_x_value = [spot.alpha_corrected_data[ratio_x.delta_name][0] for spot in
                              sample.spots]
-            delta_x_errors = [spot.drift_corrected_deltas[ratio_x.delta_name][1] for spot in
+            delta_x_errors = [spot.alpha_corrected_data[ratio_x.delta_name][1] for spot in
                               sample.spots]
             list_for_finding_minimum_and_maximum_y_values.extend(delta_y_value)
             list_for_finding_minimum_and_maximum_x_values.extend(delta_x_value)
             axis.errorbar(delta_x_value, delta_y_value, xerr=delta_x_errors,
-                                                         yerr=delta_y_errors, ls="", marker="o",
-                                                         color=sample.colour, label=sample.name)
+                          yerr=delta_y_errors, ls="", marker="o",
+                          color=sample.colour, label=sample.name)
 
-        list_for_finding_minimum_and_maximum_x_values.append(min(list_for_finding_minimum_and_maximum_y_values) / MDF_factor)
-        list_for_finding_minimum_and_maximum_x_values.append(max(list_for_finding_minimum_and_maximum_y_values) / MDF_factor)
+        list_for_finding_minimum_and_maximum_x_values.append(
+            min(list_for_finding_minimum_and_maximum_y_values) / MDF_factor)
+        list_for_finding_minimum_and_maximum_x_values.append(
+            max(list_for_finding_minimum_and_maximum_y_values) / MDF_factor)
         minimum = min(list_for_finding_minimum_and_maximum_x_values)
         maximum = max(list_for_finding_minimum_and_maximum_x_values)
         round_down_minimum = math.floor(minimum)
@@ -121,15 +125,51 @@ class SulphurCAPWidget(QWidget):
         axis.plot(xs, ys, marker="", ls="-", color='lightgray', label='MDF')
         axis.legend()
 
-    def _create_cap_three_vs_delta_four_graph(self):
-        return
+    def _create_cap_three_vs_delta_four_graph(self, axis):
+        axis.clear()
+        axis.set_title("Cap S33 vs delta S34")
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+        axis.set_xlabel("delta S34")
+        axis.set_ylabel("Cap S33")
 
-    def _create_cap_three_vs_cap_six_graph(self):
-        return
+        for sample in self.samples:
+            xs = [spot.alpha_corrected_data[S34_S32.delta_name][0] for spot in sample.spots]
+            x_errors = [spot.alpha_corrected_data[S34_S32.delta_name][1] for spot in sample.spots]
+            ys = [spot.cap_data_S33[0] for spot in sample.spots]
+            y_errors = [spot.cap_data_S33[1] for spot in sample.spots]
+
+            axis.errorbar(x=xs, xerr=x_errors, y=ys, yerr=y_errors, ls="", marker="o", color=sample.colour,
+                          label=sample.name)
+
+        axis.legend()
+
+    def _create_cap_three_vs_cap_six_graph(self, axis):
+        axis.clear()
+        axis.set_title("Cap S33 vs Cap S36")
+        axis.spines['top'].set_visible(False)
+        axis.spines['right'].set_visible(False)
+        axis.set_xlabel("Cap S33")
+        axis.set_ylabel("Cap S36")
+
+        for sample in self.samples:
+            xs = [spot.cap_data_S33[0] for spot in sample.spots]
+            x_errors = [spot.cap_data_S33[1] for spot in sample.spots]
+            ys = [spot.cap_data_S36[0] for spot in sample.spots]
+            y_errors = [spot.cap_data_S36[1] for spot in sample.spots]
+
+            axis.errorbar(x=xs, xerr=x_errors, y=ys, yerr=y_errors, ls="", marker="o", color=sample.colour,
+                          label=sample.name)
+
+        axis.legend()
 
     def update_graph_tabs(self):
         self._create_delta_graph(self.delta_four_vs_delta_three_axis, 1, 0, 0.515)
         self._create_delta_graph(self.delta_four_vs_delta_six_axis, 1, 2, 1.91)
+        self._create_cap_three_vs_delta_four_graph(self.cap_three_vs_delta_four_axis)
+        self._create_cap_three_vs_cap_six_graph(self.cap_three_vs_cap_six_axis)
 
         self.delta_four_vs_delta_three_canvas.draw()
         self.delta_four_vs_delta_six_canvas.draw()
+        self.cap_three_vs_delta_four_canvas.draw()
+        self.cap_three_vs_cap_six_canvas.draw()

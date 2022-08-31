@@ -76,8 +76,9 @@ class SidrsWindow(QMainWindow):
         self.model.process_data()
         self.model.drift_correction_process()
         self.model.SIMS_correction_process()
-        if Isotope.S36 in self.model.isotopes:
-            self.model.calculate_cap_values_S36_S33()
+        for isotope in self.model.isotopes:
+            if isotope.value == "36S":
+                self.model.calculate_cap_values_S36_S33()
         dialog = DataProcessingDialog(self.model)
         result = dialog.exec()
 

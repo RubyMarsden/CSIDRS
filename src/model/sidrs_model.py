@@ -22,7 +22,8 @@ from model.spot import SpotAttribute
 
 from model.isotopes import Isotope
 
-from src.model.maths import calculate_cap_value_and_uncertainty
+from model.maths import calculate_cap_value_and_uncertainty
+from model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32
 
 
 class SidrsModel:
@@ -373,35 +374,37 @@ class SidrsModel:
             if sample.is_primary_reference_material:
                 primary_rm = sample
 
-            primary_rm_spot_data_33 = [spot.drift_corrected_deltas["delta" + Isotope.S33][0] for spot in
-                                       primary_rm.spots if
-                                       not spot.is_flagged]
-            primary_rm_spot_data_34 = [spot.drift_corrected_deltas["delta" + Isotope.S33][0] for spot in
-                                       primary_rm.spots if
-                                       not spot.is_flagged]
-            primary_rm_spot_data_36 = [spot.drift_corrected_deltas["delta" + Isotope.S36][0] for spot in
-                                       primary_rm.spots if
-                                       not spot.is_flagged]
-            array_33 = np.array(primary_rm_spot_data_33)
-            array_34 = np.array(primary_rm_spot_data_34)
-            array_36 = np.array(primary_rm_spot_data_36)
-            primary_covariance_33_34 = np.cov(array_33, array_34)[0][1]
-            primary_covariance_36_34 = np.cov(array_36, array_34)[0][1]
+                primary_rm_spot_data_33 = [spot.drift_corrected_deltas[S33_S32.delta_name][0] for spot in
+                                           primary_rm.spots if
+                                           not spot.is_flagged]
+                primary_rm_spot_data_34 = [spot.drift_corrected_deltas[S34_S32.delta_name][0] for spot in
+                                           primary_rm.spots if
+                                           not spot.is_flagged]
+                primary_rm_spot_data_36 = [spot.drift_corrected_deltas[S36_S32.delta_name][0] for spot in
+                                           primary_rm.spots if
+                                           not spot.is_flagged]
+                array_33 = np.array(primary_rm_spot_data_33)
+                array_34 = np.array(primary_rm_spot_data_34)
+                array_36 = np.array(primary_rm_spot_data_36)
+                primary_covariance_33_34 = np.cov(array_33, array_34)[0][1]
+                primary_covariance_36_34 = np.cov(array_36, array_34)[0][1]
+
+        for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 spot.cap_data_S36 = calculate_cap_value_and_uncertainty(
-                    delta_value_x=spot.alpha_corrected_data[("delta" + Isotope.S36)][0],
-                    uncertainty_x=spot.alpha_corrected_data[("delta" + Isotope.S36)][1],
-                    delta_value_relative=spot.alpha_corrected_data[("delta" + Isotope.S34)][0],
-                    uncertainty_relative=spot.alpha_corrected_data[("delta" + Isotope.S34)][1],
+                    delta_value_x=spot.alpha_corrected_data[S36_S32.delta_name][0],
+                    uncertainty_x=spot.alpha_corrected_data[S36_S32.delta_name][1],
+                    delta_value_relative=spot.alpha_corrected_data[S34_S32.delta_name][0],
+                    uncertainty_relative=spot.alpha_corrected_data[S34_S32.delta_name][1],
                     MDF=1.91,
                     reference_material_covariance=primary_covariance_36_34)
                 spot.cap_data_S33 = calculate_cap_value_and_uncertainty(
-                    delta_value_x=spot.alpha_corrected_data[("delta" + Isotope.S33)][0],
-                    uncertainty_x=spot.alpha_corrected_data[("delta" + Isotope.S33)][1],
+                    delta_value_x=spot.alpha_corrected_data[S33_S32.delta_name][0],
+                    uncertainty_x=spot.alpha_corrected_data[S33_S32.delta_name][1],
                     delta_value_relative=spot.alpha_corrected_data[
-                        ("delta" + Isotope.S34)][0],
+                        S34_S32.delta_name][0],
                     uncertainty_relative=spot.alpha_corrected_data[
-                        ("delta" + Isotope.S34)][1],
+                        S34_S32.delta_name][1],
                     MDF=0.515,
                     reference_material_covariance=primary_covariance_33_34)
 
