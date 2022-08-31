@@ -18,6 +18,12 @@ from model.settings.isotope_reference_materials import reference_material_dictio
 from model.settings.methods_from_isotopes import list_of_methods
 from model.spot import Spot
 
+from model.spot import SpotAttribute
+
+from model.isotopes import Isotope
+
+from src.model.maths import calculate_cap_value_and_uncertainty
+
 
 class SidrsModel:
     def __init__(self, signals):
@@ -36,6 +42,8 @@ class SidrsModel:
         self.secondary_reference_material = None
         self.primary_rm_deltas_by_ratio = {}
         self.statsmodel_result_by_ratio = {}
+        self.statsmodel_curvilinear_result_by_ratio = {}
+        self.statsmodel_multiple_linear_result_by_ratio = {}
         self.t_zero = None
         self.drift_coefficient_by_ratio = {}
         self.drift_y_intercept_by_ratio = {}
@@ -51,6 +59,7 @@ class SidrsModel:
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
         self.signals.recalculateNewSpotData.connect(self.recalculate_data)
         self.signals.driftCorrectionChanged.connect(self.recalculate_data_with_drift_correction_changed)
+        self.signals.multipleLinearRegressionFactorsInput.connect(self.characterise_multiple_linear_regression)
         self.signals.clearAllData.connect(self.clear_all_data_and_methods)
 
     #################
@@ -183,8 +192,6 @@ class SidrsModel:
             if ratio.name == "36S/32S":
                 self.characterise_curvilinear_drift(ratio, primary_rm.spots)
 
-            self.characterise_multiple_linear_regression(ratio, primary_rm.spots, factors=["dtfa-x", "time"])
-
             if self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.NONE:
                 self.calculate_data_not_drift_corrected(ratio)
             elif self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
@@ -252,7 +259,7 @@ class SidrsModel:
         if ratio in self.primary_rm_deltas_by_ratio:
             Y = values
             X = times
-            #adding and array of '1s' for statsmodels
+            # adding and array of '1s' for statsmodels
             X = sm.add_constant(X)
 
             self.statsmodel_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
@@ -278,10 +285,54 @@ class SidrsModel:
         self.statsmodel_curvilinear_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
         return
 
-    def characterise_multiple_linear_regression(self, ratio, spots, factors):
-        factors
-        for spot in spots:
-            timestamp = time.mktime(spot.datetime.timetuple())
+    def characterise_multiple_linear_regression(self, factors, ratio):
+        print("hi")
+        for factor in factors:
+            print(factor == SpotAttribute.TIME)
+        spots_to_use = [spot for spot in self.spots if not spot.is_flagged]
+        values = []
+        uncertainties = []
+        for spot in spots_to_use:
+            if ratio in spot.standard_ratios:
+                [value, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                values.append(value)
+                uncertainties.append(uncertainty)
+
+            elif ratio not in spot.standard_ratios:
+                [value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                values.append(value)
+                uncertainties.append(uncertainty)
+
+        lists_of_independent_variables = []
+        for factor in factors:
+            if factor == SpotAttribute.TIME:
+                times = []
+                for spot in spots_to_use:
+                    timestamp = time.mktime(spot.datetime.timetuple())
+                    times.append(timestamp)
+                lists_of_independent_variables.append(times)
+            elif factor == SpotAttribute.DTFAX:
+                dtfa_xs = []
+                for spot in spots_to_use:
+                    dtfa_xs.append(spot.dtfa_x)
+                lists_of_independent_variables.append(dtfa_xs)
+            elif factor == SpotAttribute.DTFAY:
+                dtfa_ys = []
+                for spot in spots_to_use:
+                    dtfa_ys.append(spot.dtfa_y)
+                lists_of_independent_variables.append(dtfa_ys)
+            elif factor == SpotAttribute.DISTANCE:
+                distances = []
+                for spot in spots_to_use:
+                    distances.append(spot.distance_from_mount_centre)
+                lists_of_independent_variables.append(distances)
+            array_of_independent_variables = np.array(lists_of_independent_variables)
+            X = np.column_stack(array_of_independent_variables)
+            Y = values
+            X = sm.add_constant(X)
+
+            self.statsmodel_multiple_linear_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
+            print(self.statsmodel_multiple_linear_result_by_ratio[ratio].summary())
 
         return
 
@@ -315,6 +366,44 @@ class SidrsModel:
                                                                                                  alpha_sims_uncertainty)
                     else:
                         spot.alpha_corrected_data[ratio.name] = spot.drift_corrected_ratio_values_by_ratio[ratio]
+
+    def calculate_cap_values_S36_S33(self):
+        print("Calculating cap")
+        for sample in self.samples_by_name.values():
+            if sample.is_primary_reference_material:
+                primary_rm = sample
+
+            primary_rm_spot_data_33 = [spot.drift_corrected_deltas["delta" + Isotope.S33][0] for spot in
+                                       primary_rm.spots if
+                                       not spot.is_flagged]
+            primary_rm_spot_data_34 = [spot.drift_corrected_deltas["delta" + Isotope.S33][0] for spot in
+                                       primary_rm.spots if
+                                       not spot.is_flagged]
+            primary_rm_spot_data_36 = [spot.drift_corrected_deltas["delta" + Isotope.S36][0] for spot in
+                                       primary_rm.spots if
+                                       not spot.is_flagged]
+            array_33 = np.array(primary_rm_spot_data_33)
+            array_34 = np.array(primary_rm_spot_data_34)
+            array_36 = np.array(primary_rm_spot_data_36)
+            primary_covariance_33_34 = np.cov(array_33, array_34)[0][1]
+            primary_covariance_36_34 = np.cov(array_36, array_34)[0][1]
+            for spot in sample.spots:
+                spot.cap_data_S36 = calculate_cap_value_and_uncertainty(
+                    delta_value_x=spot.alpha_corrected_data[("delta" + Isotope.S36)][0],
+                    uncertainty_x=spot.alpha_corrected_data[("delta" + Isotope.S36)][1],
+                    delta_value_relative=spot.alpha_corrected_data[("delta" + Isotope.S34)][0],
+                    uncertainty_relative=spot.alpha_corrected_data[("delta" + Isotope.S34)][1],
+                    MDF=1.91,
+                    reference_material_covariance=primary_covariance_36_34)
+                spot.cap_data_S33 = calculate_cap_value_and_uncertainty(
+                    delta_value_x=spot.alpha_corrected_data[("delta" + Isotope.S33)][0],
+                    uncertainty_x=spot.alpha_corrected_data[("delta" + Isotope.S33)][1],
+                    delta_value_relative=spot.alpha_corrected_data[
+                        ("delta" + Isotope.S34)][0],
+                    uncertainty_relative=spot.alpha_corrected_data[
+                        ("delta" + Isotope.S34)][1],
+                    MDF=0.515,
+                    reference_material_covariance=primary_covariance_33_34)
 
     ###############
     ### Signals ###
@@ -364,6 +453,8 @@ class SidrsModel:
 
         self.drift_correction_process()
         self.SIMS_correction_process()
+        if Isotope.S36 in self.isotopes:
+            self.calculate_cap_values_S36_S33()
 
     def _remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
         spot.exclude_cycle_information_update(cycle_number, is_flagged, ratio)

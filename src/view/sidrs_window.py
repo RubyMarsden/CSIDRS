@@ -6,6 +6,8 @@ from view.file_entry_widget import FileEntryWidget
 from view.isotope_button_widget import IsotopeButtonWidget
 from view.reference_material_dialog import ReferenceMaterialSelectionDialog
 
+from src.model.isotopes import Isotope
+
 
 class SidrsWindow(QMainWindow):
     def __init__(self, model):
@@ -74,6 +76,8 @@ class SidrsWindow(QMainWindow):
         self.model.process_data()
         self.model.drift_correction_process()
         self.model.SIMS_correction_process()
+        if Isotope.S36 in self.model.isotopes:
+            self.model.calculate_cap_values_S36_S33()
         dialog = DataProcessingDialog(self.model)
         result = dialog.exec()
 
