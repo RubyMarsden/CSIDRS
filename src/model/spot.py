@@ -28,7 +28,6 @@ class Spot:
         # TODO change how this works - currently doesn't update
         self.mass_peak_names = mass_peak_names
 
-
         self.spot_data = spot_data
         self.date = standardise_date_format(self.spot_data[DATE_INDEX[0]][DATE_INDEX[1]])
         self.time, self.twelve_hr_data = str.split(self.spot_data[TIME_INDEX[0]][TIME_INDEX[1]])
@@ -153,3 +152,19 @@ class Spot:
 
     def exclude_cycle_information_update(self, cycle_number, is_flagged, ratio):
         self.cycle_flagging_information[ratio][cycle_number] = is_flagged
+
+
+from enum import Enum
+
+
+class SpotAttribute(Enum):
+
+    # Overriding the equality function as sending an Enum as a signal seems to break the equality (perhaps the object
+    # and class are copied when emitted?)
+    def __eq__(self, other):
+        return self.value == other.value and self.name == other.name
+
+    TIME = "Time"
+    DTFAX = "dtfa-x"
+    DTFAY = "dtfa-y"
+    DISTANCE = "Distance to mount centre"

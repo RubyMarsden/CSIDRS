@@ -23,3 +23,4 @@ class Signals(QObject):
     replotAndTabulateRecalculatedData = pyqtSignal()
     clearAllData = pyqtSignal()
     dataCleared = pyqtSignal()
+    multipleLinearRegressionFactorsInput = pyqtSignal(list, Ratio)

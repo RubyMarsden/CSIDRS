@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QCheckBox, QWidget, QDialogButtonBox, QHBoxLayout, QPushButton
 
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -6,6 +7,8 @@ import matplotlib.dates as mdates
 
 from utils import gui_utils
 from view.ratio_box_widget import RatioBoxWidget
+
+from src.model.spot import SpotAttribute
 
 
 class FurtherMultipleLinearRegressionDialog(QDialog):
@@ -15,7 +18,10 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self.setMinimumWidth(450)
         self.data_processing_dialog = data_processing_dialog
         self.model = data_processing_dialog.model
+        self.signals = data_processing_dialog.model.signals
         self.ratio = self.data_processing_dialog.method.ratios[0]
+        self.spot_attribute_box_list = []
+        self.spot_attributes = []
 
         # Create the ratio selection button here - because the button must exist before ratio can change.
         self._create_ratio_selection_widget()
@@ -26,12 +32,20 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
             if sample.is_primary_reference_material:
                 self.primary_reference_material_sample = sample
 
+        self.calculate_mlr_using_selected_factors_button = QPushButton("Calculate MLR")
+        self.calculate_mlr_using_selected_factors_button.clicked.connect(self.on_calculate_mlr_button_clicked)
+
         layout = QVBoxLayout()
+        layout_horizontal = QHBoxLayout()
         graph_widget = self._create_graph_widget()
 
-        layout.addWidget(self.ratio_radiobox_widget)
-        layout.addWidget(graph_widget)
+        options_for_mlr_widget = self._create_options_for_mlr_widget()
 
+        layout.addWidget(self.ratio_radiobox_widget)
+        layout_horizontal.addWidget(graph_widget)
+        layout_horizontal.addWidget(options_for_mlr_widget)
+        layout.addLayout(layout_horizontal)
+        layout.addWidget(self.calculate_mlr_using_selected_factors_button, alignment=Qt.AlignRight)
         self.setLayout(layout)
 
     def _create_ratio_selection_widget(self):
@@ -58,6 +72,19 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
 
         return graph_widget
 
+    def _create_options_for_mlr_widget(self):
+        mlr_widget = QWidget()
+        layout = QVBoxLayout()
+        for spot_attribute in SpotAttribute:
+            box = QCheckBox(spot_attribute.value)
+            box.attribute = spot_attribute
+            box.stateChanged.connect(self.on_spot_attributes_changed)
+            layout.addWidget(box)
+            self.spot_attribute_box_list.append(box)
+
+        mlr_widget.setLayout(layout)
+        return mlr_widget
+
     ###############
     ### Actions ###
     ###############
@@ -78,6 +105,23 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self._create_dtfa_y_graph()
 
         self.canvas.draw()
+
+    def on_spot_attributes_changed(self):
+        self.spot_attributes.clear()
+        for box in self.spot_attribute_box_list:
+            if box.isChecked():
+                self.spot_attributes.append(box.attribute)
+
+        #TODO this please
+        #if self.spot_attributes:
+         #   self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+
+    def on_calculate_mlr_button_clicked(self):
+        for spot_attribute in self.spot_attributes:
+            print(spot_attribute == SpotAttribute.TIME)
+
+        self.signals.multipleLinearRegressionFactorsInput.emit(self.spot_attributes, self.ratio)
+
 
     ################
     ### PLotting ###
@@ -103,7 +147,8 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
     def _create_time_graph(self):
         xs = []
         for spot in self.primary_reference_material_sample.spots:
-            xs.append(spot.datetime)
+            if not spot.is_flagged:
+                xs.append(spot.datetime)
 
         colour = self.primary_reference_material_sample.colour
         self.time_axis.errorbar(xs, self.ys, yerr=self.yerrors, marker="o", ls="", color=colour)
@@ -118,7 +163,8 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
     def _create_dtfa_x_graph(self):
         xs = []
         for spot in self.primary_reference_material_sample.spots:
-            xs.append(spot.dtfa_x)
+            if not spot.is_flagged:
+                xs.append(spot.dtfa_x)
 
         colour = self.primary_reference_material_sample.colour
         self.dtfa_x_axis.errorbar(xs, self.ys, yerr=self.yerrors, marker="o", ls="", color=colour)
@@ -126,7 +172,8 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
     def _create_dtfa_y_graph(self):
         xs = []
         for spot in self.primary_reference_material_sample.spots:
-            xs.append(spot.dtfa_y)
+            if not spot.is_flagged:
+                xs.append(spot.dtfa_y)
 
         colour = self.primary_reference_material_sample.colour
         self.dtfa_y_axis.errorbar(xs, self.ys, yerr=self.yerrors, marker="o", ls="", color=colour)
