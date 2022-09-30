@@ -14,7 +14,7 @@ from view.ratio_box_widget import RatioBoxWidget
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
 
-from utils import gui_utils
+from utils.gui_utils import create_figure_widget
 from view.cycle_data_dialog import CycleDataDialog
 
 
@@ -101,9 +101,9 @@ class BasicDataCheckWidget(QWidget):
         column_headers = ["Sample name"]
         for ratio in method.ratios:
             ratio_uncertainty_name = "uncertainty"
-            column_headers.append(ratio.name)
+            column_headers.append(ratio.name())
             column_headers.append(ratio_uncertainty_name)
-            column_headers.append(ratio.delta_name)
+            column_headers.append(ratio.delta_name())
             column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
@@ -115,16 +115,14 @@ class BasicDataCheckWidget(QWidget):
 
                 for ratio in method.ratios:
                     ratio_value, ratio_uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
-                    if ratio in spot.standard_ratios:
-                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio.delta_name]
+                    if ratio.has_delta:
+                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio]
                     else:
                         delta, delta_uncertainty = "No delta", ""
                     row.append(ratio_value)
                     row.append(ratio_uncertainty)
                     row.append(delta)
                     row.append(delta_uncertainty)
-
-
 
                 row.append(spot.dtfa_x)
                 row.append(spot.dtfa_y)
@@ -178,14 +176,17 @@ class BasicDataCheckWidget(QWidget):
 
         column_headers = ["Sample name"]
         for ratio in method.ratios:
-            column_headers.append(ratio.delta_name)
+            if ratio.has_delta:
+                column_headers.append(ratio.delta_name())
+            else:
+                column_headers.append(ratio.name())
             ratio_uncertainty_name = "uncertainty"
             column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
         for sample in self.data_processing_dialog.samples:
-            for spot in sample.spots:
+            for _spot in sample.spots:
                 number_of_rows += 1
 
         table = QTableWidget()
@@ -208,52 +209,43 @@ class BasicDataCheckWidget(QWidget):
 
         font_family = self.basic_data_table.font().family()
         font = QFont(font_family, 9)
-        i = 0
+        row_number = 0
         for sample in self.data_processing_dialog.samples:
             background_colour = sample.q_colour
             for spot in sample.spots:
-                j = 0
-                name_item = QTableWidgetItem(str(sample.name + " " + spot.id))
-                name_item.setBackground(background_colour)
-                name_item.setFont(font)
-                self.basic_data_table.setItem(i, j, name_item)
+                row_items = []
+                row_items.append(str(sample.name + " " + spot.id))
 
                 for ratio in method.ratios:
-                    j += 1
-                    if ratio in spot.standard_ratios:
-                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio.delta_name]
-                        delta_item = QTableWidgetItem(format(delta, ".3f"))
+                    if ratio.has_delta:
+                        value, uncertainty = spot.not_corrected_deltas[ratio]
+                        value_format = ".3f"
+                        uncertainty_format = ".4f"
                     else:
-                        delta_item = QTableWidgetItem("No delta calculated")
-                    delta_item.setFont(font)
-                    self.basic_data_table.setItem(i, j, delta_item)
-                    j += 1
-                    if ratio in spot.standard_ratios:
-                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio.delta_name]
-                        delta_uncertainty_item = QTableWidgetItem(format(delta_uncertainty, ".4f"))
-                    else:
-                        delta_uncertainty_item = QTableWidgetItem("No delta calculated")
-                    delta_uncertainty_item.setFont(font)
-                    self.basic_data_table.setItem(i, j, delta_uncertainty_item)
-                    if spot.is_flagged:
-                        delta_item.setBackground(QColor("red"))
-                        delta_uncertainty_item.setBackground(QColor("red"))
+                        value, uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
+                        value_format = ".5f"
+                        uncertainty_format = ".6f"
 
-                dtfa_x_item = QTableWidgetItem(str(spot.dtfa_x))
-                dtfa_y_item = QTableWidgetItem(str(spot.dtfa_y))
-                relative_ion_yield_item = QTableWidgetItem(format(spot.secondary_ion_yield, ".3f"))
-                distance_to_mount_centre_item = QTableWidgetItem(str(round(spot.distance_from_mount_centre)))
+                    row_items.append(format(value, value_format))
+                    row_items.append(format(uncertainty, uncertainty_format))
 
-                for item in [dtfa_x_item, dtfa_y_item, relative_ion_yield_item, distance_to_mount_centre_item]:
+                row_items.append(str(spot.dtfa_x))
+                row_items.append(str(spot.dtfa_y))
+                row_items.append(format(spot.secondary_ion_yield, ".3f"))
+                row_items.append(str(round(spot.distance_from_mount_centre)))
+
+                for column_number, value in enumerate(row_items):
+                    item = QTableWidgetItem(value)
                     item.setFont(font)
-                    if spot.is_flagged:
+                    if column_number == 0:
+                        item.setBackground(background_colour)
+                    elif spot.is_flagged:
                         item.setBackground(QColor("red"))
 
-                self.basic_data_table.setItem(i, j + 1, dtfa_x_item)
-                self.basic_data_table.setItem(i, j + 2, dtfa_y_item)
-                self.basic_data_table.setItem(i, j + 3, relative_ion_yield_item)
-                self.basic_data_table.setItem(i, j + 4, distance_to_mount_centre_item)
-                i += 1
+                    self.basic_data_table.setItem(row_number, column_number, item)
+
+                row_number += 1
+
         self.basic_data_table.resizeColumnsToContents()
 
     ################
@@ -270,7 +262,7 @@ class BasicDataCheckWidget(QWidget):
         self.create_raw_delta_time_plot(self.ratio)
         self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
 
-        widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
+        widget, self.canvas = create_figure_widget(self.fig, self)
 
         return widget
 
@@ -284,20 +276,20 @@ class BasicDataCheckWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio in spot.standard_ratios:
-                    self.raw_delta_time_axis.set_title("Raw " + ratio.delta_name + " against time.")
-                    ys.append(spot.not_corrected_deltas[ratio.delta_name][0])
-                    dys.append(spot.not_corrected_deltas[ratio.delta_name][1])
+                if ratio.has_delta:
+                    self.raw_delta_time_axis.set_title("Raw " + ratio.delta_name() + " against time.")
+                    ys.append(spot.not_corrected_deltas[ratio][0])
+                    dys.append(spot.not_corrected_deltas[ratio][1])
 
-                    self.raw_delta_time_axis.set_ylabel(ratio.delta_name)
+                    self.raw_delta_time_axis.set_ylabel(ratio.delta_name())
 
                 else:
-                    self.raw_delta_time_axis.set_title("Raw " + ratio.name + " against time.")
+                    self.raw_delta_time_axis.set_title("Raw " + ratio.name() + " against time.")
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.raw_delta_time_axis.set_ylabel(ratio.name)
-                    self.raw_delta_time_axis.set_ylabel(ratio.name)
+                    self.raw_delta_time_axis.set_ylabel(ratio.name())
+                    self.raw_delta_time_axis.set_ylabel(ratio.name())
 
             self.raw_delta_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", markersize=4, color=sample.colour)
 
@@ -305,7 +297,6 @@ class BasicDataCheckWidget(QWidget):
         self.raw_delta_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         self.fig.tight_layout()
-
 
     def create_all_samples_x_y_positions_plot(self, samples, axis):
         axis.clear()

@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidgetItem
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 

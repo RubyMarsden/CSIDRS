@@ -70,7 +70,6 @@ class SidrsWindow(QMainWindow):
             self.on_reference_material_selected()
 
         return None
-        # TODO: Make it go back if no reference material selected and forward to next screen if there is.
 
     def on_reference_material_selected(self):
         self.model.process_data()
@@ -78,7 +77,10 @@ class SidrsWindow(QMainWindow):
         self.model.SIMS_correction_process()
         for isotope in self.model.isotopes:
             if isotope.value == "36S":
-                self.model.calculate_cap_values_S36_S33()
+                self.model.calculate_cap_values_S36()
+            elif isotope.value == "33S":
+                self.model.calculate_cap_values_S33()
+
         dialog = DataProcessingDialog(self.model)
         result = dialog.exec()
 

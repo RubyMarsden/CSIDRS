@@ -7,13 +7,14 @@ from utils.make_csv_file import write_csv_output, get_output_file
 from view.cycle_data_dialog import CycleDataDialog
 
 
+
 class CorrectedDataWidget(QWidget):
     def __init__(self, data_processing_dialog):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
 
-        self.basic_data_table = self._create_basic_table()
+        self.corrected_data_table = self._create_corrected_data_table()
 
         self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_basic_table)
 
@@ -40,7 +41,7 @@ class CorrectedDataWidget(QWidget):
         button_layout.addWidget(data_output_button)
         button_layout.addWidget(analytical_conditions_button)
 
-        layout.addWidget(self.basic_data_table)
+        layout.addWidget(self.corrected_data_table)
         layout.addLayout(button_layout)
 
         return layout
@@ -60,12 +61,12 @@ class CorrectedDataWidget(QWidget):
 
         column_headers = ["Sample name", "Spot excluded"]
         for ratio in method.ratios:
-            column_headers.append("corrected " + ratio.delta_name)
+            column_headers.append("corrected " + ratio.delta_name())
             ratio_uncertainty_name = "uncertainty"
             column_headers.append(ratio_uncertainty_name)
-            column_headers.append("uncorrected " + ratio.delta_name)
+            column_headers.append("uncorrected " + ratio.delta_name())
             column_headers.append(ratio_uncertainty_name)
-            column_headers.append("uncorrected " + ratio.name)
+            column_headers.append("uncorrected " + ratio.name())
             column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
@@ -80,8 +81,8 @@ class CorrectedDataWidget(QWidget):
                 row = [str(sample.name + "-" + spot.id), spot_excluded]
 
                 for ratio in method.ratios:
-                    [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio.delta_name]
-                    [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
+                    [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio]
+                    [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio]
                     [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
                     row.append(delta)
                     row.append(delta_uncertainty)
@@ -111,7 +112,7 @@ class CorrectedDataWidget(QWidget):
     ### Table ###
     #############
 
-    def _create_basic_table(self):
+    def _create_corrected_data_table(self):
 
         method = self.data_processing_dialog.method
 
@@ -120,15 +121,17 @@ class CorrectedDataWidget(QWidget):
 
         column_headers = ["Sample name"]
         for ratio in method.ratios:
-            column_headers.append("Corrected " + ratio.delta_name)
+            if ratio.has_delta:
+                column_headers.append("Corrected " + ratio.delta_name())
+            else:
+                column_headers.append("Corrected " + ratio.name())
             ratio_uncertainty_name = "uncertainty"
             column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Distance to centre (um)"])
 
         for sample in self.data_processing_dialog.samples:
-            for spot in sample.spots:
-                number_of_rows += 1
+            number_of_rows += len(sample.spots)
 
         table = QTableWidget()
         table.verticalHeader().setVisible(False)
@@ -148,58 +151,47 @@ class CorrectedDataWidget(QWidget):
     def _populate_basic_table(self):
         method = self.data_processing_dialog.method
 
-        font_family = self.basic_data_table.font().family()
+        font_family = self.corrected_data_table.font().family()
         font = QFont(font_family, 9)
-        i = 0
+
+        row_number = 0
         for sample in self.data_processing_dialog.samples:
             background_colour = sample.q_colour
             for spot in sample.spots:
-                j = 0
-                name_item = QTableWidgetItem(str(sample.name + " " + spot.id))
-                name_item.setBackground(background_colour)
-                name_item.setFont(font)
-                self.basic_data_table.setItem(i, j, name_item)
+                row_items = []
+                row_items.append(str(sample.name + " " + spot.id))
 
                 for ratio in method.ratios:
-                    j += 1
-                    if ratio in spot.standard_ratios:
-                        delta, delta_uncertainty = spot.alpha_corrected_data[ratio.delta_name]
-                        delta_text = format(delta, ".3f")
+                    if ratio.has_delta:
+                        value, uncertainty = spot.alpha_corrected_data[ratio]
+                        value_format = ".3f"
+                        uncertainty_format = ".4f"
                     else:
-                        delta_text = "No delta calculated"
-                    delta_item = QTableWidgetItem(delta_text)
-                    delta_item.setFont(font)
-                    self.basic_data_table.setItem(i, j, delta_item)
-                    j += 1
-                    if ratio in spot.standard_ratios:
-                        delta, delta_uncertainty = spot.alpha_corrected_data[ratio.delta_name]
-                        delta_uncertainty_text = format(delta_uncertainty, ".4f")
-                    else:
-                        delta_uncertainty_text = "No delta calculated"
-                    delta_uncertainty_item = QTableWidgetItem(delta_uncertainty_text)
-                    delta_uncertainty_item.setFont(font)
-                    self.basic_data_table.setItem(i, j, delta_uncertainty_item)
-                    if spot.is_flagged:
-                        delta_item.setBackground(QColor("red"))
-                        delta_uncertainty_item.setBackground(QColor("red"))
+                        value, uncertainty = spot.drift_corrected_ratio_values_by_ratio[ratio]
+                        value_format = ".5f"
+                        uncertainty_format = ".6f"
 
-                dtfa_x_item = QTableWidgetItem(str(spot.dtfa_x))
-                dtfa_y_item = QTableWidgetItem(str(spot.dtfa_y))
-                relative_ion_yield_item = QTableWidgetItem(format(spot.secondary_ion_yield, ".3f"))
-                distance_to_mount_centre_item = QTableWidgetItem(str(round(spot.distance_from_mount_centre)))
+                    row_items.append(format(value, value_format))
+                    row_items.append(format(uncertainty, uncertainty_format))
 
-                for item in [dtfa_x_item, dtfa_y_item, relative_ion_yield_item, distance_to_mount_centre_item]:
+                row_items.append(str(spot.dtfa_x))
+                row_items.append(str(spot.dtfa_y))
+                row_items.append(format(spot.secondary_ion_yield, ".3f"))
+                row_items.append(str(round(spot.distance_from_mount_centre)))
+
+                for column_number, value in enumerate(row_items):
+                    item = QTableWidgetItem(value)
                     item.setFont(font)
-                    if spot.is_flagged:
+                    if column_number == 0:
+                        item.setBackground(background_colour)
+                    elif spot.is_flagged:
                         item.setBackground(QColor("red"))
 
-                self.basic_data_table.setItem(i, j + 1, dtfa_x_item)
-                self.basic_data_table.setItem(i, j + 2, dtfa_y_item)
-                self.basic_data_table.setItem(i, j + 3, relative_ion_yield_item)
-                self.basic_data_table.setItem(i, j + 4, distance_to_mount_centre_item)
-                i += 1
-        self.basic_data_table.resizeColumnsToContents()
+                    self.corrected_data_table.setItem(row_number, column_number, item)
+                row_number += 1
+
+        self.corrected_data_table.resizeColumnsToContents()
 
     def update_basic_table(self):
-        self.basic_data_table.clearContents()
+        self.corrected_data_table.clearContents()
         self._populate_basic_table()

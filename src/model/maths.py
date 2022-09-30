@@ -50,8 +50,11 @@ def vector_length_from_origin(x: int, y: int):
 
 
 def drift_correction(x, y, dy, drift_coefficient, zero_time):
-    correction = (zero_time - x) * drift_coefficient
-    y_corrected = y + correction
+    """
+    Drift correction is independent of the y-intercept of the linear drift equation
+    """
+    correction = (x - zero_time) * drift_coefficient
+    y_corrected = y - correction
     return y_corrected, dy
 
 
@@ -80,11 +83,6 @@ def calculate_error_weighted_mean_and_st_dev(values, errors):
     weighted_mean = (sum([value * inverseError for value, inverseError in zip(values, inverse_errors)])) / sigma
     weighted_st_dev = math.sqrt(1 / sigma)
     return weighted_mean, weighted_st_dev
-
-
-def calculate_reduced_chi_squared():
-    # TODO - talk this out with Chris?
-    return
 
 
 def calculate_sims_alpha(primary_reference_material_mean_delta, primary_reference_material_st_dev,

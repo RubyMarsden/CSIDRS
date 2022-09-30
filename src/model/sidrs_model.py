@@ -182,36 +182,32 @@ class SidrsModel:
         for sample in self.samples_by_name.values():
             if sample.is_primary_reference_material:
                 primary_rm = sample
-            elif sample.is_secondary_reference_material:
-                secondary_rm = sample
-            else:
-                continue
 
         for ratio in self.method.ratios:
 
             self.characterise_linear_drift(ratio, primary_rm.spots)
-            if ratio.name == "36S/32S":
+            if ratio.name() == "36S/32S":
                 self.characterise_curvilinear_drift(ratio, primary_rm.spots)
 
             if self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.NONE:
                 self.calculate_data_not_drift_corrected(ratio)
             elif self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
-                self.correct_data_for_drift(ratio)
+                self.correct_data_for_linear_drift(ratio)
             elif self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.QUAD:
                 print("Not yet it's not")
             else:
-                raise Exception("There is not an input valid drift type.")
+                raise Exception("There is not a valid input drift type.")
 
-    def correct_data_for_drift(self, ratio):
+    def correct_data_for_linear_drift(self, ratio):
         drift_correction_coef = float(self.drift_coefficient_by_ratio[ratio])
-        drift_correction_intercept = self.drift_y_intercept_by_ratio[ratio]
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 timestamp = time.mktime(spot.datetime.timetuple())
-                if ratio in spot.standard_ratios:
-                    [delta, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                    spot.drift_corrected_deltas[ratio.delta_name] = drift_correction(
-                        x=timestamp, y=delta,
+                if ratio.has_delta:
+                    [delta, uncertainty] = spot.not_corrected_deltas[ratio]
+                    spot.drift_corrected_deltas[ratio] = drift_correction(
+                        x=timestamp,
+                        y=delta,
                         dy=uncertainty,
                         drift_coefficient=drift_correction_coef,
                         zero_time=self.t_zero)
@@ -227,28 +223,25 @@ class SidrsModel:
     def calculate_data_not_drift_corrected(self, ratio):
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
-                if ratio in spot.standard_ratios:
-                    spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+                if ratio.has_delta:
+                    spot.drift_corrected_deltas[ratio] = spot.not_corrected_deltas[ratio]
                 else:
                     spot.drift_corrected_ratio_values_by_ratio[ratio] = spot.mean_two_st_error_isotope_ratios[ratio]
 
     def get_data_for_drift_characterisation_input(self, ratio, spots):
         times = []
         values = []
-        uncertainties = []
         for spot in spots:
+            if spot.is_flagged:
+                continue
             timestamp = time.mktime(spot.datetime.timetuple())
-            if ratio in spot.standard_ratios and not spot.is_flagged:
-                [value, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                times.append(timestamp)
-                values.append(value)
-                uncertainties.append(uncertainty)
+            if ratio.has_delta:
+                [value, _uncertainty] = spot.not_corrected_deltas[ratio]
+            else:
+                [value, _uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
 
-            elif ratio not in spot.standard_ratios and not spot.is_flagged:
-                [value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
-                times.append(timestamp)
-                values.append(value)
-                uncertainties.append(uncertainty)
+            times.append(timestamp)
+            values.append(value)
 
         return values, times
 
@@ -257,23 +250,15 @@ class SidrsModel:
         values, times = self.get_data_for_drift_characterisation_input(ratio, spots)
         self.primary_rm_deltas_by_ratio[ratio] = values
 
-        if ratio in self.primary_rm_deltas_by_ratio:
-            Y = values
-            X = times
-            # adding and array of '1s' for statsmodels
-            X = sm.add_constant(X)
+        Y = values
+        # adding a column of '1s' for statsmodels to the array 'times'
+        X = sm.add_constant(times)
 
-            self.statsmodel_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
-            self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
-                ratio] = self.statsmodel_result_by_ratio[ratio].params
+        self.statsmodel_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
+        self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
+            ratio] = self.statsmodel_result_by_ratio[ratio].params
 
-            self.t_zero = np.median(times)
-
-        else:
-            self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[ratio] = None, None
-            for sample in self.samples_by_name.values():
-                for spot in sample.spots:
-                    spot.drift_corrected_deltas[ratio.delta_name] = spot.not_corrected_deltas[ratio.delta_name]
+        self.t_zero = np.median(times)
 
     def characterise_curvilinear_drift(self, ratio, spots):
         values, times = self.get_data_for_drift_characterisation_input(ratio, spots)
@@ -281,8 +266,8 @@ class SidrsModel:
         x1 = times
         x2 = [t ** 2 for t in times]
         # making the factors into an array and adding a constant
-        X = np.column_stack((x1, x2))
-        X = sm.add_constant(X)
+        x_array = np.column_stack((x1, x2))
+        X = sm.add_constant(x_array)
         self.statsmodel_curvilinear_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
         return
 
@@ -294,15 +279,12 @@ class SidrsModel:
         values = []
         uncertainties = []
         for spot in spots_to_use:
-            if ratio in spot.standard_ratios:
-                [value, uncertainty] = spot.not_corrected_deltas[ratio.delta_name]
-                values.append(value)
-                uncertainties.append(uncertainty)
-
-            elif ratio not in spot.standard_ratios:
+            if ratio.has_delta:
+                [value, uncertainty] = spot.not_corrected_deltas[ratio]
+            else:
                 [value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
-                values.append(value)
-                uncertainties.append(uncertainty)
+            values.append(value)
+            uncertainties.append(uncertainty)
 
         lists_of_independent_variables = []
         for factor in factors:
@@ -335,8 +317,6 @@ class SidrsModel:
             self.statsmodel_multiple_linear_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
             print(self.statsmodel_multiple_linear_result_by_ratio[ratio].summary())
 
-        return
-
     def SIMS_correction_process(self):
         # This correction method is described fully in  Kita et al., 2009
         # How does the ratio process work? Can you have different corrections for each one?
@@ -345,8 +325,8 @@ class SidrsModel:
                 if sample.is_primary_reference_material:
                     primary_rm = sample
 
-            primary_rm_spot_data = [spot.drift_corrected_deltas[ratio.delta_name][0] for spot in primary_rm.spots if
-                                    not spot.is_flagged and ratio in spot.standard_ratios]
+            primary_rm_spot_data = [spot.drift_corrected_deltas[ratio][0] for spot in primary_rm.spots if
+                                    not spot.is_flagged and ratio.has_delta]
 
             if primary_rm_spot_data:
                 primary_rm_mean = np.mean(primary_rm_spot_data)
@@ -361,52 +341,65 @@ class SidrsModel:
             for sample in self.samples_by_name.values():
                 for spot in sample.spots:
 
-                    if ratio in spot.standard_ratios:
-                        data = spot.drift_corrected_deltas[ratio.delta_name]
-                        spot.alpha_corrected_data[ratio.delta_name] = calculate_alpha_correction(data, alpha_sims,
+                    if ratio.has_delta:
+                        data = spot.drift_corrected_deltas[ratio]
+                        spot.alpha_corrected_data[ratio] = calculate_alpha_correction(data, alpha_sims,
                                                                                                  alpha_sims_uncertainty)
                     else:
-                        spot.alpha_corrected_data[ratio.name] = spot.drift_corrected_ratio_values_by_ratio[ratio]
+                        spot.alpha_corrected_data[ratio] = spot.drift_corrected_ratio_values_by_ratio[ratio]
 
-    def calculate_cap_values_S36_S33(self):
+    def calculate_cap_values_S33(self):
+        print("Calculating cap33")
+        for sample in self.samples_by_name.values():
+            if sample.is_primary_reference_material:
+                primary_rm = sample
+
+                primary_rm_spot_data_33 = [spot.drift_corrected_deltas[S33_S32][0] for spot in
+                                           primary_rm.spots if
+                                           not spot.is_flagged]
+                primary_rm_spot_data_34 = [spot.drift_corrected_deltas[S34_S32][0] for spot in
+                                           primary_rm.spots if
+                                           not spot.is_flagged]
+                array_33 = np.array(primary_rm_spot_data_33)
+                array_34 = np.array(primary_rm_spot_data_34)
+                primary_covariance_33_34 = np.cov(array_33, array_34)[0][1]
+
+        for sample in self.samples_by_name.values():
+            for spot in sample.spots:
+                spot.cap_data_S33 = calculate_cap_value_and_uncertainty(
+                    delta_value_x=spot.alpha_corrected_data[S33_S32][0],
+                    uncertainty_x=spot.alpha_corrected_data[S33_S32][1],
+                    delta_value_relative=spot.alpha_corrected_data[S34_S32][0],
+                    uncertainty_relative=spot.alpha_corrected_data[S34_S32][1],
+                    MDF=0.515,
+                    reference_material_covariance=primary_covariance_33_34)
+
+    def calculate_cap_values_S36(self):
         print("Calculating cap")
         for sample in self.samples_by_name.values():
             if sample.is_primary_reference_material:
                 primary_rm = sample
 
-                primary_rm_spot_data_33 = [spot.drift_corrected_deltas[S33_S32.delta_name][0] for spot in
+                primary_rm_spot_data_34 = [spot.drift_corrected_deltas[S34_S32][0] for spot in
                                            primary_rm.spots if
                                            not spot.is_flagged]
-                primary_rm_spot_data_34 = [spot.drift_corrected_deltas[S34_S32.delta_name][0] for spot in
+                primary_rm_spot_data_36 = [spot.drift_corrected_deltas[S36_S32][0] for spot in
                                            primary_rm.spots if
                                            not spot.is_flagged]
-                primary_rm_spot_data_36 = [spot.drift_corrected_deltas[S36_S32.delta_name][0] for spot in
-                                           primary_rm.spots if
-                                           not spot.is_flagged]
-                array_33 = np.array(primary_rm_spot_data_33)
+
                 array_34 = np.array(primary_rm_spot_data_34)
                 array_36 = np.array(primary_rm_spot_data_36)
-                primary_covariance_33_34 = np.cov(array_33, array_34)[0][1]
                 primary_covariance_36_34 = np.cov(array_36, array_34)[0][1]
 
         for sample in self.samples_by_name.values():
             for spot in sample.spots:
                 spot.cap_data_S36 = calculate_cap_value_and_uncertainty(
-                    delta_value_x=spot.alpha_corrected_data[S36_S32.delta_name][0],
-                    uncertainty_x=spot.alpha_corrected_data[S36_S32.delta_name][1],
-                    delta_value_relative=spot.alpha_corrected_data[S34_S32.delta_name][0],
-                    uncertainty_relative=spot.alpha_corrected_data[S34_S32.delta_name][1],
+                    delta_value_x=spot.alpha_corrected_data[S36_S32][0],
+                    uncertainty_x=spot.alpha_corrected_data[S36_S32][1],
+                    delta_value_relative=spot.alpha_corrected_data[S34_S32][0],
+                    uncertainty_relative=spot.alpha_corrected_data[S34_S32][1],
                     MDF=1.91,
                     reference_material_covariance=primary_covariance_36_34)
-                spot.cap_data_S33 = calculate_cap_value_and_uncertainty(
-                    delta_value_x=spot.alpha_corrected_data[S33_S32.delta_name][0],
-                    uncertainty_x=spot.alpha_corrected_data[S33_S32.delta_name][1],
-                    delta_value_relative=spot.alpha_corrected_data[
-                        S34_S32.delta_name][0],
-                    uncertainty_relative=spot.alpha_corrected_data[
-                        S34_S32.delta_name][1],
-                    MDF=0.515,
-                    reference_material_covariance=primary_covariance_33_34)
 
     ###############
     ### Signals ###
@@ -456,8 +449,10 @@ class SidrsModel:
 
         self.drift_correction_process()
         self.SIMS_correction_process()
+        if Isotope.S33 in self.isotopes:
+            self.calculate_cap_values_S33()
         if Isotope.S36 in self.isotopes:
-            self.calculate_cap_values_S36_S33()
+            self.calculate_cap_values_S36()
 
     def _remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
         spot.exclude_cycle_information_update(cycle_number, is_flagged, ratio)

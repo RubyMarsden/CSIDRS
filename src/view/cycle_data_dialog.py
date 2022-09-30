@@ -136,7 +136,7 @@ class CycleDataDialog(QDialog):
         column_headers = ["Sample name", "Cycle number"]
 
         for ratio in method.ratios:
-            column_headers.append(str(ratio.name))
+            column_headers.append(str(ratio.name()))
             column_headers.append("Excluded cycle")
 
         for isotope in method.isotopes:
@@ -221,7 +221,7 @@ class CycleDataDialog(QDialog):
         self.ratio_axis.spines['top'].set_visible(False)
         self.ratio_axis.spines['right'].set_visible(False)
 
-        self.ratio_axis.set_ylabel(self.ratio.name)
+        self.ratio_axis.set_ylabel(self.ratio.name())
         self.ratio_axis.set_xlabel("Cycle")
 
         ys = spot.raw_isotope_ratios[self.ratio]

@@ -15,7 +15,7 @@ class RatioBoxWidget(QWidget):
         self.setLayout(layout)
 
         for ratio in ratios:
-            button = QRadioButton(ratio.name)
+            button = QRadioButton(ratio.name())
             button.ratio = ratio
             layout.addWidget(button, alignment=Qt.AlignCenter)
             self.ratio_qbutton_group.addButton(button)

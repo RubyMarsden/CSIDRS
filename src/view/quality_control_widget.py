@@ -105,7 +105,7 @@ class QualityControlWidget(QWidget):
     def _create_delta_vs_time_graph(self, ratio):
         self.delta_vs_time_axis.clear()
 
-        self.delta_vs_time_axis.set_title(ratio.delta_name + " against time.")
+        self.delta_vs_time_axis.set_title(ratio.delta_name() + " against time.")
 
         self.delta_vs_time_axis.spines['top'].set_visible(False)
         self.delta_vs_time_axis.spines['right'].set_visible(False)
@@ -114,16 +114,16 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio in spot.standard_ratios:
-                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
-                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+                if ratio.has_delta:
+                    ys.append(spot.alpha_corrected_data[ratio][0])
+                    dys.append(spot.alpha_corrected_data[ratio][1])
 
-                    self.delta_vs_time_axis.set_ylabel(ratio.delta_name)
+                    self.delta_vs_time_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_time_axis.set_ylabel(ratio.name)
+                    self.delta_vs_time_axis.set_ylabel(ratio.name())
 
             self.delta_vs_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
@@ -159,7 +159,7 @@ class QualityControlWidget(QWidget):
 
     def _create_delta_vs_secondary_ion_yield_graph(self, ratio):
         self.delta_vs_secondary_ion_yield_axis.clear()
-        self.delta_vs_secondary_ion_yield_axis.set_title(ratio.delta_name + " against secondary ion yields.")
+        self.delta_vs_secondary_ion_yield_axis.set_title(ratio.delta_name() + " against secondary ion yields.")
         self.delta_vs_secondary_ion_yield_axis.spines['top'].set_visible(False)
         self.delta_vs_secondary_ion_yield_axis.spines['right'].set_visible(False)
 
@@ -168,16 +168,16 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio in spot.standard_ratios:
-                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
-                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+                if ratio.has_delta:
+                    ys.append(spot.alpha_corrected_data[ratio][0])
+                    dys.append(spot.alpha_corrected_data[ratio][1])
 
-                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.delta_name)
+                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.name)
+                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.name())
 
             self.delta_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_secondary_ion_yield_axis.set_xlabel("Secondary ion yield")
@@ -185,7 +185,7 @@ class QualityControlWidget(QWidget):
 
     def _create_delta_vs_distance_from_mount_centre_graph(self, ratio):
         self.delta_vs_distance_from_mount_centre_axis.clear()
-        self.delta_vs_distance_from_mount_centre_axis.set_title(ratio.delta_name + " against distance from mount centre.")
+        self.delta_vs_distance_from_mount_centre_axis.set_title(ratio.delta_name() + " against distance from mount centre.")
         self.delta_vs_distance_from_mount_centre_axis.spines['top'].set_visible(False)
         self.delta_vs_distance_from_mount_centre_axis.spines['right'].set_visible(False)
 
@@ -194,16 +194,16 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio in spot.standard_ratios:
-                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
-                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+                if ratio.has_delta:
+                    ys.append(spot.alpha_corrected_data[ratio][0])
+                    dys.append(spot.alpha_corrected_data[ratio][1])
 
-                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.delta_name)
+                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.name)
+                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.name())
 
             self.delta_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_distance_from_mount_centre_axis.set_xlabel("Distance from mount centre")
@@ -212,7 +212,7 @@ class QualityControlWidget(QWidget):
 
     def _create_delta_vs_dtfa_x_graph(self, ratio):
         self.delta_vs_dtfa_x_axis.clear()
-        self.delta_vs_dtfa_x_axis.set_title(ratio.delta_name + " against dtfa-x.")
+        self.delta_vs_dtfa_x_axis.set_title(ratio.delta_name() + " against dtfa-x.")
         self.delta_vs_dtfa_x_axis.spines['top'].set_visible(False)
         self.delta_vs_dtfa_x_axis.spines['right'].set_visible(False)
 
@@ -221,16 +221,16 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio in spot.standard_ratios:
-                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
-                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+                if ratio.has_delta:
+                    ys.append(spot.alpha_corrected_data[ratio][0])
+                    dys.append(spot.alpha_corrected_data[ratio][1])
 
-                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.delta_name)
+                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.name)
+                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.name())
 
             self.delta_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.delta_vs_dtfa_x_axis.set_xlabel("dtfa-x")
@@ -239,7 +239,7 @@ class QualityControlWidget(QWidget):
 
     def _create_delta_vs_dtfa_y_graph(self, ratio):
         self.delta_vs_dtfa_y_axis.clear()
-        self.delta_vs_dtfa_y_axis.set_title(ratio.delta_name + " against dtfa-y.")
+        self.delta_vs_dtfa_y_axis.set_title(ratio.delta_name() + " against dtfa-y.")
         self.delta_vs_dtfa_y_axis.spines['top'].set_visible(False)
         self.delta_vs_dtfa_y_axis.spines['right'].set_visible(False)
 
@@ -249,16 +249,16 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio in spot.standard_ratios:
-                    ys.append(spot.alpha_corrected_data[ratio.delta_name][0])
-                    dys.append(spot.alpha_corrected_data[ratio.delta_name][1])
+                if ratio.has_delta:
+                    ys.append(spot.alpha_corrected_data[ratio][0])
+                    dys.append(spot.alpha_corrected_data[ratio][1])
 
-                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name)
+                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.name)
+                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.name())
             total_xs.extend(xs)
 
             self.delta_vs_dtfa_y_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
@@ -267,7 +267,7 @@ class QualityControlWidget(QWidget):
         x_maximum = max(total_xs) + 2
 
         self.delta_vs_dtfa_y_axis.set_xlabel("dtfa-y")
-        self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name)
+        self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name())
         self.delta_vs_dtfa_y_axis.set(xlim=(x_minimum, x_maximum))
 
         self.delta_vs_dtfa_y_fig.tight_layout()

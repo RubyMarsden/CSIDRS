@@ -131,18 +131,18 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self.ys = []
         self.yerrors = []
         for spot in self.primary_reference_material_sample.spots:
-            if spot.not_corrected_deltas[self.ratio.delta_name][0]:
+            if spot.not_corrected_deltas[self.ratio][0]:
                 if not spot.is_flagged:
-                    self.ys.append(spot.not_corrected_deltas[self.ratio.delta_name][0])
-                    self.yerrors.append(spot.not_corrected_deltas[self.ratio.delta_name][1])
+                    self.ys.append(spot.not_corrected_deltas[self.ratio][0])
+                    self.yerrors.append(spot.not_corrected_deltas[self.ratio][1])
 
-                self.time_axis.set_ylabel(self.ratio.delta_name)
+                self.time_axis.set_ylabel(self.ratio.delta_name())
             else:
                 if not spot.is_flagged:
                     self.ys.append(spot.mean_two_st_error_isotope_ratios[self.ratio][0])
                     self.yerrors.append(spot.mean_two_st_error_isotope_ratios[self.ratio][1])
 
-                self.time_axis.set_ylabel(self.ratio.name)
+                self.time_axis.set_ylabel(self.ratio.name())
 
     def _create_time_graph(self):
         xs = []

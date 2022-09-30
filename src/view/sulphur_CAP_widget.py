@@ -33,12 +33,15 @@ class SulphurCAPWidget(QWidget):
         cap_three_vs_delta_four_graph_widget = self._create_cap_three_vs_delta_four_graph_widget()
         cap_three_vs_cap_six_graph_widget = self._create_cap_three_vs_cap_six_graph_widget()
 
+        #TODO fix this please
         graph_tab_widget = QTabWidget()
-        graph_tab_widget.addTab(delta_four_vs_delta_three_graph_widget, "delta33 vs delta34")
-        graph_tab_widget.addTab(cap_three_vs_delta_four_graph_widget, "Cap33 vs delta34")
-        if Isotope.S36 in self.data_processing_dialog.method.isotopes:
-            graph_tab_widget.addTab(delta_four_vs_delta_six_graph_widget, "delta36 vs delta34")
-            graph_tab_widget.addTab(cap_three_vs_cap_six_graph_widget, "Cap36 vs Cap33")
+        if Isotope.S32 and Isotope.S33 and Isotope.S34 in self.data_processing_dialog.method.isotopes:
+            print("Basic working")
+            graph_tab_widget.addTab(delta_four_vs_delta_three_graph_widget, "delta33 vs delta34")
+            graph_tab_widget.addTab(cap_three_vs_delta_four_graph_widget, "Cap33 vs delta34")
+            if Isotope.S36 in self.data_processing_dialog.method.isotopes:
+                graph_tab_widget.addTab(delta_four_vs_delta_six_graph_widget, "delta36 vs delta34")
+                graph_tab_widget.addTab(cap_three_vs_cap_six_graph_widget, "Cap36 vs Cap33")
 
         return graph_tab_widget
 
@@ -86,24 +89,24 @@ class SulphurCAPWidget(QWidget):
         ratio_y = self.method.ratios[ratio_y_index]
         ratio_x = self.method.ratios[ratio_x_index]
         axis.clear()
-        axis.set_title(ratio_y.delta_name + " vs " + ratio_x.delta_name)
+        axis.set_title(ratio_y.delta_name() + " vs " + ratio_x.delta_name())
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
-        axis.set_xlabel(ratio_x.delta_name)
-        axis.set_ylabel(ratio_y.delta_name)
+        axis.set_xlabel(ratio_x.delta_name())
+        axis.set_ylabel(ratio_y.delta_name())
 
         list_for_finding_minimum_and_maximum_x_values = [0]
         list_for_finding_minimum_and_maximum_y_values = [0]
 
         for sample in self.samples:
-            delta_y_value = [spot.alpha_corrected_data[ratio_y.delta_name][0] for spot in
+            delta_y_value = [spot.alpha_corrected_data[ratio_y][0] for spot in
                              sample.spots]
-            delta_y_errors = [spot.alpha_corrected_data[ratio_y.delta_name][1] for spot in
+            delta_y_errors = [spot.alpha_corrected_data[ratio_y][1] for spot in
                               sample.spots]
-            delta_x_value = [spot.alpha_corrected_data[ratio_x.delta_name][0] for spot in
+            delta_x_value = [spot.alpha_corrected_data[ratio_x][0] for spot in
                              sample.spots]
-            delta_x_errors = [spot.alpha_corrected_data[ratio_x.delta_name][1] for spot in
+            delta_x_errors = [spot.alpha_corrected_data[ratio_x][1] for spot in
                               sample.spots]
             list_for_finding_minimum_and_maximum_y_values.extend(delta_y_value)
             list_for_finding_minimum_and_maximum_x_values.extend(delta_x_value)
@@ -134,8 +137,8 @@ class SulphurCAPWidget(QWidget):
         axis.set_ylabel("Cap S33")
 
         for sample in self.samples:
-            xs = [spot.alpha_corrected_data[S34_S32.delta_name][0] for spot in sample.spots]
-            x_errors = [spot.alpha_corrected_data[S34_S32.delta_name][1] for spot in sample.spots]
+            xs = [spot.alpha_corrected_data[S34_S32][0] for spot in sample.spots]
+            x_errors = [spot.alpha_corrected_data[S34_S32][1] for spot in sample.spots]
             ys = [spot.cap_data_S33[0] for spot in sample.spots]
             y_errors = [spot.cap_data_S33[1] for spot in sample.spots]
 
@@ -165,11 +168,14 @@ class SulphurCAPWidget(QWidget):
 
     def update_graph_tabs(self):
         self._create_delta_graph(self.delta_four_vs_delta_three_axis, 1, 0, 0.515)
-        self._create_delta_graph(self.delta_four_vs_delta_six_axis, 1, 2, 1.91)
         self._create_cap_three_vs_delta_four_graph(self.cap_three_vs_delta_four_axis)
-        self._create_cap_three_vs_cap_six_graph(self.cap_three_vs_cap_six_axis)
 
         self.delta_four_vs_delta_three_canvas.draw()
-        self.delta_four_vs_delta_six_canvas.draw()
         self.cap_three_vs_delta_four_canvas.draw()
-        self.cap_three_vs_cap_six_canvas.draw()
+
+        if Isotope.S36 in self.data_processing_dialog.model.isotopes:
+            self._create_delta_graph(self.delta_four_vs_delta_six_axis, 1, 2, 1.91)
+            self._create_cap_three_vs_cap_six_graph(self.cap_three_vs_cap_six_axis)
+
+            self.cap_three_vs_cap_six_canvas.draw()
+            self.delta_four_vs_delta_six_canvas.draw()
