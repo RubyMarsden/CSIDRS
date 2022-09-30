@@ -37,28 +37,28 @@ class QualityControlWidget(QWidget):
         self.setLayout(layout)
 
     def _create_graph_tab_widget(self):
-        delta_vs_time_graph_widget = self._create_delta_vs_time_graph_widget()
+        corrected_value_vs_time_graph_widget = self._create_corrected_value_vs_time_graph_widget()
         x_y_position_graph_widget = self._create_x_y_position_graph_widget()
-        delta_vs_secondary_ion_yield_graph_widget = self._create_delta_vs_secondary_ion_yield_graph_widget()
-        delta_vs_distance_mount_centre_graph_widget = self._create_delta_vs_distance_from_mount_centre_graph_widget()
-        delta_vs_dtfa_x_graph_widget = self._create_delta_vs_dtfa_x_graph_widget()
-        delta_vs_dtfa_y_graph_widget = self._create_delta_vs_dtfa_y_graph_widget()
+        corrected_value_vs_secondary_ion_yield_graph_widget = self._create_corrected_value_vs_secondary_ion_yield_graph_widget()
+        corrected_value_vs_distance_mount_centre_graph_widget = self._create_corrected_value_vs_distance_from_mount_centre_graph_widget()
+        corrected_value_vs_dtfa_x_graph_widget = self._create_corrected_value_vs_dtfa_x_graph_widget()
+        corrected_value_vs_dtfa_y_graph_widget = self._create_corrected_value_vs_dtfa_y_graph_widget()
 
         graph_tab_widget = QTabWidget()
-        graph_tab_widget.addTab(delta_vs_time_graph_widget, "Time")
+        graph_tab_widget.addTab(corrected_value_vs_time_graph_widget, "Time")
         graph_tab_widget.addTab(x_y_position_graph_widget, "x and y position")
-        graph_tab_widget.addTab(delta_vs_secondary_ion_yield_graph_widget, "Secondary ion yield")
-        graph_tab_widget.addTab(delta_vs_distance_mount_centre_graph_widget, "Distance to mount centre")
-        graph_tab_widget.addTab(delta_vs_dtfa_x_graph_widget, "dtfa-x")
-        graph_tab_widget.addTab(delta_vs_dtfa_y_graph_widget, "dtfa-y")
+        graph_tab_widget.addTab(corrected_value_vs_secondary_ion_yield_graph_widget, "Secondary ion yield")
+        graph_tab_widget.addTab(corrected_value_vs_distance_mount_centre_graph_widget, "Distance to mount centre")
+        graph_tab_widget.addTab(corrected_value_vs_dtfa_x_graph_widget, "dtfa-x")
+        graph_tab_widget.addTab(corrected_value_vs_dtfa_y_graph_widget, "dtfa-y")
 
         return graph_tab_widget
 
-    def _create_delta_vs_time_graph_widget(self):
-        self.delta_vs_time_fig = plt.figure()
+    def _create_corrected_value_vs_time_graph_widget(self):
+        self.corrected_value_vs_time_fig = plt.figure()
 
-        self.delta_vs_time_axis = self.delta_vs_time_fig.add_subplot()
-        graph_widget, self.time_canvas = gui_utils.create_figure_widget(self.delta_vs_time_fig, self)
+        self.corrected_value_vs_time_axis = self.corrected_value_vs_time_fig.add_subplot()
+        graph_widget, self.time_canvas = gui_utils.create_figure_widget(self.corrected_value_vs_time_fig, self)
 
         return graph_widget
 
@@ -70,45 +70,46 @@ class QualityControlWidget(QWidget):
 
         return graph_widget
 
-    def _create_delta_vs_secondary_ion_yield_graph_widget(self):
-        self.delta_vs_secondary_ion_fig = plt.figure()
+    def _create_corrected_value_vs_secondary_ion_yield_graph_widget(self):
+        self.corrected_value_vs_secondary_ion_fig = plt.figure()
 
-        self.delta_vs_secondary_ion_yield_axis = self.delta_vs_secondary_ion_fig.add_subplot()
-        graph_widget, self.secondary_canvas = gui_utils.create_figure_widget(self.delta_vs_secondary_ion_fig, self)
-
-        return graph_widget
-
-    def _create_delta_vs_distance_from_mount_centre_graph_widget(self):
-        self.delta_vs_distance_fig = plt.figure()
-
-        self.delta_vs_distance_from_mount_centre_axis = self.delta_vs_distance_fig.add_subplot()
-        graph_widget, self.distance_canvas = gui_utils.create_figure_widget(self.delta_vs_distance_fig, self)
+        self.corrected_value_vs_secondary_ion_yield_axis = self.corrected_value_vs_secondary_ion_fig.add_subplot()
+        graph_widget, self.secondary_canvas = gui_utils.create_figure_widget(self.corrected_value_vs_secondary_ion_fig, self)
 
         return graph_widget
 
-    def _create_delta_vs_dtfa_x_graph_widget(self):
-        self.delta_vs_dtfa_x_fig = plt.figure()
+    def _create_corrected_value_vs_distance_from_mount_centre_graph_widget(self):
+        self.corrected_value_vs_distance_fig = plt.figure()
 
-        self.delta_vs_dtfa_x_axis = self.delta_vs_dtfa_x_fig.add_subplot()
-        graph_widget, self.dtfa_x_canvas = gui_utils.create_figure_widget(self.delta_vs_dtfa_x_fig, self)
-
-        return graph_widget
-
-    def _create_delta_vs_dtfa_y_graph_widget(self):
-        self.delta_vs_dtfa_y_fig = plt.figure()
-
-        self.delta_vs_dtfa_y_axis = self.delta_vs_dtfa_y_fig.add_subplot()
-        graph_widget, self.dtfa_y_canvas = gui_utils.create_figure_widget(self.delta_vs_dtfa_y_fig, self)
+        self.corrected_value_vs_distance_from_mount_centre_axis = self.corrected_value_vs_distance_fig.add_subplot()
+        graph_widget, self.distance_canvas = gui_utils.create_figure_widget(self.corrected_value_vs_distance_fig, self)
 
         return graph_widget
 
-    def _create_delta_vs_time_graph(self, ratio):
-        self.delta_vs_time_axis.clear()
+    def _create_corrected_value_vs_dtfa_x_graph_widget(self):
+        self.corrected_values_vs_dtfa_x_fig = plt.figure()
 
-        self.delta_vs_time_axis.set_title(ratio.delta_name() + " against time.")
+        self.corrected_value_vs_dtfa_x_axis = self.corrected_values_vs_dtfa_x_fig.add_subplot()
+        graph_widget, self.dtfa_x_canvas = gui_utils.create_figure_widget(self.corrected_values_vs_dtfa_x_fig, self)
 
-        self.delta_vs_time_axis.spines['top'].set_visible(False)
-        self.delta_vs_time_axis.spines['right'].set_visible(False)
+        return graph_widget
+
+    def _create_corrected_value_vs_dtfa_y_graph_widget(self):
+        self.corrected_value_vs_dtfa_y_fig = plt.figure()
+
+        self.corrected_value_vs_dtfa_y_axis = self.corrected_value_vs_dtfa_y_fig.add_subplot()
+        graph_widget, self.dtfa_y_canvas = gui_utils.create_figure_widget(self.corrected_value_vs_dtfa_y_fig, self)
+
+        return graph_widget
+
+    def _create_corrected_value_vs_time_graph(self, ratio):
+        self.corrected_value_vs_time_axis.clear()
+
+        corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
+        self.corrected_value_vs_time_axis.set_title(corrected_value_name + " against time.")
+
+        self.corrected_value_vs_time_axis.spines['top'].set_visible(False)
+        self.corrected_value_vs_time_axis.spines['right'].set_visible(False)
         for sample in self.samples:
             xs = [spot.datetime for spot in sample.spots]
             ys = []
@@ -117,20 +118,17 @@ class QualityControlWidget(QWidget):
                 if ratio.has_delta:
                     ys.append(spot.alpha_corrected_data[ratio][0])
                     dys.append(spot.alpha_corrected_data[ratio][1])
-
-                    self.delta_vs_time_axis.set_ylabel(ratio.delta_name())
                 else:
-                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
-                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+                    ys.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
+                    dys.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
 
-                    self.delta_vs_time_axis.set_ylabel(ratio.name())
+            self.corrected_value_vs_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
-            self.delta_vs_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
+        self.corrected_value_vs_time_axis.set_xlabel("Time")
+        self.corrected_value_vs_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+        self.corrected_value_vs_time_axis.set_ylabel(corrected_value_name)
 
-        self.delta_vs_time_axis.set_xlabel("Time")
-        self.delta_vs_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-
-        self.delta_vs_time_fig.tight_layout()
+        self.corrected_value_vs_time_fig.tight_layout()
 
     def _create_x_y_position_graph(self):
         self.x_and_y_position_axis.clear()
@@ -157,11 +155,12 @@ class QualityControlWidget(QWidget):
         self.x_and_y_position_axis.set_aspect('equal')
         self.x_y_position_fig.tight_layout()
 
-    def _create_delta_vs_secondary_ion_yield_graph(self, ratio):
-        self.delta_vs_secondary_ion_yield_axis.clear()
-        self.delta_vs_secondary_ion_yield_axis.set_title(ratio.delta_name() + " against secondary ion yields.")
-        self.delta_vs_secondary_ion_yield_axis.spines['top'].set_visible(False)
-        self.delta_vs_secondary_ion_yield_axis.spines['right'].set_visible(False)
+    def _create_corrected_value_vs_secondary_ion_yield_graph(self, ratio):
+        self.corrected_value_vs_secondary_ion_yield_axis.clear()
+        corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
+        self.corrected_value_vs_secondary_ion_yield_axis.set_title(corrected_value_name + " against secondary ion yields.")
+        self.corrected_value_vs_secondary_ion_yield_axis.spines['top'].set_visible(False)
+        self.corrected_value_vs_secondary_ion_yield_axis.spines['right'].set_visible(False)
 
         for sample in self.samples:
             xs = [spot.secondary_ion_yield for spot in sample.spots]
@@ -171,23 +170,21 @@ class QualityControlWidget(QWidget):
                 if ratio.has_delta:
                     ys.append(spot.alpha_corrected_data[ratio][0])
                     dys.append(spot.alpha_corrected_data[ratio][1])
-
-                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_secondary_ion_yield_axis.set_ylabel(ratio.name())
+            self.corrected_value_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
+        self.corrected_value_vs_secondary_ion_yield_axis.set_xlabel("Secondary ion yield")
+        self.corrected_value_vs_secondary_ion_yield_axis.set_ylabel(corrected_value_name)
+        self.corrected_value_vs_secondary_ion_fig.tight_layout()
 
-            self.delta_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
-        self.delta_vs_secondary_ion_yield_axis.set_xlabel("Secondary ion yield")
-        self.delta_vs_secondary_ion_fig.tight_layout()
-
-    def _create_delta_vs_distance_from_mount_centre_graph(self, ratio):
-        self.delta_vs_distance_from_mount_centre_axis.clear()
-        self.delta_vs_distance_from_mount_centre_axis.set_title(ratio.delta_name() + " against distance from mount centre.")
-        self.delta_vs_distance_from_mount_centre_axis.spines['top'].set_visible(False)
-        self.delta_vs_distance_from_mount_centre_axis.spines['right'].set_visible(False)
+    def _create_corrected_value_vs_distance_from_mount_centre_graph(self, ratio):
+        self.corrected_value_vs_distance_from_mount_centre_axis.clear()
+        corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
+        self.corrected_value_vs_distance_from_mount_centre_axis.set_title(corrected_value_name + " against distance from mount centre.")
+        self.corrected_value_vs_distance_from_mount_centre_axis.spines['top'].set_visible(False)
+        self.corrected_value_vs_distance_from_mount_centre_axis.spines['right'].set_visible(False)
 
         for sample in self.samples:
             xs = [spot.distance_from_mount_centre for spot in sample.spots]
@@ -197,24 +194,22 @@ class QualityControlWidget(QWidget):
                 if ratio.has_delta:
                     ys.append(spot.alpha_corrected_data[ratio][0])
                     dys.append(spot.alpha_corrected_data[ratio][1])
-
-                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_distance_from_mount_centre_axis.set_ylabel(ratio.name())
+            self.corrected_value_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
+        self.corrected_value_vs_distance_from_mount_centre_axis.set_xlabel("Distance from mount centre")
+        self.corrected_value_vs_distance_from_mount_centre_axis.set_ylabel(corrected_value_name)
 
-            self.delta_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
-        self.delta_vs_distance_from_mount_centre_axis.set_xlabel("Distance from mount centre")
+        self.corrected_value_vs_distance_fig.tight_layout()
 
-        self.delta_vs_distance_fig.tight_layout()
-
-    def _create_delta_vs_dtfa_x_graph(self, ratio):
-        self.delta_vs_dtfa_x_axis.clear()
-        self.delta_vs_dtfa_x_axis.set_title(ratio.delta_name() + " against dtfa-x.")
-        self.delta_vs_dtfa_x_axis.spines['top'].set_visible(False)
-        self.delta_vs_dtfa_x_axis.spines['right'].set_visible(False)
+    def _create_corrected_value_vs_dtfa_x_graph(self, ratio):
+        self.corrected_value_vs_dtfa_x_axis.clear()
+        corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
+        self.corrected_value_vs_dtfa_x_axis.set_title(corrected_value_name + " against dtfa-x.")
+        self.corrected_value_vs_dtfa_x_axis.spines['top'].set_visible(False)
+        self.corrected_value_vs_dtfa_x_axis.spines['right'].set_visible(False)
 
         for sample in self.samples:
             xs = [spot.dtfa_x for spot in sample.spots]
@@ -224,24 +219,22 @@ class QualityControlWidget(QWidget):
                 if ratio.has_delta:
                     ys.append(spot.alpha_corrected_data[ratio][0])
                     dys.append(spot.alpha_corrected_data[ratio][1])
-
-                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_dtfa_x_axis.set_ylabel(ratio.name())
+            self.corrected_value_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
+        self.corrected_value_vs_dtfa_x_axis.set_xlabel("dtfa-x")
 
-            self.delta_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
-        self.delta_vs_dtfa_x_axis.set_xlabel("dtfa-x")
+        self.corrected_values_vs_dtfa_x_fig.tight_layout()
+        self.corrected_value_vs_dtfa_x_axis.set_ylabel(corrected_value_name)
 
-        self.delta_vs_dtfa_x_fig.tight_layout()
-
-    def _create_delta_vs_dtfa_y_graph(self, ratio):
-        self.delta_vs_dtfa_y_axis.clear()
-        self.delta_vs_dtfa_y_axis.set_title(ratio.delta_name() + " against dtfa-y.")
-        self.delta_vs_dtfa_y_axis.spines['top'].set_visible(False)
-        self.delta_vs_dtfa_y_axis.spines['right'].set_visible(False)
+    def _create_corrected_value_vs_dtfa_y_graph(self, ratio):
+        self.corrected_value_vs_dtfa_y_axis.clear()
+        corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
+        self.corrected_value_vs_dtfa_y_axis.set_title(corrected_value_name + " against dtfa-y.")
+        self.corrected_value_vs_dtfa_y_axis.spines['top'].set_visible(False)
+        self.corrected_value_vs_dtfa_y_axis.spines['right'].set_visible(False)
 
         total_xs = []
         for sample in self.samples:
@@ -252,25 +245,22 @@ class QualityControlWidget(QWidget):
                 if ratio.has_delta:
                     ys.append(spot.alpha_corrected_data[ratio][0])
                     dys.append(spot.alpha_corrected_data[ratio][1])
-
-                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name())
                 else:
                     ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.delta_vs_dtfa_y_axis.set_ylabel(ratio.name())
             total_xs.extend(xs)
 
-            self.delta_vs_dtfa_y_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
+            self.corrected_value_vs_dtfa_y_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
         x_minimum = min(total_xs) - 2
         x_maximum = max(total_xs) + 2
 
-        self.delta_vs_dtfa_y_axis.set_xlabel("dtfa-y")
-        self.delta_vs_dtfa_y_axis.set_ylabel(ratio.delta_name())
-        self.delta_vs_dtfa_y_axis.set(xlim=(x_minimum, x_maximum))
+        self.corrected_value_vs_dtfa_y_axis.set_xlabel("dtfa-y")
+        self.corrected_value_vs_dtfa_y_axis.set_ylabel(corrected_value_name)
+        self.corrected_value_vs_dtfa_y_axis.set(xlim=(x_minimum, x_maximum))
 
-        self.delta_vs_dtfa_y_fig.tight_layout()
+        self.corrected_value_vs_dtfa_y_fig.tight_layout()
 
     ###############
     ### Actions ###
@@ -284,12 +274,12 @@ class QualityControlWidget(QWidget):
         self.update_graph_tabs()
 
     def update_graph_tabs(self):
-        self._create_delta_vs_time_graph(self.ratio)
+        self._create_corrected_value_vs_time_graph(self.ratio)
         self._create_x_y_position_graph()
-        self._create_delta_vs_secondary_ion_yield_graph(self.ratio)
-        self._create_delta_vs_distance_from_mount_centre_graph(self.ratio)
-        self._create_delta_vs_dtfa_x_graph(self.ratio)
-        self._create_delta_vs_dtfa_y_graph(self.ratio)
+        self._create_corrected_value_vs_secondary_ion_yield_graph(self.ratio)
+        self._create_corrected_value_vs_distance_from_mount_centre_graph(self.ratio)
+        self._create_corrected_value_vs_dtfa_x_graph(self.ratio)
+        self._create_corrected_value_vs_dtfa_y_graph(self.ratio)
 
         self.time_canvas.draw()
         self.x_y_canvas.draw()

@@ -388,7 +388,6 @@ class DriftCorrectionWidget(QWidget):
                     ys_removed.append(spot.drift_corrected_deltas[ratio][0])
                     yerrors_removed.append(spot.drift_corrected_deltas[ratio][1])
 
-                self.primary_drift_corrected_axis.set_ylabel(ratio.delta_name())
             else:
                 if not spot.is_flagged:
                     xs.append(spot.datetime)
@@ -399,8 +398,7 @@ class DriftCorrectionWidget(QWidget):
                     xs_removed.append(spot.datetime)
                     ys_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
                     yerrors_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
-
-                self.primary_drift_corrected_axis.set_ylabel(ratio.name())
+                    
         self.primary_drift_corrected_axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
         self.primary_drift_corrected_axis.errorbar(xs_removed, ys_removed, yerr=yerrors_removed, ls="", marker="o",
                                                    markeredgecolor=sample.colour,
@@ -412,6 +410,9 @@ class DriftCorrectionWidget(QWidget):
             x_tick_label.set_horizontalalignment('right')
 
         self.primary_drift_corrected_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+        y_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
+        self.primary_drift_corrected_axis.set_ylabel(y_value_name)
 
         self.fig.tight_layout()
 
@@ -436,7 +437,7 @@ class DriftCorrectionWidget(QWidget):
             yerrors_removed = []
 
             for spot in sample.spots:
-                if ratio in spot.drift_corrected_deltas:
+                if ratio.has_delta:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
                         ys.append(spot.drift_corrected_deltas[ratio][0])
@@ -445,8 +446,6 @@ class DriftCorrectionWidget(QWidget):
                         xs_removed.append(spot.datetime)
                         ys_removed.append(spot.drift_corrected_deltas[ratio][0])
                         yerrors_removed.append(spot.drift_corrected_deltas[ratio][1])
-
-                    self.secondary_check_axis.set_ylabel(ratio.delta_name())
                 else:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
@@ -457,7 +456,6 @@ class DriftCorrectionWidget(QWidget):
                         ys_removed.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                         yerrors_removed.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
 
-                    self.secondary_check_axis.set_ylabel(ratio.name())
             y_mean = np.mean(ys)
             y_stdev = np.std(ys)
             label = "Mean: " + format(y_mean, ".3f") + ", St Dev: " + format(y_stdev, ".3f")
@@ -468,7 +466,8 @@ class DriftCorrectionWidget(QWidget):
                                                markeredgecolor=sample.colour,
                                                markerfacecolor="none")
             self.secondary_check_axis.set_xlabel("Time")
-            self.secondary_check_axis.set_ylabel(ratio.delta_name())
+            y_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
+            self.secondary_check_axis.set_ylabel(y_value_name)
 
             for x_tick_label in self.secondary_check_axis.get_xticklabels():
                 x_tick_label.set_rotation(30)
