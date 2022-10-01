@@ -14,8 +14,8 @@ class SulphurCAPWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
+        self.model = data_processing_dialog.model
         self.ratio = self.data_processing_dialog.method.ratios[0]
-        self.samples = data_processing_dialog.samples
         self.method = data_processing_dialog.method
 
         layout = QVBoxLayout()
@@ -99,7 +99,7 @@ class SulphurCAPWidget(QWidget):
         list_for_finding_minimum_and_maximum_x_values = [0]
         list_for_finding_minimum_and_maximum_y_values = [0]
 
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             delta_y_value = [spot.alpha_corrected_data[ratio_y][0] for spot in
                              sample.spots]
             delta_y_errors = [spot.alpha_corrected_data[ratio_y][1] for spot in
@@ -136,7 +136,7 @@ class SulphurCAPWidget(QWidget):
         axis.set_xlabel("delta S34")
         axis.set_ylabel("Cap S33")
 
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.alpha_corrected_data[S34_S32][0] for spot in sample.spots]
             x_errors = [spot.alpha_corrected_data[S34_S32][1] for spot in sample.spots]
             ys = [spot.cap_data_S33[0] for spot in sample.spots]
@@ -155,7 +155,7 @@ class SulphurCAPWidget(QWidget):
         axis.set_xlabel("Cap S33")
         axis.set_ylabel("Cap S36")
 
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.cap_data_S33[0] for spot in sample.spots]
             x_errors = [spot.cap_data_S33[1] for spot in sample.spots]
             ys = [spot.cap_data_S36[0] for spot in sample.spots]

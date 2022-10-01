@@ -28,7 +28,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
 
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             if sample.is_primary_reference_material:
                 self.primary_reference_material_sample = sample
 

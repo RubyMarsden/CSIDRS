@@ -62,7 +62,6 @@ class SidrsWindow(QMainWindow):
         self.clear_data_button.setEnabled(True)
 
     def next_button_clicked(self):
-        self.model.import_all_files(self.file_entry_widget.filenames)
         dialog = ReferenceMaterialSelectionDialog(self.model)
         result = dialog.exec()
         if result:

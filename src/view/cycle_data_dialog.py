@@ -20,8 +20,8 @@ class CycleDataDialog(QDialog):
         self.setMinimumWidth(450)
 
         self.data_processing_dialog = data_processing_dialog
+        self.model = data_processing_dialog.model
 
-        self.samples = self.data_processing_dialog.samples
         self.sample_tree = SampleTreeWidget(self.data_processing_dialog)
         self.cycle_tree = CycleTreeWidget(self.data_processing_dialog)
 
@@ -64,7 +64,7 @@ class CycleDataDialog(QDialog):
     def _create_right_widget(self):
         layout = QVBoxLayout()
         layout.addWidget(self.sample_tree)
-        self.sample_tree.set_samples(self.samples)
+        self.sample_tree.set_samples(self.model.get_samples())
         self.sample_tree.select_first_spot()
 
         layout.addWidget(self.cycle_tree)
@@ -144,12 +144,12 @@ class CycleDataDialog(QDialog):
             column_headers.append("Yield and background corrected " + isotope.value + " (cps)")
 
         rows = []
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             for spot in sample.spots:
                 spot_name = str(sample.name + " " + spot.id)
                 ratio = method.ratios[0]
                 for i, value in enumerate(spot.cycle_flagging_information[ratio]):
-                    row = [spot_name, i]
+                    row = [spot_name, i + 1]
                     for ratio in method.ratios:
                         boolean = spot.cycle_flagging_information[ratio][i]
                         if boolean:

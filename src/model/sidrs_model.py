@@ -1,6 +1,7 @@
 import csv
 import re
 import time
+from typing import List, Iterable
 
 import matplotlib
 import numpy as np
@@ -25,15 +26,15 @@ from model.isotopes import Isotope
 from model.maths import calculate_cap_value_and_uncertainty
 from model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32
 
+from utils.general_utils import find_longest_common_prefix_index, split_cameca_data_filename
+
 
 class SidrsModel:
     def __init__(self, signals):
-        self.spots = []
         self.data = {}
         self.analytical_condition_data = None
-        self.samples_by_name = {}
+        self.samples = []
         self.signals = signals
-        self.list_of_sample_names = []
         self.imported_files = []
         self.number_of_cycles = None
         self.element = None
@@ -54,7 +55,6 @@ class SidrsModel:
 
         self.signals.isotopesInput.connect(self._isotopes_input)
         self.signals.materialInput.connect(self._material_input)
-        self.signals.sampleNamesUpdated.connect(self._sample_names_updated)
         self.signals.referenceMaterialsInput.connect(self._reference_material_tag_samples)
         self.signals.spotAndCycleFlagged.connect(self._remove_cycle_from_spot)
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
@@ -69,22 +69,41 @@ class SidrsModel:
 
     def import_all_files(self, filenames):
         print("import all files")
-        # self.sample_names_from_filenames(filenames)
-        for filename in filenames:
-            if filename in self.imported_files:
-                raise Exception("The file: " + filename + " has already been imported")
-            spot = self._parse_asc_file_into_data(filename)
-            self.spots.append(spot)
-            self.imported_files.append(filename)
+        duplicate_files = set(filenames).intersection(set(self.imported_files))
+        if len(duplicate_files) != 0:
+            raise Exception("The files: " + str(duplicate_files) + " have already been imported.")
 
-        if len({spot.number_of_cycles for spot in self.spots}) != 1:
+        self.imported_files.extend(filenames)
+
+        sample_names_by_filename = self._sample_names_from_filenames(filenames)
+        unique_sample_names = set(sample_names_by_filename.values())
+        samples_by_name = {}
+        for i, sample_name in enumerate(unique_sample_names):
+            sample = Sample(sample_name)
+            sample.colour = colour_list[i]
+            sample.q_colour = q_colour_list[i]
+            samples_by_name[sample_name] = sample
+
+        spots = []
+        for filename in filenames:
+            spot = self._parse_asc_file_into_data(filename)
+            sample_name = sample_names_by_filename[filename]
+            sample = samples_by_name[sample_name]
+            sample.spots.append(spot)
+            spots.append(spot)
+
+        self.samples = list(samples_by_name.values())
+
+        if len({spot.number_of_cycles for spot in spots}) != 1:
             raise Exception("Spots have different numbers of cycles - you may have input two separate sessions")
 
-        self.number_of_cycles = self.spots[0].number_of_cycles
+        self.number_of_cycles = spots[0].number_of_cycles
 
         filename_for_analytical_conditions = filenames[0]
         self.analytical_condition_data = self._parse_asc_file_into_analytical_conditions_data(
             filename_for_analytical_conditions)
+
+        self.signals.importedFilesUpdated.emit()
 
     def _parse_asc_file_into_data(self, filename):
         with open(filename) as file:
@@ -113,35 +132,35 @@ class SidrsModel:
         analytical_condition_data = get_analytical_conditions_data_from_asc_file(data)
         return analytical_condition_data
 
-    def sample_names_from_filenames(self, filenames):
-        full_sample_names = []
+    def _sample_names_from_filenames(self, filenames):
+        """
+        :param filenames:
+        :return: dictionary mapping filenames to samples names
+        """
+        full_sample_names = {}
         for filename in filenames:
-            parts = re.split('@|\\.|/', filename)
-            full_sample_name = parts[-3]
-            if full_sample_name not in full_sample_names:
-                full_sample_names.append(full_sample_name)
+            full_sample_name, spot_id = split_cameca_data_filename(filename)
+            full_sample_names[filename] = full_sample_name
 
-        split_names = [re.split('-|_', full_sample_name) for full_sample_name in full_sample_names]
+        unique_full_sample_names = set(full_sample_names.values())
 
-        # TODO - at the end remove the self
-        self.sample_names = []
-        for i in range(len(split_names)):
-            if split_names[i - 1][-1] != split_names[i][-1]:
-                if split_names[i][-1] not in self.list_of_sample_names:
-                    self.sample_names.append(split_names[i][-1])
-        print("sampleNamesUpdated")
-        self.signals.sampleNamesUpdated.emit(self.sample_names)
-
-    def _create_samples_from_sample_names(self, spots):
-        for sample_name in self.list_of_sample_names:
-            self.samples_by_name[sample_name] = Sample(sample_name)
-            for spot in spots:
-                if sample_name in spot.full_sample_name:
-                    self.samples_by_name[sample_name].spots.append(spot)
-
-        for i, sample in enumerate(self.samples_by_name.values()):
-            sample.colour = colour_list[i]
-            sample.q_colour = q_colour_list[i]
+        if len(unique_full_sample_names) == 0:
+            raise Exception("No sample names have been imported - have you selected files?")
+        elif len(unique_full_sample_names) == 1:
+            sample_names = full_sample_names
+        else:
+            # Best effort attempt to strip common prefixes which are usually operator name and mount name.
+            # If fails then returns the full samples names with prefixes.
+            prefix_index = find_longest_common_prefix_index(unique_full_sample_names)
+            sample_names = {}
+            for filename, full_sample_name in full_sample_names.items():
+                truncated_sample_name = full_sample_name[prefix_index:]
+                if len(truncated_sample_name) > 0:
+                    sample_names[filename] = truncated_sample_name
+                else:
+                    sample_names = full_sample_names
+                    break
+        return sample_names
 
     ##################
     ### Processing ###
@@ -149,10 +168,9 @@ class SidrsModel:
 
     def process_data(self):
         print("Processing...")
-        self._create_samples_from_sample_names(self.spots)
         primary_reference_material_exists = False
         secondary_reference_material_accounted_for = False
-        for i, sample in enumerate(self.samples_by_name.values()):
+        for i, sample in enumerate(self.get_samples()):
             if sample.name == self.primary_reference_material:
                 sample.is_primary_reference_material = True
                 primary_reference_material_exists = True
@@ -171,7 +189,7 @@ class SidrsModel:
         if not primary_reference_material_exists or not secondary_reference_material_accounted_for:
             raise Exception("The reference materials selected does not match your sample data")
 
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             for spot in sample.spots:
                 spot.calculate_relative_secondary_ion_yield()
                 spot.calculate_raw_isotope_ratios(self.method)
@@ -179,7 +197,7 @@ class SidrsModel:
                 spot.calculate_raw_delta_for_isotope_ratio(self.element)
 
     def drift_correction_process(self):
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             if sample.is_primary_reference_material:
                 primary_rm = sample
 
@@ -200,7 +218,7 @@ class SidrsModel:
 
     def correct_data_for_linear_drift(self, ratio):
         drift_correction_coef = float(self.drift_coefficient_by_ratio[ratio])
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             for spot in sample.spots:
                 timestamp = time.mktime(spot.datetime.timetuple())
                 if ratio.has_delta:
@@ -221,7 +239,7 @@ class SidrsModel:
                         zero_time=self.t_zero)
 
     def calculate_data_not_drift_corrected(self, ratio):
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             for spot in sample.spots:
                 if ratio.has_delta:
                     spot.drift_corrected_deltas[ratio] = spot.not_corrected_deltas[ratio]
@@ -272,10 +290,8 @@ class SidrsModel:
         return
 
     def characterise_multiple_linear_regression(self, factors, ratio):
-        print("hi")
-        for factor in factors:
-            print(factor == SpotAttribute.TIME)
-        spots_to_use = [spot for spot in self.spots if not spot.is_flagged]
+
+        spots_to_use = [spot for spot in self.get_all_spots() if not spot.is_flagged]
         values = []
         uncertainties = []
         for spot in spots_to_use:
@@ -321,7 +337,7 @@ class SidrsModel:
         # This correction method is described fully in  Kita et al., 2009
         # How does the ratio process work? Can you have different corrections for each one?
         for ratio in self.method.ratios:
-            for sample in self.samples_by_name.values():
+            for sample in self.get_samples():
                 if sample.is_primary_reference_material:
                     primary_rm = sample
 
@@ -338,19 +354,19 @@ class SidrsModel:
                     externally_measured_primary_reference_value_and_uncertainty=
                     self.primary_rm_values_by_ratio[ratio])
 
-            for sample in self.samples_by_name.values():
+            for sample in self.get_samples():
                 for spot in sample.spots:
 
                     if ratio.has_delta:
                         data = spot.drift_corrected_deltas[ratio]
                         spot.alpha_corrected_data[ratio] = calculate_alpha_correction(data, alpha_sims,
-                                                                                                 alpha_sims_uncertainty)
+                                                                                      alpha_sims_uncertainty)
                     else:
                         spot.alpha_corrected_data[ratio] = spot.drift_corrected_ratio_values_by_ratio[ratio]
 
     def calculate_cap_values_S33(self):
         print("Calculating cap33")
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             if sample.is_primary_reference_material:
                 primary_rm = sample
 
@@ -364,7 +380,7 @@ class SidrsModel:
                 array_34 = np.array(primary_rm_spot_data_34)
                 primary_covariance_33_34 = np.cov(array_33, array_34)[0][1]
 
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             for spot in sample.spots:
                 spot.cap_data_S33 = calculate_cap_value_and_uncertainty(
                     delta_value_x=spot.alpha_corrected_data[S33_S32][0],
@@ -376,7 +392,7 @@ class SidrsModel:
 
     def calculate_cap_values_S36(self):
         print("Calculating cap")
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             if sample.is_primary_reference_material:
                 primary_rm = sample
 
@@ -391,7 +407,7 @@ class SidrsModel:
                 array_36 = np.array(primary_rm_spot_data_36)
                 primary_covariance_36_34 = np.cov(array_36, array_34)[0][1]
 
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             for spot in sample.spots:
                 spot.cap_data_S36 = calculate_cap_value_and_uncertainty(
                     delta_value_x=spot.alpha_corrected_data[S36_S32][0],
@@ -402,7 +418,7 @@ class SidrsModel:
                     reference_material_covariance=primary_covariance_36_34)
 
     ###############
-    ### Signals ###
+    ### Actions ###
     ###############
 
     def _isotopes_input(self, isotopes, enum):
@@ -415,8 +431,20 @@ class SidrsModel:
     def _material_input(self, material):
         self.material = material
 
-    def _sample_names_updated(self, sample_names):
-        self.list_of_sample_names = sample_names
+    def get_samples(self) -> Iterable[Sample]:
+        """
+        :return: a complete list of sample objects
+        """
+        return self.samples
+
+    def get_all_spots(self) -> Iterable[Spot]:
+        """
+        :return: a complete list of spot objects
+        """
+        spots = []
+        for sample in self.get_samples():
+            spots.extend(sample.spots)
+        return spots
 
     def _reference_material_tag_samples(self, primary_reference_material, secondary_reference_material):
         self.primary_reference_material = primary_reference_material
@@ -442,7 +470,7 @@ class SidrsModel:
             "the HACKING.md file.")
 
     def recalculate_data_with_cycles_changed(self):
-        for sample in self.samples_by_name.values():
+        for sample in self.get_samples():
             for spot in sample.spots:
                 spot.calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers()
                 spot.calculate_raw_delta_for_isotope_ratio(self.element)
@@ -467,11 +495,9 @@ class SidrsModel:
         self.recalculate_data()
 
     def clear_all_data_and_methods(self):
-        self.spots = []
         self.data.clear()
         self.analytical_condition_data = None
-        self.samples_by_name.clear()
-        self.list_of_sample_names = []
+        self.samples = []
         self.imported_files = []
         self.number_of_cycles = None
         self.element = None

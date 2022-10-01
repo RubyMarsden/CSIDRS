@@ -73,7 +73,7 @@ class CorrectedDataWidget(QWidget):
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
         rows = []
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             for spot in sample.spots:
                 spot_excluded = "x" if spot.is_flagged else ""
                 row = [str(sample.name + "-" + spot.id), spot_excluded]
@@ -130,7 +130,7 @@ class CorrectedDataWidget(QWidget):
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Distance to centre (um)"])
 
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             number_of_rows += len(sample.spots)
 
         table = QTableWidget()
@@ -155,7 +155,7 @@ class CorrectedDataWidget(QWidget):
         font = QFont(font_family, 9)
 
         row_number = 0
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             background_colour = sample.q_colour
             for spot in sample.spots:
                 row_items = []

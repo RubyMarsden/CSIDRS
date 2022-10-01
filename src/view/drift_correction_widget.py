@@ -35,7 +35,7 @@ class DriftCorrectionWidget(QWidget):
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.layout = QHBoxLayout()
 
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             if sample.is_primary_reference_material:
                 self.primary_sample = sample
             elif sample.is_secondary_reference_material:

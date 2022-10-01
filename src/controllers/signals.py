@@ -10,7 +10,7 @@ from model.spot import Spot
 class Signals(QObject):
     isotopesInput = pyqtSignal(list, Element)
     materialInput = pyqtSignal(Material)
-    filenamesUpdated = pyqtSignal(list)
+    importedFilesUpdated = pyqtSignal()
     sampleNamesUpdated = pyqtSignal(list)
     referenceMaterialsInput = pyqtSignal(str, str)
     cycleTreeItemChanged = pyqtSignal(int, int)

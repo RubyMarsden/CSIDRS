@@ -17,7 +17,7 @@ class QualityControlWidget(QWidget):
 
         self.data_processing_dialog = data_processing_dialog
         self.ratio = self.data_processing_dialog.method.ratios[0]
-        self.samples = data_processing_dialog.samples
+        self.model = data_processing_dialog.model
 
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
@@ -110,7 +110,7 @@ class QualityControlWidget(QWidget):
 
         self.corrected_value_vs_time_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_time_axis.spines['right'].set_visible(False)
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.datetime for spot in sample.spots]
             ys = []
             dys = []
@@ -135,7 +135,7 @@ class QualityControlWidget(QWidget):
         self.x_and_y_position_axis.spines['top'].set_visible(False)
         self.x_and_y_position_axis.spines['right'].set_visible(False)
 
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [int(spot.x_position) for spot in sample.spots]
             ys = [int(spot.y_position) for spot in sample.spots]
             self.x_and_y_position_axis.plot(xs, ys, marker="o", ls="", markersize=3, color=sample.colour)
@@ -162,7 +162,7 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_secondary_ion_yield_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_secondary_ion_yield_axis.spines['right'].set_visible(False)
 
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.secondary_ion_yield for spot in sample.spots]
             ys = []
             dys = []
@@ -186,7 +186,7 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_distance_from_mount_centre_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_distance_from_mount_centre_axis.spines['right'].set_visible(False)
 
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.distance_from_mount_centre for spot in sample.spots]
             ys = []
             dys = []
@@ -211,7 +211,7 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_dtfa_x_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_dtfa_x_axis.spines['right'].set_visible(False)
 
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.dtfa_x for spot in sample.spots]
             ys = []
             dys = []
@@ -237,7 +237,7 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_dtfa_y_axis.spines['right'].set_visible(False)
 
         total_xs = []
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.dtfa_y for spot in sample.spots]
             ys = []
             dys = []

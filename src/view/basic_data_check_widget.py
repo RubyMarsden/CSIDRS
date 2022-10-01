@@ -23,9 +23,9 @@ class BasicDataCheckWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
+        self.model = data_processing_dialog.model
 
         self.ratio = self.data_processing_dialog.method.ratios[0]
-        self.samples = data_processing_dialog.samples
 
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
@@ -110,7 +110,7 @@ class BasicDataCheckWidget(QWidget):
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
         rows = []
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             for spot in sample.spots:
                 row = [str(sample.name + " " + spot.id)]
 
@@ -145,20 +145,17 @@ class BasicDataCheckWidget(QWidget):
                 previous_spot = None
             else:
                 previous_spot = previous_tree_item.spot
-            xs = []
-            ys = []
-            for sample in self.data_processing_dialog.samples:
+
+            for sample in self.data_processing_dialog.model.get_samples():
                 for spot in sample.spots:
-                    ys.append(spot.secondary_ion_yield)
-                    xs.append(spot)
+                    x = spot.datetime
+                    y = spot.secondary_ion_yield
+                    if spot == current_spot:
+                        self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4, color="yellow")
 
-            for x, y in zip(xs, ys):
-                sample = self.data_processing_dialog.model.samples_by_name[x.sample_name]
-                if x == current_spot:
-                    self.raw_delta_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color="yellow")
-
-                if x == previous_spot:
-                    self.raw_delta_time_axis.plot(x.datetime, y, ls="", marker="o", markersize=4, color=sample.colour)
+                    if spot == previous_spot:
+                        self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4,
+                                                      color=sample.colour)
 
         self.canvas.draw()
 
@@ -184,7 +181,7 @@ class BasicDataCheckWidget(QWidget):
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.data_processing_dialog.model.get_samples():
             for _spot in sample.spots:
                 number_of_rows += 1
 
@@ -209,7 +206,7 @@ class BasicDataCheckWidget(QWidget):
         font_family = self.basic_data_table.font().family()
         font = QFont(font_family, 9)
         row_number = 0
-        for sample in self.data_processing_dialog.samples:
+        for sample in self.model.get_samples():
             background_colour = sample.q_colour
             for spot in sample.spots:
                 row_items = []
@@ -259,7 +256,7 @@ class BasicDataCheckWidget(QWidget):
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
 
         self.create_raw_delta_time_plot(self.ratio)
-        self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.samples, self.x_y_pos_axis)
+        self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.model.get_samples(), self.x_y_pos_axis)
 
         widget, self.canvas = create_figure_widget(self.fig, self)
 
@@ -270,7 +267,7 @@ class BasicDataCheckWidget(QWidget):
 
         self.raw_delta_time_axis.spines['top'].set_visible(False)
         self.raw_delta_time_axis.spines['right'].set_visible(False)
-        for sample in self.samples:
+        for sample in self.model.get_samples():
             xs = [spot.datetime for spot in sample.spots]
             ys = []
             dys = []

@@ -17,12 +17,13 @@ from utils.convert_date_format_from_new_asci import standardise_date_format
 from utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
     convert_to_twenty_four_hour_time_am
 
+from utils.general_utils import split_cameca_data_filename
+
 
 class Spot:
     def __init__(self, filename, spot_data, mass_peak_names):
         self.filename = filename
-        parts = re.split('@|\\.|/', self.filename)
-        self.full_sample_name, self.id = parts[-3], parts[-2]
+        self.full_sample_name, self.id = split_cameca_data_filename(filename)
         split_sample_name = re.split('-|_', self.full_sample_name)
         self.sample_name = split_sample_name[-1]
         # TODO change how this works - currently doesn't update
