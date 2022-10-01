@@ -61,11 +61,12 @@ class CorrectedDataWidget(QWidget):
 
         column_headers = ["Sample name", "Spot excluded"]
         for ratio in method.ratios:
-            column_headers.append("corrected " + ratio.delta_name())
             ratio_uncertainty_name = "uncertainty"
-            column_headers.append(ratio_uncertainty_name)
-            column_headers.append("uncorrected " + ratio.delta_name())
-            column_headers.append(ratio_uncertainty_name)
+            if ratio.has_delta:
+                column_headers.append("corrected " + ratio.delta_name())
+                column_headers.append(ratio_uncertainty_name)
+                column_headers.append("uncorrected " + ratio.delta_name())
+                column_headers.append(ratio_uncertainty_name)
             column_headers.append("uncorrected " + ratio.name())
             column_headers.append(ratio_uncertainty_name)
 
@@ -74,20 +75,19 @@ class CorrectedDataWidget(QWidget):
         rows = []
         for sample in self.data_processing_dialog.samples:
             for spot in sample.spots:
-                if spot.is_flagged:
-                    spot_excluded = "x"
-                else:
-                    spot_excluded = ""
+                spot_excluded = "x" if spot.is_flagged else ""
                 row = [str(sample.name + "-" + spot.id), spot_excluded]
 
                 for ratio in method.ratios:
-                    [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio]
-                    [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio]
+                    if ratio.has_delta:
+                        [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio]
+                        [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio]
+                        row.append(delta)
+                        row.append(delta_uncertainty)
+                        row.append(uncorrected_delta)
+                        row.append(uncorrected_delta_uncertainty)
+
                     [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
-                    row.append(delta)
-                    row.append(delta_uncertainty)
-                    row.append(uncorrected_delta)
-                    row.append(uncorrected_delta_uncertainty)
                     row.append(uncorrected_ratio)
                     row.append(uncorrected_ratio_uncertainty)
 

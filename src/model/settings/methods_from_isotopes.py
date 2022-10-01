@@ -18,7 +18,7 @@ S36_S32 = Ratio(Isotope.S36, Isotope.S32, has_delta=True)
 # Oxygen ratios
 O17_O16 = Ratio(Isotope.O17, Isotope.O16, has_delta=True)
 O18_O16 = Ratio(Isotope.O18, Isotope.O16, has_delta=True)
-O16H1_O16 = Ratio(Isotope.HYD, Isotope.O16, has_delta=False)
+O16H1_O16 = Ratio(Isotope.O16H1, Isotope.O16, has_delta=False)
 
 two_isotopes_carbon = Method([Isotope.C12, Isotope.C13, Isotope.C14], [C14_C12, C13_C12])
 
@@ -32,9 +32,9 @@ two_isotopes_no_hydroxide_oxygen = Method([Isotope.O16, Isotope.O18], [O18_O16])
 
 three_isotopes_no_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18], [O17_O16, O18_O16])
 
-two_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O18, Isotope.HYD], [O18_O16, O16H1_O16])
+two_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O18, Isotope.O16H1], [O18_O16, O16H1_O16])
 
-three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
+three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.O16H1],
                                          [O17_O16, O18_O16, O16H1_O16])
 
 list_of_methods = [three_isotopes_sulphur,

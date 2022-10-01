@@ -141,7 +141,7 @@ class CycleDataDialog(QDialog):
 
         for isotope in method.isotopes:
             column_headers.append(str(isotope.name + " (cps)"))
-            column_headers.append("Yield and background corrected " + str(isotope.name) + " (cps)")
+            column_headers.append("Yield and background corrected " + isotope.value + " (cps)")
 
         rows = []
         for sample in self.data_processing_dialog.samples:

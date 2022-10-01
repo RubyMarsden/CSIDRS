@@ -10,7 +10,7 @@ class Isotope(Enum):
     O16 = "16O"
     O17 = "17O"
     O18 = "18O"
-    HYD = "16O 1H"
+    O16H1 = "16O 1H"
     S32 = "32S"
     S33 = "33S"
     S34 = "34S"
@@ -22,7 +22,7 @@ class Isotope(Enum):
 
 isotopes_by_element = {
     Element.CAR: [Isotope.C12, Isotope.C13, Isotope.C14],
-    Element.OXY: [Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
+    Element.OXY: [Isotope.O16, Isotope.O17, Isotope.O18, Isotope.O16H1],
     Element.SUL: [Isotope.S32, Isotope.S33, Isotope.S34, Isotope.S36],
     Element.CHL: [Isotope.Cl35, Isotope.Cl37, Isotope.F19]
 }

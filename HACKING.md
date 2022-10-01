@@ -66,7 +66,7 @@ e.g.:
 
 5. Instantiate the new Method object and add it to the list of methods in `src/model/settings/methods_from_isotopes.py` e.g.:
     ```python
-   three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.HYD],
+   three_isotopes_hydroxide_oxygen = Method([Isotope.O16, Isotope.O17, Isotope.O18, Isotope.O16H1],
                                              [O17_O16, O18_O16, O16H1_O16])
    new_method = Method([Isotope.NE1, Isotope.NE2], [NE1_NE2])
    

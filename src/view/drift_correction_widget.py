@@ -398,7 +398,7 @@ class DriftCorrectionWidget(QWidget):
                     xs_removed.append(spot.datetime)
                     ys_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
                     yerrors_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
-                    
+
         self.primary_drift_corrected_axis.errorbar(xs, ys, yerr=yerrors, ls="", marker="o", color=sample.colour)
         self.primary_drift_corrected_axis.errorbar(xs_removed, ys_removed, yerr=yerrors_removed, ls="", marker="o",
                                                    markeredgecolor=sample.colour,

@@ -103,8 +103,9 @@ class BasicDataCheckWidget(QWidget):
             ratio_uncertainty_name = "uncertainty"
             column_headers.append(ratio.name())
             column_headers.append(ratio_uncertainty_name)
-            column_headers.append(ratio.delta_name())
-            column_headers.append(ratio_uncertainty_name)
+            if ratio.has_delta:
+                column_headers.append(ratio.delta_name())
+                column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
@@ -115,14 +116,12 @@ class BasicDataCheckWidget(QWidget):
 
                 for ratio in method.ratios:
                     ratio_value, ratio_uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
-                    if ratio.has_delta:
-                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio]
-                    else:
-                        delta, delta_uncertainty = "No delta", ""
                     row.append(ratio_value)
                     row.append(ratio_uncertainty)
-                    row.append(delta)
-                    row.append(delta_uncertainty)
+                    if ratio.has_delta:
+                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio]
+                        row.append(delta)
+                        row.append(delta_uncertainty)
 
                 row.append(spot.dtfa_x)
                 row.append(spot.dtfa_y)
