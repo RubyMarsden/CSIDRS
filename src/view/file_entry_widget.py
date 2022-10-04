@@ -46,7 +46,8 @@ class FileEntryWidget(QWidget):
         layout.addLayout(rhs_layout)
 
         self.model.signals.dataCleared.connect(self.on_data_cleared)
-        self.model.signals.importedFilesUpdated.connect(self.on_filenames_updated)
+        self.model.signals.importedFilesUpdated.connect(self.on_imported_files_updated)
+        self.model.signals.sampleNamesUpdated.connect(self.on_samples_names_updated)
 
         #############
         ## Actions ##
@@ -61,15 +62,11 @@ class FileEntryWidget(QWidget):
         if filenames:
             self.model.import_all_files(filenames)
 
-    def on_filenames_updated(self):
+    def on_imported_files_updated(self):
         for filename in self.model.imported_files:
             base_name = os.path.basename(filename)
             filename_item = QTreeWidgetItem(self.filename_tree_widget)
             filename_item.setText(0, base_name)
-
-        for sample in self.model.get_samples():
-            sample_name_item = QTreeWidgetItem(self.sample_name_tree_widget)
-            sample_name_item.setText(0, sample.name)
 
         self.filename_tree_widget.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         self.filename_tree_widget.horizontalScrollBar().setEnabled(True)
@@ -81,8 +78,9 @@ class FileEntryWidget(QWidget):
         dialog = ChangeSampleNamesDialog(sample_names)
         result = dialog.exec()
         if result:
-            sample_names = dialog.sample_names
-            self.model.signals.sampleNamesUpdated.emit(sample_names)
+            merge_operations = dialog.merges
+            rename_operations = dialog.simple_renames
+            self.model.rename_and_merge_samples(rename_operations, merge_operations)
         return sample_names
 
     def on_remove_single_file_button_clicked(self):
@@ -91,3 +89,9 @@ class FileEntryWidget(QWidget):
     def on_data_cleared(self):
         self.filename_tree_widget.clear()
         self.sample_name_tree_widget.clear()
+
+    def on_samples_names_updated(self):
+        self.sample_name_tree_widget.clear()
+        for sample in self.model.get_samples():
+            sample_name_item = QTreeWidgetItem(self.sample_name_tree_widget)
+            sample_name_item.setText(0, sample.name)

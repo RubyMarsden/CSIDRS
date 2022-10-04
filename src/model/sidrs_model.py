@@ -1,7 +1,7 @@
 import csv
 import re
 import time
-from typing import List, Iterable
+from typing import List, Iterable, Dict
 
 import matplotlib
 import numpy as np
@@ -104,6 +104,7 @@ class SidrsModel:
             filename_for_analytical_conditions)
 
         self.signals.importedFilesUpdated.emit()
+        self.signals.sampleNamesUpdated.emit()
 
     def _parse_asc_file_into_data(self, filename):
         with open(filename) as file:
@@ -437,6 +438,12 @@ class SidrsModel:
         """
         return self.samples
 
+    def get_samples_by_name(self) -> Dict[str, Sample]:
+        """
+        :return: a dictionary of sample objects by name
+        """
+        return {sample.name: sample for sample in self.get_samples()}
+
     def get_all_spots(self) -> Iterable[Spot]:
         """
         :return: a complete list of spot objects
@@ -445,6 +452,33 @@ class SidrsModel:
         for sample in self.get_samples():
             spots.extend(sample.spots)
         return spots
+
+    def _rename_samples(self, rename_operations):
+        samples_by_name = self.get_samples_by_name()
+        for (old_name, new_name) in rename_operations:
+            samples_by_name[old_name].name = new_name
+
+    def _merge_samples(self, merge_operations):
+        samples_by_name = self.get_samples_by_name()
+
+        for new_name, old_names in merge_operations:
+            new_sample = Sample(new_name)
+            new_sample.colour = samples_by_name[old_names[0]].colour
+            new_sample.q_colour = samples_by_name[old_names[0]].q_colour
+
+            for old_name in old_names:
+                old_sample = samples_by_name[old_name]
+                new_sample.spots.extend(old_sample.spots)
+                self.samples.remove(old_sample)
+
+            self.samples.append(new_sample)
+
+    def rename_and_merge_samples(self, rename_operations, merge_operations):
+        self._rename_samples(rename_operations)
+        self._merge_samples(merge_operations)
+
+        if len(rename_operations) > 0 or len(merge_operations) > 0:
+            self.signals.sampleNamesUpdated.emit()
 
     def _reference_material_tag_samples(self, primary_reference_material, secondary_reference_material):
         self.primary_reference_material = primary_reference_material

@@ -11,7 +11,7 @@ class Signals(QObject):
     isotopesInput = pyqtSignal(list, Element)
     materialInput = pyqtSignal(Material)
     importedFilesUpdated = pyqtSignal()
-    sampleNamesUpdated = pyqtSignal(list)
+    sampleNamesUpdated = pyqtSignal()
     referenceMaterialsInput = pyqtSignal(str, str)
     cycleTreeItemChanged = pyqtSignal(int, int)
     ratioToDisplayChanged = pyqtSignal(Ratio)
