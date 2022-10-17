@@ -11,29 +11,23 @@ from matplotlib.patches import Circle
 from utils.csv_utils import export_csv
 from utils.gui_utils import create_figure_widget
 from view.cycle_data_dialog import CycleDataDialog
-from view.ratio_box_widget import RatioBoxWidget
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
 
 
 class BasicDataCheckWidget(QWidget):
-    def __init__(self, data_processing_dialog):
+    def __init__(self, data_view):
         QWidget.__init__(self)
 
-        self.data_processing_dialog = data_processing_dialog
-        self.model = data_processing_dialog.model
+        self.data_view = data_view
+        self.model = data_view.model
 
-        self.ratio = self.data_processing_dialog.method.ratios[0]
-
-        self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
-        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+        self.data_view.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
+        self.data_view.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
 
         self.graph_widget = self._create_graphs_to_check_data()
-        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
-                                                    self.data_processing_dialog.model.signals)
 
-        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         layout = QHBoxLayout()
 
@@ -67,8 +61,6 @@ class BasicDataCheckWidget(QWidget):
 
     def _create_rhs_layout(self):
         layout = QVBoxLayout()
-
-        layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(self.graph_widget)
 
         return layout
@@ -80,20 +72,15 @@ class BasicDataCheckWidget(QWidget):
         self.highlight_selected_ratio_data_point(current_item, previous_tree_item)
 
     def on_cycle_data_button_pushed(self):
-        dialog = CycleDataDialog(self.data_processing_dialog)
+        dialog = CycleDataDialog(self.data_view)
         result = dialog.exec()
 
-    def change_ratio(self, ratio):
-        self.ratio = ratio
-        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
-        self.update_graphs()
-
-    def update_graphs(self):
-        self.create_raw_delta_time_plot(self.ratio)
+    def on_ratio_changed(self, ratio):
+        self.create_raw_delta_time_plot(ratio)
         self.canvas.draw()
 
     def on_data_output_button_pushed(self):
-        method = self.data_processing_dialog.method
+        method = self.data_view.method
 
         column_headers = ["Sample name"]
         for ratio in method.ratios:
@@ -107,7 +94,7 @@ class BasicDataCheckWidget(QWidget):
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
         rows = []
-        for sample in self.data_processing_dialog.model.get_samples():
+        for sample in self.data_view.model.get_samples():
             for spot in sample.spots:
                 row = [str(sample.name + " " + spot.id)]
 
@@ -142,7 +129,7 @@ class BasicDataCheckWidget(QWidget):
             else:
                 previous_spot = previous_tree_item.spot
 
-            for sample in self.data_processing_dialog.model.get_samples():
+            for sample in self.data_view.model.get_samples():
                 for spot in sample.spots:
                     x = spot.datetime
                     y = spot.secondary_ion_yield
@@ -161,7 +148,7 @@ class BasicDataCheckWidget(QWidget):
 
     def _create_basic_table(self):
 
-        method = self.data_processing_dialog.method
+        method = self.data_view.method
 
         number_of_columns = 5 + (2 * len(method.ratios))
         number_of_rows = 0
@@ -177,7 +164,7 @@ class BasicDataCheckWidget(QWidget):
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
-        for sample in self.data_processing_dialog.model.get_samples():
+        for sample in self.data_view.model.get_samples():
             for _spot in sample.spots:
                 number_of_rows += 1
 
@@ -197,7 +184,7 @@ class BasicDataCheckWidget(QWidget):
         return table
 
     def _populate_basic_table(self):
-        method = self.data_processing_dialog.method
+        method = self.data_view.method
 
         font_family = self.basic_data_table.font().family()
         font = QFont(font_family, 9)
@@ -250,9 +237,9 @@ class BasicDataCheckWidget(QWidget):
         self.spot_visible_grid_spec = GridSpec(2, 1, height_ratios=[1, 2])
         self.raw_delta_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
-
-        self.create_raw_delta_time_plot(self.ratio)
-        self.create_all_samples_x_y_positions_plot(self.data_processing_dialog.model.get_samples(), self.x_y_pos_axis)
+        # TODO check this one and then delete this todo
+        # self.create_raw_delta_time_plot(self.data_view.get_current_ratio())
+        self.create_all_samples_x_y_positions_plot(self.data_view.model.get_samples(), self.x_y_pos_axis)
 
         widget, self.canvas = create_figure_widget(self.fig, self)
 

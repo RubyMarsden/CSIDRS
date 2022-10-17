@@ -8,18 +8,18 @@ from view.ratio_box_widget import RatioBoxWidget
 
 
 class ResidualsDialog(QDialog):
-    def __init__(self, data_processing_dialog, ratio):
+    def __init__(self, data_processing_dialog):
         QDialog.__init__(self)
         self.setWindowTitle("Residuals and statsmodels statistics summary")
         self.setMinimumWidth(450)
 
         self.data_processing_dialog = data_processing_dialog
 
-        self.ratio = ratio
+        self.ratio = data_processing_dialog.get_current_ratio()
         # Create the ratio selection button here - because the button must exist before ratio can change.
         self.ratio_selection_widget = self._create_ratio_selection_widget()
 
-        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+        self.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
 
         layout = QVBoxLayout()
         layout.addWidget(self.ratio_selection_widget)
@@ -34,8 +34,7 @@ class ResidualsDialog(QDialog):
         self.setLayout(layout)
 
     def _create_ratio_selection_widget(self):
-        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
-                                                    self.data_processing_dialog.model.signals)
+        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios)
         self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         return self.ratio_radiobox_widget
@@ -124,7 +123,7 @@ class ResidualsDialog(QDialog):
     ### Actions ###
     ###############
 
-    def change_ratio(self, ratio):
+    def on_ratio_changed(self, ratio):
         self.ratio = ratio
         self._create_residuals_graph()
         self.canvas.draw()

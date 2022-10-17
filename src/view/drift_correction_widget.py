@@ -11,7 +11,6 @@ from matplotlib.gridspec import GridSpec
 from model.drift_correction_type import DriftCorrectionType
 from utils import gui_utils
 from view.further_MLR_dialog import FurtherMultipleLinearRegressionDialog
-from view.ratio_box_widget import RatioBoxWidget
 from view.residuals_dialog import ResidualsDialog
 
 
@@ -22,16 +21,13 @@ class DriftCorrectionWidget(QWidget):
         self.rhs_layout = None
         self.linear_regression_text_widget = None
         self.data_processing_dialog = data_processing_dialog
-        self.ratio = self.data_processing_dialog.method.ratios[0]
-
-        # Create the ratio selection button here - because the button must exist before ratio can change.
-        self._create_ratio_selection_widget()
+        self.model = data_processing_dialog.model
 
         self.drift_coefficient = self.data_processing_dialog.model.drift_coefficient_by_ratio
         self.drift_intercept = self.data_processing_dialog.model.drift_y_intercept_by_ratio
 
-        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
-        self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_widget_contents)
+        self.data_processing_dialog.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
+        self.data_processing_dialog.model.signals.dataRecalculated.connect(self.on_data_recalculated)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.layout = QHBoxLayout()
 
@@ -43,9 +39,10 @@ class DriftCorrectionWidget(QWidget):
             elif self.data_processing_dialog.model.secondary_reference_material == "No secondary reference material":
                 self.secondary_sample = None
 
-        self.graph_widget = self._create_graph_widget(self.ratio)
+        ratio = self.data_processing_dialog.get_current_ratio()
+        self.graph_widget = self._create_graph_widget(ratio)
 
-        self.linear_regression_text_widget = self._create_linear_text_widget(self.ratio)
+        self.linear_regression_text_widget = self._create_linear_text_widget(ratio)
 
         self.no_drift_radio_button = QRadioButton("Drift correction off")
         self.no_drift_radio_button.toggled.connect(self.drift_type_changed)
@@ -61,13 +58,6 @@ class DriftCorrectionWidget(QWidget):
 
         self.setLayout(self.layout)
 
-    def _create_ratio_selection_widget(self):
-        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
-                                                    self.data_processing_dialog.model.signals)
-        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
-
-        return self.ratio_radiobox_widget
-
     def _create_rhs_layout(self):
         rhs_layout = QHBoxLayout()
         rhs_layout.addWidget(self.graph_widget)
@@ -76,7 +66,6 @@ class DriftCorrectionWidget(QWidget):
 
     def _create_lhs_layout(self):
         lhs_layout = QVBoxLayout()
-        lhs_layout.addWidget(self.ratio_radiobox_widget)
         lhs_layout.addWidget(self.linear_regression_text_widget)
         lhs_layout.addWidget(self.drift_radio_button)
 
@@ -194,23 +183,24 @@ class DriftCorrectionWidget(QWidget):
 
         self.canvas.draw()
 
-    def change_ratio(self, ratio):
-        self.ratio = ratio
-        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
+    def on_ratio_changed(self, ratio):
+        self.update_stats_text(ratio)
+        self.update_graphs(ratio)
 
-        self.update_widget_contents()
-        if self.data_processing_dialog.model.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
-            self.drift_radio_button.setChecked(True)
-            self.no_drift_radio_button.setChecked(False)
-        else:
-            self.drift_radio_button.setChecked(False)
-            self.no_drift_radio_button.setChecked(True)
+        is_linear = self.model.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN
+        self.drift_radio_button.setChecked(is_linear)
+        self.no_drift_radio_button.setChecked(not is_linear)
 
-    def update_widget_contents(self):
-        linear_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].rsquared
-        linear_adj_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].rsquared_adj
-        linear_gradient = self.data_processing_dialog.model.drift_coefficient_by_ratio[self.ratio]
-        linear_gradient_st_error = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].bse[1]
+    def on_data_recalculated(self):
+        ratio = self.data_processing_dialog.get_current_ratio()
+        self.update_stats_text(ratio)
+        self.update_graphs(ratio)
+
+    def update_stats_text(self, ratio):
+        linear_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].rsquared
+        linear_adj_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].rsquared_adj
+        linear_gradient = self.data_processing_dialog.model.drift_coefficient_by_ratio[ratio]
+        linear_gradient_st_error = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].bse[1]
 
         self.r_squared_text.setText("R<sup>2</sup>: " + format(linear_r_squared, ".3f"))
         self.adj_r_squared_text.setText("Adjusted R<sup>2</sup>: " + format(linear_adj_r_squared, ".3f"))
@@ -219,10 +209,8 @@ class DriftCorrectionWidget(QWidget):
         self.linear_gradient_standard_error_text.setText(
             "Standard error on the gradient: " + "{:.3e}".format(linear_gradient_st_error))
 
-        self.update_graphs(self.ratio)
-
     def on_residual_button_pushed(self):
-        dialog = ResidualsDialog(self.data_processing_dialog, self.ratio)
+        dialog = ResidualsDialog(self.data_processing_dialog)
         result = dialog.exec()
 
     def on_operators_button_pushed(self):
@@ -235,34 +223,36 @@ class DriftCorrectionWidget(QWidget):
         else:
             drift_correction_type = DriftCorrectionType.NONE
 
-        self.data_processing_dialog.model.signals.driftCorrectionChanged.emit(self.ratio, drift_correction_type)
+        current_ratio = self.data_processing_dialog.get_current_ratio()
+        self.model.recalculate_data_with_drift_correction_changed(current_ratio, drift_correction_type)
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
+        ratio = self.data_processing_dialog.get_current_ratio()
         if current_item is None or current_item.is_sample:
             self.primary_drift_axis.clear()
-            self.update_graphs(self.ratio)
+            self.update_graphs(ratio)
         else:
             current_spot = current_item.spot
             if previous_tree_item is None or previous_tree_item.is_sample:
                 self.primary_drift_axis.clear()
-                self.update_graphs(self.ratio)
+                self.update_graphs(ratio)
                 previous_spot = None
             else:
                 previous_spot = previous_tree_item.spot
             primary_xs = []
             primary_ys = []
             for spot in self.primary_sample.spots:
-                primary_ys.append(spot.not_corrected_deltas[self.ratio][0])
+                primary_ys.append(spot.not_corrected_deltas[ratio][0])
                 primary_xs.append(spot)
 
             if self.secondary_sample:
                 secondary_xs = []
                 secondary_ys = []
                 for spot in self.secondary_sample.spots:
-                    if self.ratio.has_delta:
-                        secondary_ys.append(spot.not_corrected_deltas[self.ratio][0])
+                    if ratio.has_delta:
+                        secondary_ys.append(spot.not_corrected_deltas[ratio][0])
                     else:
-                        secondary_ys.append(spot.mean_two_st_error_isotope_ratios[self.ratio][0])
+                        secondary_ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                     secondary_xs.append(spot)
 
                 for secondary_x, secondary_y in zip(secondary_xs, secondary_ys):

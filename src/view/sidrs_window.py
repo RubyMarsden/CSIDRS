@@ -84,7 +84,7 @@ class SidrsWindow(QMainWindow):
         result = dialog.exec()
 
     def clear_data_button_clicked(self):
-        self.signals.clearAllData.emit()
+        self.model.clear_all_data_and_methods()
 
     def on_data_cleared(self):
         self.file_entry_widget.setDisabled(True)

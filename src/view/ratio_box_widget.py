@@ -1,13 +1,16 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QRadioButton, QButtonGroup
+
+from model.ratio import Ratio
 
 
 class RatioBoxWidget(QWidget):
-    def __init__(self, ratios, signals):
+    ratioToDisplayChanged = pyqtSignal(Ratio)
+
+    def __init__(self, ratios):
         QWidget.__init__(self)
 
         self.ratio_radiobuttons = []
-        self.signals = signals
 
         self.ratio_qbutton_group = QButtonGroup()
 
@@ -30,13 +33,12 @@ class RatioBoxWidget(QWidget):
         if not is_checked:
             return
 
-        ratio = button.ratio
-
-        self.signals.ratioToDisplayChanged.emit(ratio)
+        self.ratioToDisplayChanged.emit(button.ratio)
 
     def set_ratio(self, ratio, block_signal):
         if block_signal:
             self.ratio_qbutton_group.blockSignals(True)
+
         for button in self.ratio_radiobuttons:
             checked = button.ratio == ratio
             button.setChecked(checked)

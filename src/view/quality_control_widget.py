@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 from matplotlib.patches import Circle
 
 from utils import gui_utils
-from view.ratio_box_widget import RatioBoxWidget
 
 matplotlib.use('QT5Agg')
 from matplotlib import pyplot as plt
@@ -16,22 +15,15 @@ class QualityControlWidget(QWidget):
         QWidget.__init__(self)
 
         self.data_processing_dialog = data_processing_dialog
-        self.ratio = self.data_processing_dialog.method.ratios[0]
         self.model = data_processing_dialog.model
 
-        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+        self.data_processing_dialog.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
-        self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_graph_tabs)
+        self.data_processing_dialog.model.signals.dataRecalculated.connect(self.on_data_recalculated)
 
         layout = QVBoxLayout()
 
         graph_widget = self._create_graph_tab_widget()
-        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
-                                                    self.data_processing_dialog.model.signals)
-
-        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
-
-        layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(graph_widget)
 
         self.setLayout(layout)
@@ -268,18 +260,20 @@ class QualityControlWidget(QWidget):
     def on_sample_tree_item_changed(self, current_item, previous_tree_item):
         self.highlight_selected_ratio_data_point(current_item, previous_tree_item)
 
-    def change_ratio(self, ratio):
-        self.ratio = ratio
-        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
-        self.update_graph_tabs()
+    def on_ratio_changed(self, ratio):
+        self.update_graph_tabs(ratio)
 
-    def update_graph_tabs(self):
-        self._create_corrected_value_vs_time_graph(self.ratio)
+    def on_data_recalculated(self):
+        ratio = self.data_processing_dialog.get_current_ratio()
+        self.update_graph_tabs(ratio)
+
+    def update_graph_tabs(self, ratio):
+        self._create_corrected_value_vs_time_graph(ratio)
         self._create_x_y_position_graph()
-        self._create_corrected_value_vs_secondary_ion_yield_graph(self.ratio)
-        self._create_corrected_value_vs_distance_from_mount_centre_graph(self.ratio)
-        self._create_corrected_value_vs_dtfa_x_graph(self.ratio)
-        self._create_corrected_value_vs_dtfa_y_graph(self.ratio)
+        self._create_corrected_value_vs_secondary_ion_yield_graph(ratio)
+        self._create_corrected_value_vs_distance_from_mount_centre_graph(ratio)
+        self._create_corrected_value_vs_dtfa_x_graph(ratio)
+        self._create_corrected_value_vs_dtfa_y_graph(ratio)
 
         self.time_canvas.draw()
         self.x_y_canvas.draw()

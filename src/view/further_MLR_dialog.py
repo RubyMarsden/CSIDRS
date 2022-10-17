@@ -19,14 +19,14 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self.data_processing_dialog = data_processing_dialog
         self.model = data_processing_dialog.model
         self.signals = data_processing_dialog.model.signals
-        self.ratio = self.data_processing_dialog.method.ratios[0]
+        self.ratio = self.data_processing_dialog.get_current_ratio()
         self.spot_attribute_box_list = []
         self.spot_attributes = []
 
         # Create the ratio selection button here - because the button must exist before ratio can change.
         self._create_ratio_selection_widget()
 
-        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
+        self.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
 
         for sample in self.data_processing_dialog.model.get_samples():
             if sample.is_primary_reference_material:
@@ -49,8 +49,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self.setLayout(layout)
 
     def _create_ratio_selection_widget(self):
-        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
-                                                    self.data_processing_dialog.model.signals)
+        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios)
         self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=False)
 
         return self.ratio_radiobox_widget
@@ -89,7 +88,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
     ### Actions ###
     ###############
 
-    def change_ratio(self, ratio):
+    def on_ratio_changed(self, ratio):
         self.ratio = ratio
         self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
         self.update_graphs()
@@ -131,7 +130,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self.ys = []
         self.yerrors = []
         for spot in self.primary_reference_material_sample.spots:
-            if spot.not_corrected_deltas[self.ratio][0]:
+            if self.ratio.has_delta:
                 if not spot.is_flagged:
                     self.ys.append(spot.not_corrected_deltas[self.ratio][0])
                     self.yerrors.append(spot.not_corrected_deltas[self.ratio][1])

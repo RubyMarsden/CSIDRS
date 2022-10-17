@@ -25,9 +25,8 @@ class CycleDataDialog(QDialog):
         self.sample_tree = SampleTreeWidget(self.data_processing_dialog)
         self.cycle_tree = CycleTreeWidget(self.data_processing_dialog)
 
-        self.ratio = self.data_processing_dialog.method.ratios[0]
+        self.ratio = self.data_processing_dialog.get_current_ratio()
 
-        self.data_processing_dialog.model.signals.ratioToDisplayChanged.connect(self.change_ratio)
         self.data_processing_dialog.model.signals.cycleFlagged.connect(self.on_cycle_flagged)
         self.data_processing_dialog.model.signals.recalculateNewCycleData.connect(lambda x, y: self.update_graphs(
             self.sample_tree.current_spot(),
@@ -48,15 +47,15 @@ class CycleDataDialog(QDialog):
 
         self.setLayout(layout)
 
-        self.ratio_box_widget.set_ratio(self.ratio, block_signal=True)
+        self.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
+        self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
 
     def _create_left_widget(self):
         layout = QVBoxLayout()
-        self.ratio_box_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios,
-                                               self.data_processing_dialog.model.signals)
+        self.ratio_radiobox_widget = RatioBoxWidget(self.data_processing_dialog.method.ratios)
 
         layout.addLayout(self._create_title_bar())
-        layout.addWidget(self.ratio_box_widget)
+        layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(self._create_cycle_data_graphs())
 
         return layout
@@ -117,7 +116,7 @@ class CycleDataDialog(QDialog):
 
         self.canvas.draw()
 
-    def change_ratio(self, ratio):
+    def on_ratio_changed(self, ratio):
         self.ratio = ratio
         self.update_graphs(self.sample_tree.current_spot())
 

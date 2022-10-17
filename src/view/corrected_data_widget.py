@@ -16,7 +16,7 @@ class CorrectedDataWidget(QWidget):
 
         self.corrected_data_table = self._create_corrected_data_table()
 
-        self.data_processing_dialog.model.signals.replotAndTabulateRecalculatedData.connect(self.update_basic_table)
+        self.data_processing_dialog.model.signals.dataRecalculated.connect(self.update_basic_table)
 
         layout = QHBoxLayout()
 

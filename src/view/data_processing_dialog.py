@@ -5,6 +5,7 @@ from view.basic_data_check_widget import BasicDataCheckWidget
 from view.corrected_data_widget import CorrectedDataWidget
 from view.drift_correction_widget import DriftCorrectionWidget
 from view.quality_control_widget import QualityControlWidget
+from view.ratio_box_widget import RatioBoxWidget
 from view.sample_tree import SampleTreeWidget
 from view.sulphur_CAP_widget import SulphurCAPWidget
 
@@ -18,6 +19,7 @@ class DataProcessingDialog(QDialog):
 
         self.method = model.method
         self.element = model.element
+        self._ratio = model.method.ratios[0]
 
         self.setWindowTitle("Data processing")
         self.setMinimumWidth(500)
@@ -30,12 +32,17 @@ class DataProcessingDialog(QDialog):
         layout.addLayout(right_layout)
         self.setLayout(layout)
 
+        self.ratio_radiobox_widget.set_ratio(self._ratio, block_signal=False)
+        self.sample_tree.select_first_spot()
+
     def _create_right_layout(self):
         layout = QVBoxLayout()
 
-        self.sample_tree.set_samples(self.model.get_samples())
-        self.sample_tree.select_first_spot()
+        self.ratio_radiobox_widget = RatioBoxWidget(self.method.ratios)
 
+        self.sample_tree.set_samples(self.model.get_samples())
+
+        layout.addWidget(self.ratio_radiobox_widget)
         layout.addWidget(self.sample_tree)
         return layout
 
@@ -54,4 +61,9 @@ class DataProcessingDialog(QDialog):
 
         return layout
 
+    def get_current_ratio(self):
+        return self._ratio
 
+    def change_ratio(self, ratio):
+        self._ratio = ratio
+        self.ratio_radiobox_widget.set_ratio(self._ratio, block_signal=True)

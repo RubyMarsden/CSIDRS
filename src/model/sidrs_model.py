@@ -59,9 +59,7 @@ class SidrsModel:
         self.signals.spotAndCycleFlagged.connect(self._remove_cycle_from_spot)
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
         self.signals.recalculateNewSpotData.connect(self.recalculate_data)
-        self.signals.driftCorrectionChanged.connect(self.recalculate_data_with_drift_correction_changed)
         self.signals.multipleLinearRegressionFactorsInput.connect(self.characterise_multiple_linear_regression)
-        self.signals.clearAllData.connect(self.clear_all_data_and_methods)
 
     #################
     ### Importing ###
@@ -522,7 +520,7 @@ class SidrsModel:
     def recalculate_data(self):
         self.drift_correction_process()
         self.SIMS_correction_process()
-        self.signals.replotAndTabulateRecalculatedData.emit()
+        self.signals.dataRecalculated.emit()
 
     def recalculate_data_with_drift_correction_changed(self, ratio, drift_correction_type):
         self.drift_correction_type_by_ratio[ratio] = drift_correction_type
