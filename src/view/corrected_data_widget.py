@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem, QFileDialog
 
-from utils.make_csv_file import write_csv_output, get_output_file
+from utils.csv_utils import write_csv_output, request_output_csv_filename_from_user, export_csv
 from view.cycle_data_dialog import CycleDataDialog
 
 
@@ -55,8 +55,6 @@ class CorrectedDataWidget(QWidget):
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
-        output_file_name = get_output_file("corrected_data")
-
         method = self.data_processing_dialog.method
 
         column_headers = ["Sample name", "Spot excluded"]
@@ -97,16 +95,14 @@ class CorrectedDataWidget(QWidget):
                 row.append(spot.distance_from_mount_centre)
 
                 rows.append(row)
-        if output_file_name:
-            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
+
+        export_csv(self, default_filename="corrected_data", headers=column_headers, rows=rows)
 
     def on_analytical_conditions_button_pushed(self):
-        output_file_name = get_output_file("analytical_data")
         column_headers = []
         rows = [row for row in self.data_processing_dialog.model.analytical_condition_data if row]
 
-        if output_file_name:
-            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
+        export_csv(self, default_filename="analytical_data", headers=column_headers, rows=rows)
 
     #############
     ### Table ###

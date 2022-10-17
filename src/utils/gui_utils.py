@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QVBoxLayout, QWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -16,3 +16,4 @@ def create_figure_widget(fig, parent):
     widget = QWidget()
     widget.setLayout(layout)
     return widget, canvas
+

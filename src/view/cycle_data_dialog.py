@@ -4,7 +4,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 
 from utils import gui_utils
-from utils.make_csv_file import get_output_file, write_csv_output
+from utils.csv_utils import export_csv
 from view.cycle_tree_widget import CycleTreeWidget
 from view.ratio_box_widget import RatioBoxWidget
 from view.sample_tree import SampleTreeWidget
@@ -129,8 +129,6 @@ class CycleDataDialog(QDialog):
         self.data_processing_dialog.model.signals.recalculateNewCycleData.emit()
 
     def on_export_cycle_data_button_pushed(self):
-        output_file_name = get_output_file("cycle_data")
-
         method = self.data_processing_dialog.method
 
         column_headers = ["Sample name", "Cycle number"]
@@ -165,8 +163,7 @@ class CycleDataDialog(QDialog):
 
                     rows.append(row)
 
-        if output_file_name:
-            write_csv_output(headers=column_headers, rows=rows, output_file=output_file_name)
+        export_csv(self, default_filename="cycle_data", headers=column_headers, rows=rows)
 
     ################
     ### Plotting ###
