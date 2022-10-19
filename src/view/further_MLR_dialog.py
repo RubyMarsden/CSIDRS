@@ -57,15 +57,17 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
     def _create_graph_widget(self):
         self.fig = plt.figure()
 
-        self.grid_spec = GridSpec(1, 3)
-        self.time_axis = self.fig.add_subplot(self.grid_spec[0])
-        self.dtfa_x_axis = self.fig.add_subplot(self.grid_spec[1], sharey=self.time_axis)
-        self.dtfa_y_axis = self.fig.add_subplot(self.grid_spec[2], sharey=self.time_axis)
+        self.grid_spec = GridSpec(2, 2)
+        self.time_axis = self.fig.add_subplot(self.grid_spec[0, 0])
+        self.dtfa_x_axis = self.fig.add_subplot(self.grid_spec[1, 0], sharey=self.time_axis)
+        self.dtfa_y_axis = self.fig.add_subplot(self.grid_spec[0, 1], sharey=self.time_axis)
+        self.distance_to_mount_centre_axis = self.fig.add_subplot(self.grid_spec[1, 1], sharey=self.time_axis)
 
         self._define_ys_for_plotting()
         self._create_time_graph()
         self._create_dtfa_x_graph()
         self._create_dtfa_y_graph()
+        self._create_distance_to_mount_centre_graph()
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 
@@ -97,11 +99,13 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self.time_axis.clear()
         self.dtfa_x_axis.clear()
         self.dtfa_y_axis.clear()
+        self.distance_to_mount_centre_axis.clear()
 
         self._define_ys_for_plotting()
         self._create_time_graph()
         self._create_dtfa_x_graph()
         self._create_dtfa_y_graph()
+        self._create_distance_to_mount_centre_graph()
 
         self.canvas.draw()
 
@@ -157,6 +161,8 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
             x_tick_label.set_rotation(30)
             x_tick_label.set_horizontalalignment('right')
 
+        self.time_axis.set_xlabel("Time")
+
         self.fig.tight_layout()
 
     def _create_dtfa_x_graph(self):
@@ -167,6 +173,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
 
         colour = self.primary_reference_material_sample.colour
         self.dtfa_x_axis.errorbar(xs, self.ys, yerr=self.yerrors, marker="o", ls="", color=colour)
+        self.dtfa_x_axis.set_xlabel("dtfa-x")
 
     def _create_dtfa_y_graph(self):
         xs = []
@@ -176,3 +183,16 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
 
         colour = self.primary_reference_material_sample.colour
         self.dtfa_y_axis.errorbar(xs, self.ys, yerr=self.yerrors, marker="o", ls="", color=colour)
+
+        self.dtfa_y_axis.set_xlabel("dtfa-y")
+
+    def _create_distance_to_mount_centre_graph(self):
+        xs = []
+        for spot in self.primary_reference_material_sample.spots:
+            if not spot.is_flagged:
+                xs.append(spot.distance_from_mount_centre)
+
+        colour = self.primary_reference_material_sample.colour
+        self.distance_to_mount_centre_axis.errorbar(xs, self.ys, yerr=self.yerrors, marker="o", ls="", color=colour)
+
+        self.distance_to_mount_centre_axis.set_xlabel("Relative distance to mount centre")
