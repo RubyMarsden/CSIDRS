@@ -17,7 +17,7 @@ class QualityControlWidget(QWidget):
         self.data_processing_dialog = data_processing_dialog
         self.model = data_processing_dialog.model
 
-        self.data_processing_dialog.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
+        self.data_processing_dialog.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.data_processing_dialog.model.signals.dataRecalculated.connect(self.on_data_recalculated)
 

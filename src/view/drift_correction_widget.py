@@ -26,7 +26,7 @@ class DriftCorrectionWidget(QWidget):
         self.drift_coefficient = self.data_processing_dialog.model.drift_coefficient_by_ratio
         self.drift_intercept = self.data_processing_dialog.model.drift_y_intercept_by_ratio
 
-        self.data_processing_dialog.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
+        self.data_processing_dialog.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
         self.data_processing_dialog.model.signals.dataRecalculated.connect(self.on_data_recalculated)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.layout = QHBoxLayout()

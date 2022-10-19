@@ -47,7 +47,7 @@ class CycleDataDialog(QDialog):
 
         self.setLayout(layout)
 
-        self.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
+        self.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
         self.ratio_radiobox_widget.set_ratio(self.ratio, block_signal=True)
 
     def _create_left_widget(self):

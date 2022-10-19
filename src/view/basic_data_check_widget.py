@@ -24,7 +24,7 @@ class BasicDataCheckWidget(QWidget):
         self.model = data_view.model
 
         self.data_view.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
-        self.data_view.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
+        self.data_view.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
 
         self.graph_widget = self._create_graphs_to_check_data()
 

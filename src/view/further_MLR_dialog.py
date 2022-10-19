@@ -26,7 +26,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         # Create the ratio selection button here - because the button must exist before ratio can change.
         self._create_ratio_selection_widget()
 
-        self.ratio_radiobox_widget.ratioToDisplayChanged.connect(self.on_ratio_changed)
+        self.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
 
         for sample in self.data_processing_dialog.model.get_samples():
             if sample.is_primary_reference_material:

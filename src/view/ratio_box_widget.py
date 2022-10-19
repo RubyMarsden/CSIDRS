@@ -5,7 +5,7 @@ from model.ratio import Ratio
 
 
 class RatioBoxWidget(QWidget):
-    ratioToDisplayChanged = pyqtSignal(Ratio)
+    ratioChanged = pyqtSignal(Ratio)
 
     def __init__(self, ratios):
         QWidget.__init__(self)
@@ -33,7 +33,7 @@ class RatioBoxWidget(QWidget):
         if not is_checked:
             return
 
-        self.ratioToDisplayChanged.emit(button.ratio)
+        self.ratioChanged.emit(button.ratio)
 
     def set_ratio(self, ratio, block_signal):
         if block_signal:
