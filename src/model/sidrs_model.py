@@ -114,6 +114,7 @@ class SidrsModel:
                 for i in line:
                     line[line.index(i)] = str.strip(i)
                 data_for_spot.append(line)
+        print(data_for_spot)
         spot = Spot(filename, data_for_spot, self.isotopes)
         return spot
 

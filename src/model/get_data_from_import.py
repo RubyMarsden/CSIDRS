@@ -76,7 +76,7 @@ def get_data_from_asc(spot_data, mass_peak_name):
     block_number = get_block_number_from_asc(spot_data)
 
     # Finding the start of the raw data
-    line_number = 160
+    line_number = 150
     contains_word_raw_data = False
     while not contains_word_raw_data:
         line_number += 1

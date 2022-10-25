@@ -56,7 +56,6 @@ class FileEntryWidget(QWidget):
     def on_file_entry_button_clicked(self):
         filenames, _ = QFileDialog.getOpenFileNames(self,
                                                     "Select files",
-                                                    "home/ruby/Documents/Programming/UWA/CSIDRS/data",
                                                     "ASCII files (*.asc)"
                                                     )
         if filenames:
