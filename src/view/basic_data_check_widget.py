@@ -28,7 +28,6 @@ class BasicDataCheckWidget(QWidget):
 
         self.graph_widget = self._create_graphs_to_check_data()
 
-
         layout = QHBoxLayout()
 
         lhs_layout = self._create_lhs_layout()
@@ -117,14 +116,13 @@ class BasicDataCheckWidget(QWidget):
         export_csv(self, default_filename="raw_data", headers=column_headers, rows=rows)
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
+        ratio = self.data_view.get_current_ratio()
         if current_item is None or current_item.is_sample:
-            self.create_raw_delta_time_plot()
-            self.create_ion_distance_data_plot()
+            self.create_raw_delta_time_plot(ratio)
         else:
             current_spot = current_item.spot
             if previous_tree_item is None or previous_tree_item.is_sample:
-                self.create_raw_delta_time_plot()
-                self.create_ion_distance_data_plot()
+                self.create_raw_delta_time_plot(ratio)
                 previous_spot = None
             else:
                 previous_spot = previous_tree_item.spot
@@ -132,8 +130,13 @@ class BasicDataCheckWidget(QWidget):
             for sample in self.data_view.model.get_samples():
                 for spot in sample.spots:
                     x = spot.datetime
-                    y = spot.secondary_ion_yield
+                    if self.data_view.get_current_ratio().has_delta:
+                        y = spot.not_corrected_deltas[self.data_view.get_current_ratio()][0]
+                    else:
+                        y = spot.mean_two_st_error_isotope_ratios[self.data_view.get_current_ratio()][0]
                     if spot == current_spot:
+                        print(x)
+                        print(y)
                         self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4, color="yellow")
 
                     if spot == previous_spot:

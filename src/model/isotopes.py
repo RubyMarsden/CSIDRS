@@ -4,20 +4,30 @@ from model.elements import Element
 
 
 class Isotope(Enum):
-    C12 = "12C"
-    C13 = "13C"
-    C14 = "14C"
-    O16 = "16O"
-    O17 = "17O"
-    O18 = "18O"
-    O16H1 = "16O 1H"
-    S32 = "32S"
-    S33 = "33S"
-    S34 = "34S"
-    S36 = "36S"
-    F19 = "19F"
-    Cl35 = "35Cl"
-    Cl37 = "37Cl"
+    def __new__(cls, *args, **kwargs):
+        value = len(cls.__members__) + 1
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
+
+    def __init__(self, isotope_name, usage_in_secondary_ion_calculations):
+        self.isotope_name = isotope_name
+        self.usage_in_secondary_ion_calculations = usage_in_secondary_ion_calculations
+
+    C12 = "12C", True
+    C13 = "13C", True
+    C14 = "14C", True
+    O16 = "16O", True
+    O17 = "17O", True
+    O18 = "18O", True
+    O16H1 = "16O 1H", False
+    S32 = "32S", True
+    S33 = "33S", True
+    S34 = "34S", True
+    S36 = "36S", True
+    F19 = "19F", False
+    Cl35 = "35Cl", True
+    Cl37 = "37Cl", True
 
 
 isotopes_by_element = {

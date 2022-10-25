@@ -37,7 +37,7 @@ class MethodSelectionDialog(QDialog):
         material_list = materials_by_element[self.element]
 
         for isotope in isotope_list:
-            box = QCheckBox(isotope.value)
+            box = QCheckBox(isotope.isotope_name)
             box.isotope = isotope
             box.stateChanged.connect(self.on_isotopes_changed)
 

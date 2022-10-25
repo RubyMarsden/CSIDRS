@@ -79,12 +79,13 @@ class Spot:
 
     # TODO write a test for this function
     def calculate_relative_secondary_ion_yield(self):
-        cps_values = [mass_peak.mean_cps for mass_peak in self.mass_peaks.values()]
-        total_cps = sum(cps_values)
+        total_cps = 0
+        for mass_peak_name, mass_peak in self.mass_peaks.items():
+            if mass_peak_name.usage_in_secondary_ion_calculations:
+                total_cps += mass_peak.mean_cps
         self.secondary_ion_yield = total_cps / (self.primary_beam_current * (10 ** 18))
 
     def calculate_raw_isotope_ratios(self, method):
-
         for ratio in method.ratios:
             numerator = ratio.numerator
             denominator = ratio.denominator

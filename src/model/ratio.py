@@ -5,10 +5,10 @@ class Ratio:
         self.has_delta = has_delta
 
     def name(self):
-        return self.numerator.value + "/" + self.denominator.value
+        return self.numerator.isotope_name + "/" + self.denominator.isotope_name
 
     def delta_name(self):
         if self.has_delta:
-            return "delta" + self.numerator.value
+            return "delta" + self.numerator.isotope_name
 
         raise Exception("You are calling delta_name on a ratio which has no delta value.")
