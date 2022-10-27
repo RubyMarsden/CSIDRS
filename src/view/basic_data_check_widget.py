@@ -135,8 +135,6 @@ class BasicDataCheckWidget(QWidget):
                     else:
                         y = spot.mean_two_st_error_isotope_ratios[self.data_view.get_current_ratio()][0]
                     if spot == current_spot:
-                        print(x)
-                        print(y)
                         self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4, color="yellow")
 
                     if spot == previous_spot:

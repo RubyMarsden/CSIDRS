@@ -65,6 +65,9 @@ class CorrectedDataWidget(QWidget):
                 column_headers.append(ratio_uncertainty_name)
                 column_headers.append("uncorrected " + ratio.delta_name())
                 column_headers.append(ratio_uncertainty_name)
+            else:
+                column_headers.append("corrected " + ratio.name())
+                column_headers.append(ratio_uncertainty_name)
             column_headers.append("uncorrected " + ratio.name())
             column_headers.append(ratio_uncertainty_name)
 
@@ -84,6 +87,10 @@ class CorrectedDataWidget(QWidget):
                         row.append(delta_uncertainty)
                         row.append(uncorrected_delta)
                         row.append(uncorrected_delta_uncertainty)
+                    else:
+                        [corrected_ratio, corrected_ratio_uncertainty] = spot.drift_corrected_ratio_values_by_ratio[ratio]
+                        row.append(corrected_ratio)
+                        row.append(corrected_ratio_uncertainty)
 
                     [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
                     row.append(uncorrected_ratio)

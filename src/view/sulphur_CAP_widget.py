@@ -36,7 +36,6 @@ class SulphurCAPWidget(QWidget):
         #TODO fix this please
         graph_tab_widget = QTabWidget()
         if Isotope.S32 and Isotope.S33 and Isotope.S34 in self.data_processing_dialog.method.isotopes:
-            print("Basic working")
             graph_tab_widget.addTab(delta_four_vs_delta_three_graph_widget, "delta33 vs delta34")
             graph_tab_widget.addTab(cap_three_vs_delta_four_graph_widget, "Cap33 vs delta34")
             if Isotope.S36 in self.data_processing_dialog.method.isotopes:
