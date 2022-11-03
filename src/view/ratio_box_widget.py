@@ -45,3 +45,10 @@ class RatioBoxWidget(QWidget):
 
         if block_signal:
             self.ratio_qbutton_group.blockSignals(False)
+
+    def get_ratio(self):
+        for button in self.ratio_radiobuttons:
+            if button.isChecked():
+                return button.ratio
+
+        raise Exception("No ratio selected")

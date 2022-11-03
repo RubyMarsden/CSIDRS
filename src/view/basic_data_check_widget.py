@@ -130,10 +130,10 @@ class BasicDataCheckWidget(QWidget):
             for sample in self.data_view.model.get_samples():
                 for spot in sample.spots:
                     x = spot.datetime
-                    if self.data_view.get_current_ratio().has_delta:
-                        y = spot.not_corrected_deltas[self.data_view.get_current_ratio()][0]
+                    if ratio.has_delta:
+                        y = spot.not_corrected_deltas[ratio][0]
                     else:
-                        y = spot.mean_two_st_error_isotope_ratios[self.data_view.get_current_ratio()][0]
+                        y = spot.mean_two_st_error_isotope_ratios[ratio][0]
                     if spot == current_spot:
                         self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4, color="yellow")
 
@@ -238,8 +238,7 @@ class BasicDataCheckWidget(QWidget):
         self.spot_visible_grid_spec = GridSpec(2, 1, height_ratios=[1, 2])
         self.raw_delta_time_axis = self.fig.add_subplot(self.spot_visible_grid_spec[0])
         self.x_y_pos_axis = self.fig.add_subplot(self.spot_visible_grid_spec[1])
-        # TODO check this one and then delete this todo
-        # self.create_raw_delta_time_plot(self.data_view.get_current_ratio())
+
         self.create_all_samples_x_y_positions_plot(self.data_view.model.get_samples(), self.x_y_pos_axis)
 
         widget, self.canvas = create_figure_widget(self.fig, self)

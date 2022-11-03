@@ -19,7 +19,6 @@ class DataProcessingDialog(QDialog):
 
         self.method = model.method
         self.element = model.element
-        self._ratio = model.method.ratios[0]
 
         self.setWindowTitle("Data processing")
         self.setMinimumWidth(500)
@@ -32,7 +31,8 @@ class DataProcessingDialog(QDialog):
         layout.addLayout(right_layout)
         self.setLayout(layout)
 
-        self.ratio_radiobox_widget.set_ratio(self._ratio, block_signal=False)
+        default_ratio = model.method.ratios[0]
+        self.ratio_radiobox_widget.set_ratio(default_ratio, block_signal=False)
         self.sample_tree.select_first_spot()
 
     def _create_right_layout(self):
@@ -62,8 +62,5 @@ class DataProcessingDialog(QDialog):
         return layout
 
     def get_current_ratio(self):
-        return self._ratio
+        return self.ratio_radiobox_widget.get_ratio()
 
-    def change_ratio(self, ratio):
-        self._ratio = ratio
-        self.ratio_radiobox_widget.set_ratio(self._ratio, block_signal=True)

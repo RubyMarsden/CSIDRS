@@ -39,19 +39,18 @@ class DriftCorrectionWidget(QWidget):
             elif self.data_processing_dialog.model.secondary_reference_material == "No secondary reference material":
                 self.secondary_sample = None
 
-        ratio = self.data_processing_dialog.get_current_ratio()
-        self.graph_widget = self._create_graph_widget(ratio)
+        self.graph_widget = self._create_graph_widget()
 
-        self.linear_regression_text_widget = self._create_linear_text_widget(ratio)
+        self.linear_regression_text_widget = self._create_linear_text_widget()
 
         self.no_drift_radio_button = QRadioButton("Drift correction off")
+        self.no_drift_radio_button.setChecked(True)
         self.no_drift_radio_button.toggled.connect(self.drift_type_changed)
         self.drift_radio_button = QRadioButton("Linear drift correction on")
         self.drift_radio_button.toggled.connect(self.drift_type_changed)
 
         self.rhs_layout = self._create_rhs_layout()
         self.lhs_layout = self._create_lhs_layout()
-        self.no_drift_radio_button.setChecked(True)
 
         self.layout.addLayout(self.lhs_layout, 4)
         self.layout.addLayout(self.rhs_layout, 6)
@@ -77,12 +76,8 @@ class DriftCorrectionWidget(QWidget):
 
         return lhs_layout
 
-    def _create_linear_text_widget(self, ratio):
+    def _create_linear_text_widget(self):
         widget = QWidget()
-        linear_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].rsquared
-        linear_adj_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].rsquared_adj
-        linear_gradient = self.data_processing_dialog.model.drift_coefficient_by_ratio[ratio]
-        linear_gradient_st_error = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].bse[1]
 
         info_layout = QVBoxLayout()
 
@@ -102,7 +97,7 @@ class DriftCorrectionWidget(QWidget):
         font_italic.setItalic(True)
         citation_text.setWordWrap(True)
         citation_text.setFont(font_italic)
-        self.r_squared_text = QLabel("R<sup>2</sup>: " + format(linear_r_squared, ".3f"))
+        self.r_squared_text = QLabel()
         self.r_squared_text.setWordWrap(True)
         self.r_squared_text.setFont(font)
         adj_r_squared_explanation_text = QLabel(
@@ -110,18 +105,16 @@ class DriftCorrectionWidget(QWidget):
             "multiple linear regression analysis always increases the R<sup>2</sup> value.")
         adj_r_squared_explanation_text.setWordWrap(True)
         adj_r_squared_explanation_text.setFont(font)
-        self.adj_r_squared_text = QLabel("Adjusted R<sup>2</sup>: " + format(linear_adj_r_squared, ".3f"))
+        self.adj_r_squared_text = QLabel()
         self.adj_r_squared_text.setWordWrap(True)
         self.adj_r_squared_text.setFont(font)
-        self.linear_gradient_value_text = QLabel(
-            "Gradient of calculated linear drift: " + "{:.3e}".format(linear_gradient))
+        self.linear_gradient_value_text = QLabel()
         self.linear_gradient_value_text.setWordWrap(True)
         self.linear_gradient_value_text.setFont(font)
         linear_gradient_st_error_explanation_text = QLabel("Explain the st error here")
         linear_gradient_st_error_explanation_text.setWordWrap(True)
         linear_gradient_st_error_explanation_text.setFont(font)
-        self.linear_gradient_standard_error_text = QLabel(
-            "Standard error on the gradient: " + "{:.3e}".format(linear_gradient_st_error))
+        self.linear_gradient_standard_error_text = QLabel()
         self.linear_gradient_standard_error_text.setWordWrap(True)
         self.linear_gradient_standard_error_text.setFont(font)
 
@@ -149,17 +142,13 @@ class DriftCorrectionWidget(QWidget):
         layout.addWidget(operators_button, alignment=Qt.AlignLeft)
         return layout
 
-    def _create_graph_widget(self, ratio):
+    def _create_graph_widget(self):
         self.fig = plt.figure()
 
         self.grid_spec = GridSpec(3, 1)
         self.primary_drift_axis = self.fig.add_subplot(self.grid_spec[0])
         self.primary_drift_corrected_axis = self.fig.add_subplot(self.grid_spec[1])
         self.secondary_check_axis = self.fig.add_subplot(self.grid_spec[2])
-
-        self._create_primary_drift_graph(self.primary_sample, ratio)
-        self._create_primary_drift_corrected_graph(self.primary_sample, ratio)
-        self._create_secondary_check_graph(self.secondary_sample, ratio)
 
         graph_widget, self.canvas = gui_utils.create_figure_widget(self.fig, self)
 

@@ -58,7 +58,7 @@ class SidrsModel:
         self.signals.referenceMaterialsInput.connect(self._reference_material_tag_samples)
         self.signals.spotAndCycleFlagged.connect(self._remove_cycle_from_spot)
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
-        self.signals.recalculateNewSpotData.connect(self.recalculate_data)
+        self.signals.recalculateNewSpotData.connect(self.recalculate_data_from_drift_correction_onwards)
         self.signals.multipleLinearRegressionFactorsInput.connect(self.characterise_multiple_linear_regression)
 
     #################
@@ -517,14 +517,14 @@ class SidrsModel:
     def _remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
         spot.exclude_cycle_information_update(cycle_number, is_flagged, ratio)
 
-    def recalculate_data(self):
+    def recalculate_data_from_drift_correction_onwards(self):
         self.drift_correction_process()
         self.SIMS_correction_process()
         self.signals.dataRecalculated.emit()
 
     def recalculate_data_with_drift_correction_changed(self, ratio, drift_correction_type):
         self.drift_correction_type_by_ratio[ratio] = drift_correction_type
-        self.recalculate_data()
+        self.recalculate_data_from_drift_correction_onwards()
 
     def clear_all_data_and_methods(self):
         self.data.clear()
