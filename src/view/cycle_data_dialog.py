@@ -199,12 +199,12 @@ class CycleDataDialog(QDialog):
         x1s = range(1, 1 + len(y1s))
         x2s = range(1, 1 + len(y2s))
 
-        self.counts_axis.plot(x1s, y1s, ls="", marker="x", color="red", label=self.ratio.numerator.value)
-        self.counts_axis2.plot(x2s, y2s, ls="", marker="+", color="black", label=self.ratio.denominator.value)
+        self.counts_axis.plot(x1s, y1s, ls="", marker="x", color="red", label=self.ratio.numerator.isotope_name)
+        self.counts_axis2.plot(x2s, y2s, ls="", marker="+", color="black", label=self.ratio.denominator.isotope_name)
 
         self.counts_axis.set_xlabel("Cycle")
-        self.counts_axis.set_ylabel(str(self.ratio.numerator.value) + " (cps)")
-        self.counts_axis2.set_ylabel(str(self.ratio.denominator.value) + " (cps)")
+        self.counts_axis.set_ylabel(str(self.ratio.numerator.isotope_name) + " (cps)")
+        self.counts_axis2.set_ylabel(str(self.ratio.denominator.isotope_name) + " (cps)")
         self.counts_axis.set_xticks(x1s)
         # self.counts_axis.autoscale(enable=True, axis='y')
         axis_1_values, axis_1_labels = self.counts_axis.get_legend_handles_labels()

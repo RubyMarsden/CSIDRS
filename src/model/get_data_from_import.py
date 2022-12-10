@@ -39,8 +39,9 @@ def get_isotopics_ratio_line(spot_data):
     return isotopics_ratio_line_number
 
 
-def get_raw_cps_data(raw_data_line_start, column_number, spot_data, block_number):
-    line_range = range(raw_data_line_start, raw_data_line_start + int(block_number))
+def get_raw_cps_data(raw_data_line_start, column_number, spot_data, block_number, number_of_cycles):
+    range_extent = int(block_number) * int(number_of_cycles)
+    line_range = range(raw_data_line_start, raw_data_line_start + range_extent)
     raw_cps_data = [spot_data[line][column_number] for line in line_range]
 
     return raw_cps_data
@@ -86,10 +87,12 @@ def get_data_from_asc(spot_data, mass_peak_name):
     raw_data_mass_peak_line = line_number + 4
     raw_data_line_start = line_number + 6
 
+    number_of_cycles = get_number_of_cycles_from_asc(spot_data, raw_data_line_start)
+
     # +1 is because the file format is fairly terrible
     column_number = spot_data[raw_data_mass_peak_line].index(mass_peak_name.isotope_name) + 1
 
-    raw_cps_data = get_raw_cps_data(raw_data_line_start, column_number, spot_data, block_number)
+    raw_cps_data = get_raw_cps_data(raw_data_line_start, column_number, spot_data, block_number, number_of_cycles)
 
     detector_data = get_detector_data(spot_data, column_number)
 
@@ -129,7 +132,7 @@ def get_dtfa_x_and_y_from_asc(spot_data):
 
 
 def get_block_number_from_asc(spot_data):
-    # Finding the number of blocks - this is actually the number of cycles, but is labelled blocks in the asc file.
+    # Finding the number of blocks - labelled blocks in the asc file.
     line_number = 113
     contains_blocks = "Blocks" in spot_data[line_number]
     while not contains_blocks:
@@ -145,6 +148,18 @@ def get_block_number_from_asc(spot_data):
         raise ValueError("The number of blocks read from the asc file cannot be converted into an integer.")
 
     return integer_block_number
+
+
+def get_number_of_cycles_from_asc(spot_data, raw_data_line_start):
+    line_number = raw_data_line_start
+    current_block_number = int(spot_data[line_number][0])
+    number_of_cycles = 0
+    while current_block_number == 0:
+        number_of_cycles += 1
+        line_number += 1
+        current_block_number = int(spot_data[line_number][0])
+    print("Check this with Matthew")
+    return number_of_cycles
 
 
 def get_analytical_conditions_data_from_asc_file(data):
