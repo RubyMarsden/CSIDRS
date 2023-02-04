@@ -135,11 +135,8 @@ class DriftCorrectionWidget(QWidget):
         residuals_button = QPushButton("Residual graph")
         residuals_button.clicked.connect(self.on_residual_button_pushed)
 
-        operators_button = QPushButton("Developers - MLR")
-        operators_button.clicked.connect(self.on_operators_button_pushed)
-
         layout.addWidget(residuals_button, alignment=Qt.AlignLeft)
-        layout.addWidget(operators_button, alignment=Qt.AlignLeft)
+
         return layout
 
     def _create_graph_widget(self):
@@ -200,10 +197,6 @@ class DriftCorrectionWidget(QWidget):
 
     def on_residual_button_pushed(self):
         dialog = ResidualsDialog(self.data_processing_dialog)
-        result = dialog.exec()
-
-    def on_operators_button_pushed(self):
-        dialog = FurtherMultipleLinearRegressionDialog(self.data_processing_dialog)
         result = dialog.exec()
 
     def drift_type_changed(self):
