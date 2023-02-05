@@ -89,6 +89,8 @@ def get_data_from_asc(spot_data, mass_peak_name):
 
     number_of_cycles = get_number_of_cycles_from_asc(spot_data, raw_data_line_start)
 
+    number_of_measurements = block_number * number_of_cycles
+
     # +1 is because the file format is fairly terrible
     column_number = spot_data[raw_data_mass_peak_line].index(mass_peak_name.isotope_name) + 1
 
@@ -96,7 +98,7 @@ def get_data_from_asc(spot_data, mass_peak_name):
 
     detector_data = get_detector_data(spot_data, column_number)
 
-    return raw_cps_data, detector_data
+    return raw_cps_data, detector_data, number_of_measurements
 
 
 def get_primary_beam_current_data_asc(spot_data):
@@ -158,7 +160,6 @@ def get_number_of_cycles_from_asc(spot_data, raw_data_line_start):
         number_of_cycles += 1
         line_number += 1
         current_block_number = int(spot_data[line_number][0])
-    print("Check this with Matthew")
     return number_of_cycles
 
 

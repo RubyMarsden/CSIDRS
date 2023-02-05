@@ -9,7 +9,8 @@ class MassPeak:
                  spot_id,
                  mass_peak_name,
                  raw_cps_data,
-                 detector_data
+                 detector_data,
+                 number_of_measurements
                  ):
         self.sample_name = sample_name
         self.spot_id = spot_id
@@ -18,6 +19,7 @@ class MassPeak:
         self.detector_yield = detector_data[0]
         self.detector_background = detector_data[1]
         self.dead_time = detector_data[2]
+        self.number_of_measurements = number_of_measurements
 
         self.detector_corrected_cps_data = []
         self.mean_cps = None

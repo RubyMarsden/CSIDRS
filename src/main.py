@@ -7,6 +7,7 @@ from model.sidrs_model import SidrsModel
 from controllers.signals import Signals
 from view.sidrs_window import SidrsWindow
 
+
 def set_except_hook(window):
     def except_hook(cls, exception, traceback):
         sys.__excepthook__(cls, exception, traceback)

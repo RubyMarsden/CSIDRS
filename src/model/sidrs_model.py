@@ -36,7 +36,7 @@ class SidrsModel:
         self.samples = []
         self.signals = signals
         self.imported_files = []
-        self.number_of_cycles = None
+        self.number_of_count_measurements = None
         self.element = None
         self.isotopes = None
         self.material = None
@@ -92,10 +92,10 @@ class SidrsModel:
 
         self.samples = list(samples_by_name.values())
 
-        if len({spot.number_of_cycles for spot in spots}) != 1:
+        if len({spot.number_of_count_measurements for spot in spots}) != 1:
             raise Exception("Spots have different numbers of cycles - you may have input two separate sessions")
 
-        self.number_of_cycles = spots[0].number_of_cycles
+        self.number_of_count_measurements = spots[0].number_of_count_measurements
 
         filename_for_analytical_conditions = filenames[0]
         self.analytical_condition_data = self._parse_asc_file_into_analytical_conditions_data(
@@ -334,12 +334,12 @@ class SidrsModel:
 
     def SIMS_correction_process(self):
         # This correction method is described fully in  Kita et al., 2009
-        # How does the ratio process work? Can you have different corrections for each one?
-        for ratio in self.method.ratios:
-            for sample in self.get_samples():
-                if sample.is_primary_reference_material:
-                    primary_rm = sample
+        # TODO How does the ratio process work? Can you have different corrections for each one?
+        for sample in self.get_samples():
+            if sample.is_primary_reference_material:
+                primary_rm = sample
 
+        for ratio in self.method.ratios:
             primary_rm_spot_data = [spot.drift_corrected_deltas[ratio][0] for spot in primary_rm.spots if
                                     not spot.is_flagged and ratio.has_delta]
 
@@ -531,7 +531,7 @@ class SidrsModel:
         self.analytical_condition_data = None
         self.samples = []
         self.imported_files = []
-        self.number_of_cycles = None
+        self.number_of_count_measurements = None
         self.element = None
         self.isotopes = None
         self.material = None

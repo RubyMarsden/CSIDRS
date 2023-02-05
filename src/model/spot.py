@@ -9,7 +9,7 @@ from model.maths import vector_length_from_origin, calculate_outlier_resistant_m
     calculate_delta_from_ratio, calculate_number_of_outliers_to_remove
 from model.settings.asc_file_settings_general import *
 from model.get_data_from_import import get_data_from_asc, get_primary_beam_current_data_asc, \
-    get_dtfa_x_and_y_from_asc, get_block_number_from_asc
+    get_dtfa_x_and_y_from_asc
 from model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
     carbon_isotope_reference, chlorine_isotope_reference
 from model.settings.statistics_values import PROBABILITY_CUTOFF, PROBABILITY_OF_SINGLE_OUTLIER
@@ -45,7 +45,6 @@ class Spot:
         self.distance_from_mount_centre = vector_length_from_origin(self.x_position, self.y_position)
 
         self.dtfa_x, self.dtfa_y = get_dtfa_x_and_y_from_asc(self.spot_data)
-        self.number_of_cycles = get_block_number_from_asc(self.spot_data)
 
         self.primary_beam_current = get_primary_beam_current_data_asc(self.spot_data)
 
@@ -53,6 +52,7 @@ class Spot:
         self.secondary_ion_yield = None
         self.mass_peaks = {}
         self.raw_isotope_ratios = {}
+        self.number_of_count_measurements = None
         self.mean_two_st_error_isotope_ratios = {}
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
@@ -64,13 +64,14 @@ class Spot:
         self.alpha_corrected_data = {}
 
         for mass_peak_name in self.mass_peak_names:
-            raw_cps_data, detector_data = get_data_from_asc(self.spot_data, mass_peak_name)
+            raw_cps_data, detector_data, number_of_measurements = get_data_from_asc(self.spot_data, mass_peak_name)
             mass_peak = MassPeak(
                 self.full_sample_name,
                 self.id,
                 mass_peak_name,
                 raw_cps_data,
-                detector_data
+                detector_data,
+                number_of_measurements
             )
 
             mass_peak.correct_cps_data_for_detector_parameters()
@@ -96,8 +97,14 @@ class Spot:
             self.raw_isotope_ratios[ratio] = ratios
 
     def calculate_mean_st_error_for_isotope_ratios(self):
-        number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(self.number_of_cycles, PROBABILITY_CUTOFF,
+        if len({mass_peak.number_of_measurements for mass_peak in self.mass_peaks.values()}) != 1:
+            raise Exception("Mass peaks have different numbers of cycles - this indicates a problem with the input "
+                            "data file")
+        self.number_of_count_measurements = [mass_peak for mass_peak in self.mass_peaks.values()][0].number_of_measurements
+        number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(self.number_of_count_measurements,
+                                                                              PROBABILITY_CUTOFF,
                                                                               PROBABILITY_OF_SINGLE_OUTLIER)
+
         for ratio, raw_ratio_list in self.raw_isotope_ratios.items():
             # TODO fix number of outliers allowed
             mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
