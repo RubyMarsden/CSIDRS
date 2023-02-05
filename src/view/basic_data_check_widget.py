@@ -45,7 +45,7 @@ class BasicDataCheckWidget(QWidget):
         self.basic_data_table = self._create_basic_table()
         self._populate_basic_table()
 
-        cycle_data_button = QPushButton("Operators only")
+        cycle_data_button = QPushButton("Cycle data")
         cycle_data_button.clicked.connect(self.on_cycle_data_button_pushed)
         button_layout.addWidget(cycle_data_button)
 

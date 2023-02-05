@@ -23,9 +23,8 @@ class SulphurCAPWidget(QWidget):
         graph_widget = self._create_graph_tab_widget()
         layout.addWidget(graph_widget)
 
-        self.update_graph_tabs()
-
         self.setLayout(layout)
+        self.update_graph_tabs()
 
     def _create_graph_tab_widget(self):
         delta_four_vs_delta_three_graph_widget = self._create_delta_four_vs_delta_three_graph_widget()
@@ -85,6 +84,7 @@ class SulphurCAPWidget(QWidget):
     ################
 
     def _create_delta_graph(self, axis, ratio_x_index, ratio_y_index, MDF_factor):
+        print("Ran _create_delta_graph")
         ratio_y = self.method.ratios[ratio_y_index]
         ratio_x = self.method.ratios[ratio_x_index]
         axis.clear()
@@ -128,14 +128,20 @@ class SulphurCAPWidget(QWidget):
         axis.legend()
 
     def _create_cap_three_vs_delta_four_graph(self, axis):
+        print("Ran _create_cap_three_vs_delta_four_graph")
         axis.clear()
         axis.set_title("Cap S33 vs delta S34")
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
         axis.set_xlabel("delta S34")
         axis.set_ylabel("Cap S33")
-
+        print("hi")
         for sample in self.model.get_samples():
+            print(S34_S32.name())
+            print(sample.name)
+            for spot in sample.spots:
+                for key in spot.alpha_corrected_data.keys():
+                    print(key, spot.alpha_corrected_data[key])
             xs = [spot.alpha_corrected_data[S34_S32][0] for spot in sample.spots]
             x_errors = [spot.alpha_corrected_data[S34_S32][1] for spot in sample.spots]
             ys = [spot.cap_data_S33[0] for spot in sample.spots]
@@ -147,6 +153,7 @@ class SulphurCAPWidget(QWidget):
         axis.legend()
 
     def _create_cap_three_vs_cap_six_graph(self, axis):
+        print("Ran _create_cap_three_vs_delta_six_graph")
         axis.clear()
         axis.set_title("Cap S33 vs Cap S36")
         axis.spines['top'].set_visible(False)
@@ -164,6 +171,9 @@ class SulphurCAPWidget(QWidget):
                           label=sample.name)
 
         axis.legend()
+###############
+### ACTIONS ###
+###############
 
     def update_graph_tabs(self):
         self._create_delta_graph(self.delta_four_vs_delta_three_axis, 1, 0, 0.515)
