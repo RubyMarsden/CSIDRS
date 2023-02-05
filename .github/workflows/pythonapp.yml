@@ -46,13 +46,13 @@ jobs:
 
           - os: ubuntu-latest
             OS_NAME: ubuntu
-            PYTHON_VERSION: 3.8.13
+            PYTHON_VERSION: 3.8
             EXTENSION:
             RESOURCES: resources:resources
 
           - os: windows-latest
             OS_NAME: windows
-            PYTHON_VERSION: 3.8.10
+            PYTHON_VERSION: 3.8
             EXTENSION: .exe
             RESOURCES: resources;resources
 

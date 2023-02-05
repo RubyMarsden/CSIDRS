@@ -8,7 +8,7 @@ import matplotlib.dates as mdates
 from utils import gui_utils
 from view.ratio_box_widget import RatioBoxWidget
 
-from src.model.spot import SpotAttribute
+from model.spot import SpotAttribute
 
 
 class FurtherMultipleLinearRegressionDialog(QDialog):

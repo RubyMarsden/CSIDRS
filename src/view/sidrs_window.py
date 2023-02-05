@@ -6,7 +6,7 @@ from view.file_entry_widget import FileEntryWidget
 from view.isotope_button_widget import IsotopeButtonWidget
 from view.reference_material_dialog import ReferenceMaterialSelectionDialog
 
-from src.model.isotopes import Isotope
+from model.isotopes import Isotope
 
 
 class SidrsWindow(QMainWindow):

@@ -1,11 +1,11 @@
 import unittest
 import numpy as np
 
-from src.model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
+from model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
     calculate_alpha_correction, calculate_cap_value_and_uncertainty, calculate_number_of_outliers_to_remove, \
     calculate_binomial_distribution_probability
 
-from src.model.mass_peak import MassPeak
+from model.mass_peak import MassPeak
 
 
 class MathsTests(unittest.TestCase):

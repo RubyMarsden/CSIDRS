@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from model.isotopes import Isotope
 from utils import gui_utils
 
-from src.model.settings.methods_from_isotopes import S34_S32
+from model.settings.methods_from_isotopes import S34_S32
 
 
 class SulphurCAPWidget(QWidget):
