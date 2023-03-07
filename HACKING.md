@@ -20,7 +20,7 @@ The CSIDRS software is designed to have a degree of flexibility - this means tha
 
 - src/model/settings/methods_from_isotopes
 
-and in the case of new reference values for these new oxygen ratios:
+and in the case of new reference values for these new methods or just adding new reference values:
 - src/model/settings/isotope_reference_materials.py
 
 As this case is covered in the method for making a totally new set of methods for a new element it will not be written about separately.
@@ -35,13 +35,13 @@ e.g.:
         NEW_ELEMENT = "New Element", "Ne"
    ```
    
-2. Create the new isotope Enums in `src/model/isotopes.py`
+2. Create the new isotope Enums in `src/model/isotopes.py`. The true or false parameters indicate whether to involve these species in secondary ion calculations or not.
 e.g.:
     ```python
    class Isotope(Enum):
-        C12 = "12C"
-        NE1 = "1NE"
-        NE2 = "2NE"
+        C12 = "12C", True
+        NE1 = "1NE", False
+        NE2 = "2NE", True
        
     ```
 3. Add the isotopes to the isotope_by_element dictionary in `src/model/isotopes.py`
@@ -56,12 +56,13 @@ e.g.:
 4. Create Ratio objects in `src/model/settings/methods_from_isotopes.py` where the first isotope is the numerator and the second is the denominator in the isotopic ratio. 
 e.g.:
    ```python
-   # Sulphur ratios
-   S33_S32 = Ratio(Isotope.S33, Isotope.S32)
-   S34_S32 = Ratio(Isotope.S34, Isotope.S32)
+   # Oxygen ratios
+   O17_O16 = Ratio(Isotope.O17, Isotope.O16, has_delta=True)
+   O18_O16 = Ratio(Isotope.O18, Isotope.O16, has_delta=True)
+   O16H1_O16 = Ratio(Isotope.O16H1, Isotope.O16, has_delta=False)
       
    # New element ratios
-   NE1_NE2 = Ratio(Isotope.NE1, Isotope.NE2) 
+   NE1_NE2 = Ratio(Isotope.NE1, Isotope.NE2, has_delta=True) 
    ```
 
 5. Instantiate the new Method object and add it to the list of methods in `src/model/settings/methods_from_isotopes.py` e.g.:

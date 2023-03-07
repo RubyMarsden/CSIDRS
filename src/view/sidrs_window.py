@@ -6,8 +6,6 @@ from view.file_entry_widget import FileEntryWidget
 from view.isotope_button_widget import IsotopeButtonWidget
 from view.reference_material_dialog import ReferenceMaterialSelectionDialog
 
-from model.isotopes import Isotope
-
 
 class SidrsWindow(QMainWindow):
     def __init__(self, model):
@@ -18,7 +16,7 @@ class SidrsWindow(QMainWindow):
         self.signals = self.model.signals
 
         self.setMinimumSize(QSize(640, 480))
-        self.setWindowTitle("CSIDRS v-0.0")
+        self.setWindowTitle("CSIDRS v-0.1.7")
 
         self.file_entry_widget = FileEntryWidget(model)
 
