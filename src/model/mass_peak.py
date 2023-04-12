@@ -29,7 +29,8 @@ class MassPeak:
         for data in self.raw_cps_data:
             data, magnitude = data.split("E+")
             value = float(data) * 10 ** int(magnitude)
-            background_corrected_data = value - int(self.detector_background)
+            dead_time_corrected_data = self.correct_cps_for_deadtime_if_required(value)
+            background_corrected_data = dead_time_corrected_data - int(self.detector_background)
             yield_corrected_data = background_corrected_data / float(self.detector_yield)
             self.detector_corrected_cps_data.append(yield_corrected_data)
 
@@ -38,3 +39,13 @@ class MassPeak:
             self.detector_corrected_cps_data, 1)
         self.mean_cps = mean
         self.st_error_cps = st_dev / math.sqrt(n)
+
+    def correct_cps_for_deadtime_if_required(self, value):
+        dead_time_value = float(self.dead_time)
+        if dead_time_value == 0.0:
+            return value
+
+        corrected_data = value / (1 - value * dead_time_value * 10 ** -9)
+
+        return corrected_data
+
