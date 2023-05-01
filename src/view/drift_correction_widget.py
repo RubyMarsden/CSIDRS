@@ -224,7 +224,10 @@ class DriftCorrectionWidget(QWidget):
             primary_xs = []
             primary_ys = []
             for spot in self.primary_sample.spots:
-                primary_ys.append(spot.not_corrected_deltas[ratio][0])
+                if ratio.has_delta:
+                    primary_ys.append(spot.not_corrected_deltas[ratio][0])
+                else:
+                    primary_ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
                 primary_xs.append(spot)
 
             if self.secondary_sample:
