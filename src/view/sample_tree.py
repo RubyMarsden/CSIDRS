@@ -119,6 +119,7 @@ class SampleTreeWidget(QWidget):
         current_tree_item.setBackground(0, colour)
 
     def on_exclude_spot_checkbox_state_changed(self):
+        # TODO if this is a sample what happens? causes attribute error if you go from a flagged spot to a sample name in the tree.
         self.current_spot().is_flagged = self.exclude_spot_checkbox.isChecked()
         self.highlight_spot(self.current_spot().is_flagged)
         self.data_processing_dialog.model.signals.recalculateNewSpotData.emit()
