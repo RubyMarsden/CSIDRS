@@ -28,9 +28,8 @@ class CycleDataDialog(QDialog):
         self.ratio = self.data_processing_dialog.get_current_ratio()
 
         self.data_processing_dialog.model.signals.cycleFlagged.connect(self.on_cycle_flagged)
-        self.data_processing_dialog.model.signals.recalculateNewCycleData.connect(lambda x, y: self.update_graphs(
-            self.sample_tree.current_spot(),
-            self.ratio))
+
+        self.data_processing_dialog.model.signals.recalculateNewCycleData.connect(self.on_cycle_data_recalculated)
 
         layout = QHBoxLayout()
         right_layout = self._create_right_widget()
@@ -38,10 +37,7 @@ class CycleDataDialog(QDialog):
         layout.addLayout(left_layout)
         layout.addLayout(right_layout)
 
-        self.sample_tree.tree.currentItemChanged.connect(lambda x, y: self.update_graphs(
-            self.sample_tree.current_spot()))
-        self.sample_tree.tree.currentItemChanged.connect(
-            lambda x, y: self.cycle_tree.set_cycles(self.sample_tree.current_spot(), self.ratio))
+        self.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_selection_changed)
 
         self.data_processing_dialog.model.signals.cycleTreeItemChanged.connect(self.on_cycle_tree_item_changed)
 
@@ -105,24 +101,21 @@ class CycleDataDialog(QDialog):
     ### Actions ###
     ###############
 
-    def update_graphs(self, spot):
-        self.counts_axis.clear()
-        self.counts_axis2.clear()
-        self.ratio_axis.clear()
+    def on_sample_tree_item_selection_changed(self):
+        spot = self.sample_tree.current_spot()
+        self.update_graphs(spot)
+        self.cycle_tree.set_cycles(spot, self.ratio)
 
-        if spot:
-            self.create_counts_plot(spot)
-            self.create_ratio_plot(spot)
-
-        self.canvas.draw()
+    def on_cycle_data_recalculated(self):
+        self.update_graphs(self.sample_tree.current_spot())
 
     def on_ratio_changed(self, ratio):
         self.ratio = ratio
         self.update_graphs(self.sample_tree.current_spot())
 
     def on_cycle_flagged(self, cycle_number, is_flagged):
-        self.data_processing_dialog.model.signals.spotAndCycleFlagged.emit(self.sample_tree.current_spot(),
-                                                                           cycle_number, is_flagged, self.ratio)
+        self.data_processing_dialog.model.remove_cycle_from_spot(self.sample_tree.current_spot(),
+                                                                 cycle_number, is_flagged, self.ratio)
 
     def on_update_button_pushed(self):
         self.data_processing_dialog.model.signals.recalculateNewCycleData.emit()
@@ -167,6 +160,17 @@ class CycleDataDialog(QDialog):
     ################
     ### Plotting ###
     ################
+
+    def update_graphs(self, spot):
+        self.counts_axis.clear()
+        self.counts_axis2.clear()
+        self.ratio_axis.clear()
+
+        if spot:
+            self.create_counts_plot(spot)
+            self.create_ratio_plot(spot)
+
+        self.canvas.draw()
 
     def _create_cycle_data_graphs(self):
         graph = QWidget()
@@ -244,13 +248,6 @@ class CycleDataDialog(QDialog):
         self.ratio_axis.set_xticks(xs)
         self.fig.tight_layout()
 
-    ###############
-    ### Actions ###
-    ###############
-
-    def on_cycle_tree_item_changed(self, cycle_number, previous_cycle_number):
-        self.highlight_selected_ratio_data_point(self.sample_tree.current_spot(), cycle_number, previous_cycle_number)
-
     def highlight_selected_ratio_data_point(self, spot, cycle_number, previous_cycle_number):
         ys = spot.raw_isotope_ratios[self.ratio]
         xs = list(range(1, 1 + len(ys)))
@@ -268,3 +265,10 @@ class CycleDataDialog(QDialog):
                 else:
                     self.ratio_axis.plot(x, y, ls="", marker="o", color="navy")
         self.canvas.draw()
+
+    ###############
+    ### Actions ###
+    ###############
+
+    def on_cycle_tree_item_changed(self, cycle_number, previous_cycle_number):
+        self.highlight_selected_ratio_data_point(self.sample_tree.current_spot(), cycle_number, previous_cycle_number)

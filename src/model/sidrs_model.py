@@ -56,7 +56,6 @@ class SidrsModel:
         self.signals.isotopesInput.connect(self._isotopes_input)
         self.signals.materialInput.connect(self._material_input)
         self.signals.referenceMaterialsInput.connect(self._reference_material_tag_samples)
-        self.signals.spotAndCycleFlagged.connect(self._remove_cycle_from_spot)
         self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
         self.signals.recalculateNewSpotData.connect(self.recalculate_data_from_drift_correction_onwards)
         self.signals.multipleLinearRegressionFactorsInput.connect(self.characterise_multiple_linear_regression)
@@ -514,7 +513,7 @@ class SidrsModel:
         if Isotope.S36 in self.isotopes:
             self.calculate_cap_values_S36()
 
-    def _remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
+    def remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
         spot.exclude_cycle_information_update(cycle_number, is_flagged, ratio)
 
     def recalculate_data_from_drift_correction_onwards(self):

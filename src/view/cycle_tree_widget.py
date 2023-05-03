@@ -31,20 +31,21 @@ class CycleTreeWidget(QWidget):
 
     def set_cycles(self, spot, ratio):
         self.tree.clear()
-        cycles = [i for i in enumerate(spot.raw_isotope_ratios[ratio])]
-        for i, value in enumerate(spot.raw_isotope_ratios[ratio]):
-            exclude_cycle = spot.cycle_flagging_information[ratio][i]
-            cycle_tree_item = QTreeWidgetItem(self.tree, [str(i+1)])
-            cycle_tree_item.is_flagged = exclude_cycle
+        if spot:
+            isotope_ratios = spot.raw_isotope_ratios[ratio]
+            for i, value in enumerate(isotope_ratios):
+                exclude_cycle = spot.cycle_flagging_information[ratio][i]
+                cycle_tree_item = QTreeWidgetItem(self.tree, [str(i+1)])
+                cycle_tree_item.is_flagged = exclude_cycle
 
-            self.highlight_cycle_tree_item(cycle_tree_item)
+                self.highlight_cycle_tree_item(cycle_tree_item)
 
-        any_samples = len(cycles) > 0
-        self.next_item_button.setEnabled(any_samples)
-        self.back_item_button.setEnabled(any_samples)
-        self.select_first_cycle()
+            any_samples = len(isotope_ratios) > 0
+            self.next_item_button.setEnabled(any_samples)
+            self.back_item_button.setEnabled(any_samples)
+            self.select_first_cycle()
 
-        self._on_selected_cycle_change(self.tree.currentItem(), None)
+            self._on_selected_cycle_change(self.tree.currentItem(), None)
 
     def select_first_cycle(self):
         first_cycle = self.tree.topLevelItem(0)
