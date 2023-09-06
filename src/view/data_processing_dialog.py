@@ -21,7 +21,7 @@ class DataProcessingDialog(QDialog):
         self.element = model.element
 
         self.setWindowTitle("Data processing")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(1000)
 
         right_layout = self._create_right_layout()
         left_layout = self._create_left_layout()
