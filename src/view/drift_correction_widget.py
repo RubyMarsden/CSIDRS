@@ -261,6 +261,7 @@ class DriftCorrectionWidget(QWidget):
                             self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
                                                                color=self.secondary_sample.colour)
 
+
             for primary_x, primary_y in zip(primary_xs, primary_ys):
                 if primary_x == current_spot:
                     self.primary_drift_axis.errorbar(primary_x.datetime, primary_y, ls="", marker="o", color="yellow")
@@ -269,7 +270,8 @@ class DriftCorrectionWidget(QWidget):
                     self.primary_drift_axis.errorbar(primary_x.datetime, primary_y, ls="", marker="o",
                                                      color=self.primary_sample.colour)
 
-        self.canvas.draw()
+        self.primary_drift_canvas.draw()
+        self.secondary_check_canvas.draw()
 
     ################
     ### Plotting ###
@@ -296,10 +298,12 @@ class DriftCorrectionWidget(QWidget):
                     ys.append(spot.not_corrected_deltas[ratio][0])
                     yerrors.append(spot.not_corrected_deltas[ratio][1])
 
+
                 else:
                     xs_removed.append(spot.datetime)
                     ys_removed.append(spot.not_corrected_deltas[ratio][0])
                     yerrors_removed.append(spot.not_corrected_deltas[ratio][1])
+
 
                 self.primary_drift_axis.set_ylabel(ratio.delta_name())
             else:

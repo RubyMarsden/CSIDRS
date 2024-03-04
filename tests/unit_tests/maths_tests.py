@@ -62,7 +62,8 @@ class MathsTests(unittest.TestCase):
             spot_id=1,
             mass_peak_name="test",
             raw_cps_data=test_data,
-            detector_data=test_detector_data
+            detector_data=test_detector_data,
+            number_of_measurements=1
 
         )
         mass_peak.correct_cps_data_for_detector_parameters()
