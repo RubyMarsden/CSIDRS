@@ -3,8 +3,9 @@ from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, 
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 
+from model.settings.default_filenames import cycle_data_default_filename
 from utils import gui_utils
-from utils.csv_utils import export_csv
+from utils.csv_utils import export_csv, request_output_csv_filename_from_user, csv_exported_successfully_popup
 from view.cycle_tree_widget import CycleTreeWidget
 from view.ratio_box_widget import RatioBoxWidget
 from view.sample_tree import SampleTreeWidget
@@ -121,41 +122,13 @@ class CycleDataDialog(QDialog):
         self.data_processing_dialog.model.signals.recalculateNewCycleData.emit()
 
     def on_export_cycle_data_button_pushed(self):
-        method = self.data_processing_dialog.method
+        filename = request_output_csv_filename_from_user(cycle_data_default_filename)
+        if not filename:
+            return
+        self.data_processing_dialog.model.export_cycle_data_csv(filename)
 
-        column_headers = ["Sample name", "Cycle number"]
+        csv_exported_successfully_popup(self, filename)
 
-        for ratio in method.ratios:
-            column_headers.append(str(ratio.name()))
-            column_headers.append("Excluded cycle")
-
-        for isotope in method.isotopes:
-            column_headers.append(str(isotope.name + " (cps)"))
-            column_headers.append("Yield and background corrected " + isotope.isotope_name + " (cps)")
-
-        rows = []
-        for sample in self.data_processing_dialog.model.get_samples():
-            for spot in sample.spots:
-                spot_name = str(sample.name + " " + spot.id)
-                ratio = method.ratios[0]
-                for i, value in enumerate(spot.cycle_flagging_information[ratio]):
-                    row = [spot_name, i + 1]
-                    for ratio in method.ratios:
-                        boolean = spot.cycle_flagging_information[ratio][i]
-                        if boolean:
-                            excluded_info = "x"
-                        else:
-                            excluded_info = " "
-
-                        row.extend([spot.raw_isotope_ratios[ratio][i], excluded_info])
-
-                    for isotope in method.isotopes:
-                        row.append(spot.mass_peaks[isotope].raw_cps_data[i])
-                        row.append(spot.mass_peaks[isotope].detector_corrected_cps_data[i])
-
-                    rows.append(row)
-
-        export_csv(self, default_filename="cycle_data", headers=column_headers, rows=rows)
 
     ################
     ### Plotting ###

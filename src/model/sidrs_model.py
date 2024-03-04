@@ -15,6 +15,7 @@ from model.get_data_from_import import get_block_number_from_asc, \
 from model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction
 from model.sample import Sample
 from model.settings.colours import colour_list, q_colour_list
+from model.settings.default_filenames import raw_data_default_filename
 from model.settings.isotope_reference_materials import reference_material_dictionary
 from model.settings.methods_from_isotopes import list_of_methods
 from model.spot import Spot
@@ -25,6 +26,7 @@ from model.isotopes import Isotope
 
 from model.maths import calculate_cap_value_and_uncertainty
 from model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32
+from utils.csv_utils import write_csv_output
 
 from utils.general_utils import find_longest_common_prefix_index, split_cameca_data_filename
 
@@ -74,8 +76,10 @@ class SidrsModel:
 
         sample_names_by_filename = self._sample_names_from_filenames(filenames)
         unique_sample_names = set(sample_names_by_filename.values())
+        sorted_sample_names = list(unique_sample_names)
+        sorted_sample_names.sort()
         samples_by_name = {}
-        for i, sample_name in enumerate(unique_sample_names):
+        for i, sample_name in enumerate(sorted_sample_names):
             sample = Sample(sample_name)
             sample.colour = colour_list[i]
             sample.q_colour = q_colour_list[i]
@@ -170,6 +174,7 @@ class SidrsModel:
         secondary_reference_material_accounted_for = False
         for i, sample in enumerate(self.get_samples()):
             if sample.name == self.primary_reference_material:
+
                 sample.is_primary_reference_material = True
                 primary_reference_material_exists = True
                 number_of_primary_rm_spots = len(sample.spots)
@@ -546,3 +551,137 @@ class SidrsModel:
         self.method = None
 
         self.signals.dataCleared.emit()
+
+    def export_cycle_data_csv(self, filename):
+        method = self.method
+
+        column_headers = ["Sample name", "Cycle number"]
+
+        for ratio in method.ratios:
+            column_headers.append(str(ratio.name()))
+            column_headers.append("Excluded cycle")
+
+        for isotope in method.isotopes:
+            column_headers.append(str(isotope.name + " (cps)"))
+            column_headers.append("Yield and background corrected " + isotope.isotope_name + " (cps)")
+
+        rows = []
+        for sample in self.get_samples():
+            for spot in sample.spots:
+                spot_name = str(sample.name + " " + spot.id)
+                ratio = method.ratios[0]
+                for i, value in enumerate(spot.cycle_flagging_information[ratio]):
+                    row = [spot_name, i + 1]
+                    for ratio in method.ratios:
+                        boolean = spot.cycle_flagging_information[ratio][i]
+                        if boolean:
+                            excluded_info = "x"
+                        else:
+                            excluded_info = " "
+
+                        row.extend([spot.raw_isotope_ratios[ratio][i], excluded_info])
+
+                    for isotope in method.isotopes:
+                        row.append(spot.mass_peaks[isotope].raw_cps_data[i])
+                        row.append(spot.mass_peaks[isotope].detector_corrected_cps_data[i])
+
+                    rows.append(row)
+
+        write_csv_output(output_file=filename, headers=column_headers, rows=rows)
+
+        write_csv_output(output_file=filename, headers=column_headers, rows=rows)
+
+    def export_raw_data_csv(self, filename):
+        method = self.method
+
+        column_headers = ["Sample name"]
+        for ratio in method.ratios:
+            ratio_uncertainty_name = "uncertainty"
+            column_headers.append(ratio.name())
+            column_headers.append(ratio_uncertainty_name)
+            if ratio.has_delta:
+                column_headers.append(ratio.delta_name())
+                column_headers.append(ratio_uncertainty_name)
+
+        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
+
+        rows = []
+        for sample in self.get_samples():
+            for spot in sample.spots:
+                row = [str(sample.name + " " + spot.id)]
+
+                for ratio in method.ratios:
+                    ratio_value, ratio_uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
+                    row.append(ratio_value)
+                    row.append(ratio_uncertainty)
+                    if ratio.has_delta:
+                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio]
+                        row.append(delta)
+                        row.append(delta_uncertainty)
+
+                row.append(spot.dtfa_x)
+                row.append(spot.dtfa_y)
+                row.append(format(spot.secondary_ion_yield, ".5f"))
+                row.append(spot.distance_from_mount_centre)
+
+                rows.append(row)
+
+        write_csv_output(output_file=filename, headers=column_headers, rows=rows)
+
+    def export_corrected_data_csv(self, filename):
+
+        method = self.method
+
+        column_headers = ["Sample name", "Spot excluded"]
+        for ratio in method.ratios:
+            ratio_uncertainty_name = "uncertainty"
+            if ratio.has_delta:
+                column_headers.append("corrected " + ratio.delta_name())
+                column_headers.append(ratio_uncertainty_name)
+                column_headers.append("uncorrected " + ratio.delta_name())
+                column_headers.append(ratio_uncertainty_name)
+            else:
+                column_headers.append("corrected " + ratio.name())
+                column_headers.append(ratio_uncertainty_name)
+            column_headers.append("uncorrected " + ratio.name())
+            column_headers.append(ratio_uncertainty_name)
+
+        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
+
+        rows = []
+        for sample in self.get_samples():
+            for spot in sample.spots:
+                spot_excluded = "x" if spot.is_flagged else ""
+                row = [str(sample.name + "-" + spot.id), spot_excluded]
+
+                for ratio in method.ratios:
+                    if ratio.has_delta:
+                        [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio]
+                        [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio]
+                        row.append(delta)
+                        row.append(delta_uncertainty)
+                        row.append(uncorrected_delta)
+                        row.append(uncorrected_delta_uncertainty)
+                    else:
+                        [corrected_ratio, corrected_ratio_uncertainty] = spot.drift_corrected_ratio_values_by_ratio[ratio]
+                        row.append(corrected_ratio)
+                        row.append(corrected_ratio_uncertainty)
+
+                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                    row.append(uncorrected_ratio)
+                    row.append(uncorrected_ratio_uncertainty)
+
+                row.append(spot.dtfa_x)
+                row.append(spot.dtfa_y)
+                row.append(format(spot.secondary_ion_yield, ".5f"))
+                row.append(spot.distance_from_mount_centre)
+
+                rows.append(row)
+
+        write_csv_output(output_file=filename, headers=column_headers, rows=rows)
+
+    def export_analytical_conditions_csv(self, filename):
+        column_headers = []
+        rows = [row for row in self.analytical_condition_data if row]
+
+        write_csv_output(output_file=filename, headers=column_headers, rows=rows)

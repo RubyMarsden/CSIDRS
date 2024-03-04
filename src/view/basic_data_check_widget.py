@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTab
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
-from utils.csv_utils import export_csv
+from model.settings.default_filenames import raw_data_default_filename
+from utils.csv_utils import export_csv, request_output_csv_filename_from_user, csv_exported_successfully_popup
 from utils.gui_utils import create_figure_widget
 from view.cycle_data_dialog import CycleDataDialog
 
@@ -79,41 +80,13 @@ class BasicDataCheckWidget(QWidget):
         self.canvas.draw()
 
     def on_data_output_button_pushed(self):
-        method = self.data_view.method
+        filename = request_output_csv_filename_from_user(raw_data_default_filename)
+        if not filename:
+            return
+        self.model.export_raw_data_csv(filename)
 
-        column_headers = ["Sample name"]
-        for ratio in method.ratios:
-            ratio_uncertainty_name = "uncertainty"
-            column_headers.append(ratio.name())
-            column_headers.append(ratio_uncertainty_name)
-            if ratio.has_delta:
-                column_headers.append(ratio.delta_name())
-                column_headers.append(ratio_uncertainty_name)
+        csv_exported_successfully_popup(self, filename)
 
-        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
-
-        rows = []
-        for sample in self.data_view.model.get_samples():
-            for spot in sample.spots:
-                row = [str(sample.name + " " + spot.id)]
-
-                for ratio in method.ratios:
-                    ratio_value, ratio_uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
-                    row.append(ratio_value)
-                    row.append(ratio_uncertainty)
-                    if ratio.has_delta:
-                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio]
-                        row.append(delta)
-                        row.append(delta_uncertainty)
-
-                row.append(spot.dtfa_x)
-                row.append(spot.dtfa_y)
-                row.append(format(spot.secondary_ion_yield, ".5f"))
-                row.append(spot.distance_from_mount_centre)
-
-                rows.append(row)
-
-        export_csv(self, default_filename="raw_data", headers=column_headers, rows=rows)
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         ratio = self.data_view.get_current_ratio()

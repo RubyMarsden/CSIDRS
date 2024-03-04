@@ -3,7 +3,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem, QFileDialog
 
-from utils.csv_utils import write_csv_output, request_output_csv_filename_from_user, export_csv
+from model.settings.default_filenames import corrected_data_default_filename, analytical_conditions_default_filename
+from utils.csv_utils import write_csv_output, request_output_csv_filename_from_user, export_csv, \
+    csv_exported_successfully_popup
 from view.cycle_data_dialog import CycleDataDialog
 
 
@@ -55,61 +57,22 @@ class CorrectedDataWidget(QWidget):
         result = dialog.exec()
 
     def on_data_output_button_pushed(self):
-        method = self.data_processing_dialog.method
+        filename = request_output_csv_filename_from_user(corrected_data_default_filename)
+        if not filename:
+            return
+        self.data_processing_dialog.model.export_corrected_data_csv(filename)
 
-        column_headers = ["Sample name", "Spot excluded"]
-        for ratio in method.ratios:
-            ratio_uncertainty_name = "uncertainty"
-            if ratio.has_delta:
-                column_headers.append("corrected " + ratio.delta_name())
-                column_headers.append(ratio_uncertainty_name)
-                column_headers.append("uncorrected " + ratio.delta_name())
-                column_headers.append(ratio_uncertainty_name)
-            else:
-                column_headers.append("corrected " + ratio.name())
-                column_headers.append(ratio_uncertainty_name)
-            column_headers.append("uncorrected " + ratio.name())
-            column_headers.append(ratio_uncertainty_name)
+        csv_exported_successfully_popup(self, filename)
 
-        column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
-
-        rows = []
-        for sample in self.data_processing_dialog.model.get_samples():
-            for spot in sample.spots:
-                spot_excluded = "x" if spot.is_flagged else ""
-                row = [str(sample.name + "-" + spot.id), spot_excluded]
-
-                for ratio in method.ratios:
-                    if ratio.has_delta:
-                        [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio]
-                        [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio]
-                        row.append(delta)
-                        row.append(delta_uncertainty)
-                        row.append(uncorrected_delta)
-                        row.append(uncorrected_delta_uncertainty)
-                    else:
-                        [corrected_ratio, corrected_ratio_uncertainty] = spot.drift_corrected_ratio_values_by_ratio[ratio]
-                        row.append(corrected_ratio)
-                        row.append(corrected_ratio_uncertainty)
-
-                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
-                    row.append(uncorrected_ratio)
-                    row.append(uncorrected_ratio_uncertainty)
-
-                row.append(spot.dtfa_x)
-                row.append(spot.dtfa_y)
-                row.append(format(spot.secondary_ion_yield, ".5f"))
-                row.append(spot.distance_from_mount_centre)
-
-                rows.append(row)
-
-        export_csv(self, default_filename="corrected_data", headers=column_headers, rows=rows)
 
     def on_analytical_conditions_button_pushed(self):
-        column_headers = []
-        rows = [row for row in self.data_processing_dialog.model.analytical_condition_data if row]
+        filename = request_output_csv_filename_from_user(analytical_conditions_default_filename)
+        if not filename:
+            return
+        self.data_processing_dialog.model.export_analytical_conditions_csv(filename)
 
-        export_csv(self, default_filename="analytical_data", headers=column_headers, rows=rows)
+        csv_exported_successfully_popup(self, filename)
+
 
     #############
     ### Table ###
