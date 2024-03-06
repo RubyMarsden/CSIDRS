@@ -52,7 +52,6 @@ class Spot:
         self.secondary_ion_yield = None
         self.mass_peaks = {}
         self.raw_isotope_ratios = {}
-        self.number_of_count_measurements = None
         self.mean_two_st_error_isotope_ratios = {}
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
@@ -78,49 +77,11 @@ class Spot:
             mass_peak.outlier_resistant_mean_and_st_error()
             self.mass_peaks[mass_peak_name] = mass_peak
 
-    # TODO write a test for this function
-    def calculate_relative_secondary_ion_yield(self):
-        total_cps = 0
-        for mass_peak_name, mass_peak in self.mass_peaks.items():
-            if mass_peak_name.usage_in_secondary_ion_calculations:
-                total_cps += mass_peak.mean_cps
-        self.secondary_ion_yield = total_cps / (self.primary_beam_current * (10 ** 18))
-
-    def calculate_raw_isotope_ratios(self, method):
-        for ratio in method.ratios:
-            numerator = ratio.numerator
-            denominator = ratio.denominator
-
-            ratios = [i / j for i, j in zip(self.mass_peaks[numerator].detector_corrected_cps_data,
-                                            self.mass_peaks[denominator].detector_corrected_cps_data)]
-
-            self.raw_isotope_ratios[ratio] = ratios
-
-    def calculate_mean_st_error_for_isotope_ratios(self):
         if len({mass_peak.number_of_measurements for mass_peak in self.mass_peaks.values()}) != 1:
             raise Exception("Mass peaks have different numbers of cycles - this indicates a problem with the input "
                             "data file")
-        self.number_of_count_measurements = [mass_peak for mass_peak in self.mass_peaks.values()][0].number_of_measurements
-        number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(self.number_of_count_measurements,
-                                                                              PROBABILITY_CUTOFF,
-                                                                              PROBABILITY_OF_SINGLE_OUTLIER)
-
-        for ratio, raw_ratio_list in self.raw_isotope_ratios.items():
-            # TODO fix number of outliers allowed
-            mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
-                                                                                                        number_of_outliers_to_remove)
-            two_st_error = 2 * st_dev / math.sqrt(n)
-            self.mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
-            self.outliers_removed_from_raw_data[ratio] = removed_data
-            self.outlier_bounds[ratio] = outlier_bounds
-
-            cycle_exclude_list = []
-            for value in raw_ratio_list:
-                if value in self.outliers_removed_from_raw_data[ratio]:
-                    cycle_exclude_list.append(True)
-                else:
-                    cycle_exclude_list.append(False)
-            self.cycle_flagging_information[ratio] = cycle_exclude_list
+        self.number_of_count_measurements = [mass_peak for mass_peak in self.mass_peaks.values()][
+            0].number_of_measurements
 
     def calculate_raw_delta_for_isotope_ratio(self, element):
         # TODO this is not quite right yet
@@ -138,7 +99,7 @@ class Spot:
         for ratio, [mean, two_st_error] in self.mean_two_st_error_isotope_ratios.items():
 
             if ratio.has_delta:
-                standard_ratio_value = self.standard_ratios[ratio]
+                standard_ratio_value, uncertainty = self.standard_ratios[ratio]
                 delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio_value)
                 self.not_corrected_deltas[ratio] = (delta, delta_uncertainty)
 
@@ -161,6 +122,54 @@ class Spot:
 
     def exclude_cycle_information_update(self, cycle_number, is_flagged, ratio):
         self.cycle_flagging_information[ratio][cycle_number] = is_flagged
+
+    # TODO write a test for this function
+
+
+def calculate_relative_secondary_ion_yield(spot):
+    total_cps = 0
+    for mass_peak_name, mass_peak in spot.mass_peaks.items():
+        if mass_peak_name.usage_in_secondary_ion_calculations:
+            total_cps += mass_peak.mean_cps
+    secondary_ion_yield = total_cps / (spot.primary_beam_current * (10 ** 18))
+
+    return secondary_ion_yield
+
+
+def calculate_raw_isotope_ratios(mass_peaks, method):
+    raw_isotope_ratios = {}
+    for ratio in method.ratios:
+        numerator = ratio.numerator
+        denominator = ratio.denominator
+
+        ratios = [i / j for i, j in zip(mass_peaks[numerator].detector_corrected_cps_data,
+                                        mass_peaks[denominator].detector_corrected_cps_data)]
+
+        raw_isotope_ratios[ratio] = ratios
+
+    return raw_isotope_ratios
+
+
+def calculate_mean_st_error_for_isotope_ratios(number_of_count_measurements, raw_isotope_ratios):
+    number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(number_of_count_measurements,
+                                                                          PROBABILITY_CUTOFF,
+                                                                          PROBABILITY_OF_SINGLE_OUTLIER)
+    mean_two_st_error_isotope_ratios = {}
+    outliers_removed_from_raw_data = {}
+    outlier_bounds_by_ratio = {}
+    cycle_flagging_information = {}
+    for ratio, raw_ratio_list in raw_isotope_ratios.items():
+        mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
+                                                                                                    number_of_outliers_to_remove)
+        two_st_error = 2 * st_dev / math.sqrt(n)
+        mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
+        outliers_removed_from_raw_data[ratio] = removed_data
+        outlier_bounds_by_ratio[ratio] = outlier_bounds
+
+        cycle_exclude_list = [value in outliers_removed_from_raw_data[ratio] for value in raw_ratio_list]
+        cycle_flagging_information[ratio] = cycle_exclude_list
+
+    return mean_two_st_error_isotope_ratios, outliers_removed_from_raw_data, outlier_bounds_by_ratio, cycle_flagging_information
 
 
 from enum import Enum

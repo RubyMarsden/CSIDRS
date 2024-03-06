@@ -1,33 +1,26 @@
 import csv
-import re
 import time
-from typing import List, Iterable, Dict
+from typing import Iterable, Dict
 
-import matplotlib
 import numpy as np
 # from ltsfit.lts_linefit import lts_linefit
 import statsmodels.api as sm
 from PyQt5.QtGui import QColor
 
 from model.drift_correction_type import DriftCorrectionType
-from model.get_data_from_import import get_block_number_from_asc, \
-    get_analytical_conditions_data_from_asc_file
+from model.get_data_from_import import get_analytical_conditions_data_from_asc_file
+from model.isotopes import Isotope
+from model.maths import calculate_cap_value_and_uncertainty
 from model.maths import drift_correction, calculate_sims_alpha, calculate_alpha_correction
 from model.sample import Sample
 from model.settings.colours import colour_list, q_colour_list
-from model.settings.default_filenames import raw_data_default_filename
 from model.settings.isotope_reference_materials import reference_material_dictionary
-from model.settings.methods_from_isotopes import list_of_methods
-from model.spot import Spot
-
-from model.spot import SpotAttribute
-
-from model.isotopes import Isotope
-
-from model.maths import calculate_cap_value_and_uncertainty
 from model.settings.methods_from_isotopes import S33_S32, S34_S32, S36_S32
+from model.settings.methods_from_isotopes import list_of_methods
+from model.spot import Spot, calculate_relative_secondary_ion_yield, calculate_raw_isotope_ratios, \
+    calculate_mean_st_error_for_isotope_ratios
+from model.spot import SpotAttribute
 from utils.csv_utils import write_csv_output
-
 from utils.general_utils import find_longest_common_prefix_index, split_cameca_data_filename
 
 
@@ -194,9 +187,9 @@ class SidrsModel:
 
         for sample in self.get_samples():
             for spot in sample.spots:
-                spot.calculate_relative_secondary_ion_yield()
-                spot.calculate_raw_isotope_ratios(self.method)
-                spot.calculate_mean_st_error_for_isotope_ratios()
+                spot.secondary_ion_yield = calculate_relative_secondary_ion_yield(spot)
+                spot.raw_isotope_ratios = calculate_raw_isotope_ratios(spot.mass_peaks, self.method)
+                spot.mean_two_st_error_isotope_ratios, spot.outliers_removed_from_raw_data, spot.outlier_bounds_by_ratio, spot.cycle_flagging_information = calculate_mean_st_error_for_isotope_ratios(spot.number_of_count_measurements, spot.raw_isotope_ratios)
                 spot.calculate_raw_delta_for_isotope_ratio(self.element)
 
     def drift_correction_process(self):
