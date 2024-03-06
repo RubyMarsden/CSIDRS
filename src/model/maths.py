@@ -58,12 +58,6 @@ def drift_correction(x, y, dy, drift_coefficient, zero_time):
     return y_corrected, dy
 
 
-def calculate_added_uncertainty_to_make_single_population(ys, dys):
-    mean, uncertainty = calculate_error_weighted_mean_and_st_dev(ys, dys)
-
-    new_sample_uncertainty = (uncertainty ** 2) * (reduced_chi_squared ** 2)
-
-
 def calculate_error_weighted_mean_and_st_dev(values, errors):
     non_zero_errors = [error for error in errors if error != 0]
 
