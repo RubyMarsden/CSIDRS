@@ -1,3 +1,4 @@
+import csv
 import unittest
 
 from controllers.signals import Signals
@@ -47,9 +48,13 @@ class IntegrationTests(unittest.TestCase):
         self.model.recalculate_data_with_drift_correction_changed(self.ratio, drift_correction_type=DriftCorrectionType.LIN)
 
         self.model.export_cycle_data_csv('itest1_cycle_data.csv')
+        self.compare_csvs('itest1_cycle_data.csv', "fixtures/cycle_data.csv")
         self.model.export_raw_data_csv('itest1_raw_data.csv')
+        self.compare_csvs('itest1_raw_data.csv', "fixtures/raw_data.csv")
         self.model.export_corrected_data_csv('itest1_corrected_data.csv')
+        self.compare_csvs('itest1_corrected_data.csv', "fixtures/corrected_data.csv")
         self.model.export_analytical_conditions_csv('itest1_analytical_conditions.csv')
+        self.compare_csvs('itest1_analytical_conditions.csv', "fixtures/analytical_data.csv")
 
 
 
@@ -58,8 +63,21 @@ class IntegrationTests(unittest.TestCase):
         self.assertIn('OGC', sample_names)
         self.assertIn('unknown', sample_names)
 
-    def compare_csvs(self):
-        pass
+    def compare_csvs(self, csv1, csv2):
+        with open(csv1, newline='') as csvfile:
+            csv1_rows = list(csv.reader(csvfile, delimiter=','))
+
+        with open(csv2, newline='') as csvfile:
+            csv2_rows = list(csv.reader(csvfile, delimiter=','))
+
+        for n, (csv1_row, csv2_row) in enumerate(zip(csv1_rows, csv2_rows)):
+            for m, (i, j) in enumerate(zip(csv1_row, csv2_row)):
+                string = "File: " + csv1 + ", Row: " + str(n) + ", Col: " + str(m)
+                self.assertEqual(i, j, string)
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
