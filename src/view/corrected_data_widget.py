@@ -128,12 +128,11 @@ class CorrectedDataWidget(QWidget):
                 row_items.append(str(sample.name + " " + spot.id))
 
                 for ratio in method.ratios:
+                    value, uncertainty = spot.alpha_corrected_data[ratio]
                     if ratio.has_delta:
-                        value, uncertainty = spot.alpha_corrected_data[ratio]
                         value_format = ".3f"
                         uncertainty_format = ".4f"
                     else:
-                        value, uncertainty = spot.drift_corrected_ratio_values_by_ratio[ratio]
                         value_format = ".5f"
                         uncertainty_format = ".6f"
 

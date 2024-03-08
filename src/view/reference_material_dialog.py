@@ -7,6 +7,7 @@ from model.settings.isotope_reference_materials import reference_material_dictio
 class ReferenceMaterialSelectionDialog(QDialog):
     def __init__(self, model):
         QDialog.__init__(self)
+        self.model = model
         self.element = model.element
         self.material = model.material
         self.signals = model.signals
@@ -74,10 +75,8 @@ class ReferenceMaterialSelectionDialog(QDialog):
         self.setLayout(layout)
 
     def get_selected_reference_material(self):
-        self.signals.referenceMaterialsInput.emit(
-            self.primary_reference_material_selection,
-            self.secondary_reference_material_selection
-        )
+        self.model.reference_material_tag_samples(self.primary_reference_material_selection,
+                                                  self.secondary_reference_material_selection)
 
     def on_primary_radio_button_selected(self):
         for box in self.primary_radiobuttons:

@@ -66,7 +66,8 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_secondary_ion_fig = plt.figure()
 
         self.corrected_value_vs_secondary_ion_yield_axis = self.corrected_value_vs_secondary_ion_fig.add_subplot()
-        graph_widget, self.secondary_canvas = gui_utils.create_figure_widget(self.corrected_value_vs_secondary_ion_fig, self)
+        graph_widget, self.secondary_canvas = gui_utils.create_figure_widget(self.corrected_value_vs_secondary_ion_fig,
+                                                                             self)
 
         return graph_widget
 
@@ -107,12 +108,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio.has_delta:
-                    ys.append(spot.alpha_corrected_data[ratio][0])
-                    dys.append(spot.alpha_corrected_data[ratio][1])
-                else:
-                    ys.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
-                    dys.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
+                ys.append(spot.alpha_corrected_data[ratio][0])
+                dys.append(spot.alpha_corrected_data[ratio][1])
 
             self.corrected_value_vs_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
@@ -136,8 +133,10 @@ class QualityControlWidget(QWidget):
         circle.set_color("lightgoldenrodyellow")
 
         range_of_radians = np.linspace(0, 2 * np.pi, 100)
-        self.x_and_y_position_axis.plot(7000 * np.cos(range_of_radians), 7000 * np.sin(range_of_radians), marker="", ls="-", color="r")
-        self.x_and_y_position_axis.plot(5000 * np.cos(range_of_radians), 5000 * np.sin(range_of_radians), marker="", ls="--", color="r")
+        self.x_and_y_position_axis.plot(7000 * np.cos(range_of_radians), 7000 * np.sin(range_of_radians), marker="",
+                                        ls="-", color="r")
+        self.x_and_y_position_axis.plot(5000 * np.cos(range_of_radians), 5000 * np.sin(range_of_radians), marker="",
+                                        ls="--", color="r")
 
         self.x_and_y_position_axis.add_patch(circle)
 
@@ -150,7 +149,8 @@ class QualityControlWidget(QWidget):
     def _create_corrected_value_vs_secondary_ion_yield_graph(self, ratio):
         self.corrected_value_vs_secondary_ion_yield_axis.clear()
         corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
-        self.corrected_value_vs_secondary_ion_yield_axis.set_title(corrected_value_name + " against secondary ion yields.")
+        self.corrected_value_vs_secondary_ion_yield_axis.set_title(
+            corrected_value_name + " against secondary ion yields.")
         self.corrected_value_vs_secondary_ion_yield_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_secondary_ion_yield_axis.spines['right'].set_visible(False)
 
@@ -159,14 +159,12 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio.has_delta:
-                    ys.append(spot.alpha_corrected_data[ratio][0])
-                    dys.append(spot.alpha_corrected_data[ratio][1])
-                else:
-                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
-                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+                ys.append(spot.alpha_corrected_data[ratio][0])
+                dys.append(spot.alpha_corrected_data[ratio][1])
 
-            self.corrected_value_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
+
+            self.corrected_value_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o",
+                                                                      color=sample.colour)
         self.corrected_value_vs_secondary_ion_yield_axis.set_xlabel("Secondary ion yield")
         self.corrected_value_vs_secondary_ion_yield_axis.set_ylabel(corrected_value_name)
         self.corrected_value_vs_secondary_ion_fig.tight_layout()
@@ -174,7 +172,8 @@ class QualityControlWidget(QWidget):
     def _create_corrected_value_vs_distance_from_mount_centre_graph(self, ratio):
         self.corrected_value_vs_distance_from_mount_centre_axis.clear()
         corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
-        self.corrected_value_vs_distance_from_mount_centre_axis.set_title(corrected_value_name + " against distance from mount centre.")
+        self.corrected_value_vs_distance_from_mount_centre_axis.set_title(
+            corrected_value_name + " against distance from mount centre.")
         self.corrected_value_vs_distance_from_mount_centre_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_distance_from_mount_centre_axis.spines['right'].set_visible(False)
 
@@ -183,14 +182,12 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio.has_delta:
-                    ys.append(spot.alpha_corrected_data[ratio][0])
-                    dys.append(spot.alpha_corrected_data[ratio][1])
-                else:
-                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
-                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+                ys.append(spot.alpha_corrected_data[ratio][0])
+                dys.append(spot.alpha_corrected_data[ratio][1])
 
-            self.corrected_value_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
+
+            self.corrected_value_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o",
+                                                                             color=sample.colour)
         self.corrected_value_vs_distance_from_mount_centre_axis.set_xlabel("Distance from mount centre")
         self.corrected_value_vs_distance_from_mount_centre_axis.set_ylabel(corrected_value_name)
 
@@ -208,12 +205,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio.has_delta:
-                    ys.append(spot.alpha_corrected_data[ratio][0])
-                    dys.append(spot.alpha_corrected_data[ratio][1])
-                else:
-                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
-                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+                ys.append(spot.alpha_corrected_data[ratio][0])
+                dys.append(spot.alpha_corrected_data[ratio][1])
 
             self.corrected_value_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.corrected_value_vs_dtfa_x_axis.set_xlabel("dtfa-x")
@@ -234,12 +227,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                if ratio.has_delta:
-                    ys.append(spot.alpha_corrected_data[ratio][0])
-                    dys.append(spot.alpha_corrected_data[ratio][1])
-                else:
-                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
-                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+                ys.append(spot.alpha_corrected_data[ratio][0])
+                dys.append(spot.alpha_corrected_data[ratio][1])
 
             total_xs.extend(xs)
 

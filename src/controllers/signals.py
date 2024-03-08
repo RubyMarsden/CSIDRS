@@ -12,7 +12,6 @@ class Signals(QObject):
     materialInput = pyqtSignal(Material)
     importedFilesUpdated = pyqtSignal()
     sampleNamesUpdated = pyqtSignal()
-    referenceMaterialsInput = pyqtSignal(str, str)
     cycleTreeItemChanged = pyqtSignal(int, int)
     cycleFlagged = pyqtSignal(int, bool)
     recalculateNewCycleData = pyqtSignal()

@@ -356,27 +356,16 @@ class DriftCorrectionWidget(QWidget):
         dc_yerrors_removed = []
 
         for spot in sample.spots:
-            if ratio.has_delta:
-                if not spot.is_flagged:
-                    dc_xs.append(spot.datetime)
-                    dc_ys.append(spot.drift_corrected_deltas[ratio][0])
-                    dc_yerrors.append(spot.drift_corrected_deltas[ratio][1])
-
-                else:
-                    dc_xs_removed.append(spot.datetime)
-                    dc_ys_removed.append(spot.drift_corrected_deltas[ratio][0])
-                    dc_yerrors_removed.append(spot.drift_corrected_deltas[ratio][1])
+            if not spot.is_flagged:
+                dc_xs.append(spot.datetime)
+                dc_ys.append(spot.drift_corrected_data[ratio][0])
+                dc_yerrors.append(spot.drift_corrected_data[ratio][1])
 
             else:
-                if not spot.is_flagged:
-                    dc_xs.append(spot.datetime)
-                    dc_ys.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
-                    dc_yerrors.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
+                dc_xs_removed.append(spot.datetime)
+                dc_ys_removed.append(spot.drift_corrected_data[ratio][0])
+                dc_yerrors_removed.append(spot.drift_corrected_data[ratio][1])
 
-                else:
-                    dc_xs_removed.append(spot.datetime)
-                    dc_ys_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][0])
-                    dc_yerrors_removed.append(spot.drift_corrected_ratio_values_by_ratio[ratio][1])
         dc_y_mean = np.mean(dc_ys)
         dc_y_stdev = np.std(dc_ys)
         dc_label = "Drift corrected data: \n Mean: " + format(dc_y_mean, ".3f") + ", St Dev: " + format(dc_y_stdev, ".3f")
@@ -414,12 +403,12 @@ class DriftCorrectionWidget(QWidget):
                 if ratio.has_delta:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
-                        ys.append(spot.drift_corrected_deltas[ratio][0])
-                        yerrors.append(spot.drift_corrected_deltas[ratio][1])
+                        ys.append(spot.drift_corrected_data[ratio][0])
+                        yerrors.append(spot.drift_corrected_data[ratio][1])
                     else:
                         xs_removed.append(spot.datetime)
-                        ys_removed.append(spot.drift_corrected_deltas[ratio][0])
-                        yerrors_removed.append(spot.drift_corrected_deltas[ratio][1])
+                        ys_removed.append(spot.drift_corrected_data[ratio][0])
+                        yerrors_removed.append(spot.drift_corrected_data[ratio][1])
                 else:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)

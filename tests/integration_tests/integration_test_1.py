@@ -40,7 +40,7 @@ class IntegrationTests(unittest.TestCase):
 
         primary_reference_material = "OGC"
         secondary_reference_material = "No secondary reference material"
-        self.model._reference_material_tag_samples(primary_reference_material, secondary_reference_material)
+        self.model.reference_material_tag_samples(primary_reference_material, secondary_reference_material)
         self.model.process_data()
 
         self.check_sample_existence()
