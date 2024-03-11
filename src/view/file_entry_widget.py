@@ -33,7 +33,7 @@ class FileEntryWidget(QWidget):
 
         lhs_layout = QVBoxLayout()
         lhs_layout.addWidget(self.filename_tree_widget)
-        lhs_layout.addWidget(self.remove_single_file_button)
+        # lhs_layout.addWidget(self.remove_single_file_button)
 
         layout.addLayout(lhs_layout)
 
