@@ -109,7 +109,7 @@ class ResidualsDialog(QDialog):
         self.residuals_axis.spines['top'].set_visible(False)
         self.residuals_axis.spines['right'].set_visible(False)
         predicted_values = self.data_processing_dialog.model.statsmodel_result_by_ratio[self.ratio].predict()
-        true_values = self.data_processing_dialog.model.primary_rm_deltas_by_ratio[self.ratio]
+        true_values = self.data_processing_dialog.model.get_primary_rm_deltas(self.ratio)
         residuals = true_values - predicted_values
 
         self.residuals_axis.plot(predicted_values, residuals, ls="", marker="o")

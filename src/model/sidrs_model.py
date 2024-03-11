@@ -195,10 +195,15 @@ class SidrsModel:
 
     def drift_correction_process(self):
         primary_rm = self.get_primary_reference_material()
+        # Currently t_zero is not used anywhere else, however I feel it might be required in the future
+        self.set_t_zero(primary_rm.spots)
+        t_zero = self.get_t_zero()
+
+        self.set_primary_rm_deltas_by_ratio(primary_rm, self.method.ratios)
 
         for ratio in self.method.ratios:
-
-            self.characterise_linear_drift(ratio, primary_rm.spots)
+            self.statsmodel_result_by_ratio[ratio], self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
+                ratio] = self.characterise_linear_drift(ratio, primary_rm.spots)
             if ratio.name() == "36S/32S":
                 self.characterise_curvilinear_drift(ratio, primary_rm.spots)
 
@@ -213,7 +218,7 @@ class SidrsModel:
 
                     elif self.drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
                         drift_correction_coef = float(self.drift_coefficient_by_ratio[ratio])
-                        t_zero = self.t_zero
+
                         spot.drift_corrected_data[ratio] = correct_data_for_linear_drift(spot,
                                                                                          ratio,
                                                                                          drift_correction_coef,
@@ -226,17 +231,16 @@ class SidrsModel:
     def characterise_linear_drift(self, ratio, spots):
 
         values, times = get_data_for_drift_characterisation_input(ratio, spots)
-        self.primary_rm_deltas_by_ratio[ratio] = values
 
         Y = values
         # adding a column of '1s' for statsmodels to the array 'times'
         X = sm.add_constant(times)
 
-        self.statsmodel_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
-        self.drift_y_intercept_by_ratio[ratio], self.drift_coefficient_by_ratio[
-            ratio] = self.statsmodel_result_by_ratio[ratio].params
+        statsmodel_result = sm.OLS(Y, X).fit()
+        drift_y_intercept, drift_coefficient = statsmodel_result.params
 
-        self.t_zero = np.median(times)
+        return statsmodel_result, drift_y_intercept, drift_coefficient
+
 
     def characterise_curvilinear_drift(self, ratio, spots):
         values, times = get_data_for_drift_characterisation_input(ratio, spots)
@@ -247,7 +251,7 @@ class SidrsModel:
         x_array = np.column_stack((x1, x2))
         X = sm.add_constant(x_array)
         self.statsmodel_curvilinear_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
-        return
+
 
     def characterise_multiple_linear_regression(self, factors, ratio):
 
@@ -291,7 +295,6 @@ class SidrsModel:
             X = sm.add_constant(X)
 
             self.statsmodel_multiple_linear_result_by_ratio[ratio] = sm.OLS(Y, X).fit()
-            print(self.statsmodel_multiple_linear_result_by_ratio[ratio].summary())
 
     def SIMS_correction_process(self):
         # This correction method is described fully in  Kita et al., 2009
@@ -321,6 +324,7 @@ class SidrsModel:
                                                                                       alpha_sims_uncertainty)
                     else:
                         spot.alpha_corrected_data[ratio] = spot.drift_corrected_data[ratio]
+
     def calculate_cap_values_S33(self):
         print("Calculating cap33")
         for sample in self.get_samples():
@@ -485,6 +489,10 @@ class SidrsModel:
         self.drift_correction_process()
         self.SIMS_correction_process()
         self.signals.dataRecalculated.emit()
+        if Isotope.S33 in self.isotopes:
+            self.calculate_cap_values_S33()
+        if Isotope.S36 in self.isotopes:
+            self.calculate_cap_values_S36()
 
     def recalculate_data_with_drift_correction_changed(self, ratio, drift_correction_type):
         self.drift_correction_type_by_ratio[ratio] = drift_correction_type
@@ -650,6 +658,26 @@ class SidrsModel:
     def get_primary_reference_material(self):
         return self.primary_reference_material
 
+    def set_t_zero(self, spots):
+        times = []
+        for spot in spots:
+            if spot.is_flagged:
+                continue
+            timestamp = time.mktime(spot.datetime.timetuple())
+            times.append(timestamp)
+
+        self.t_zero = np.median(times)
+
+    def get_t_zero(self):
+        return self.t_zero
+
+    def set_primary_rm_deltas_by_ratio(self, primary_rm, ratios):
+        for ratio in ratios:
+            values, times = get_data_for_drift_characterisation_input(ratio, primary_rm.spots)
+            self.primary_rm_deltas_by_ratio[ratio] = values
+
+    def get_primary_rm_deltas(self, ratio):
+        return self.primary_rm_deltas_by_ratio[ratio]
 
 def correct_data_for_linear_drift(spot, ratio, drift_correction_coef, t_zero):
     timestamp = time.mktime(spot.datetime.timetuple())
