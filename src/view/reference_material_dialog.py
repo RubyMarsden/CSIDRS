@@ -75,8 +75,8 @@ class ReferenceMaterialSelectionDialog(QDialog):
         self.setLayout(layout)
 
     def get_selected_reference_material(self):
-        self.model.reference_material_tag_samples(self.primary_reference_material_selection,
-                                                  self.secondary_reference_material_selection)
+        self.model.set_reference_materials(self.primary_reference_material_selection,
+                                           self.secondary_reference_material_selection)
 
     def on_primary_radio_button_selected(self):
         for box in self.primary_radiobuttons:

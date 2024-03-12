@@ -23,21 +23,13 @@ class DriftCorrectionWidget(QWidget):
         self.data_processing_dialog = data_processing_dialog
         self.model = data_processing_dialog.model
 
-        self.drift_coefficient = self.data_processing_dialog.model.drift_coefficient_by_ratio
-        self.drift_intercept = self.data_processing_dialog.model.drift_y_intercept_by_ratio
-
         self.data_processing_dialog.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
         self.data_processing_dialog.model.signals.dataRecalculated.connect(self.on_data_recalculated)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.layout = QHBoxLayout()
 
-        for sample in self.data_processing_dialog.model.get_samples():
-            if sample.is_primary_reference_material:
-                self.primary_sample = sample
-            elif sample.is_secondary_reference_material:
-                self.secondary_sample = sample
-            elif self.data_processing_dialog.model.secondary_reference_material == "No secondary reference material":
-                self.secondary_sample = None
+        self.primary_sample = self.data_processing_dialog.model.primary_reference_material
+        self.secondary_sample = self.data_processing_dialog.model.secondary_reference_material
 
         self.graph_tab_widget = self._create_graph_tab_widget()
 
@@ -186,10 +178,10 @@ class DriftCorrectionWidget(QWidget):
         self.update_graphs(ratio)
 
     def update_stats_text(self, ratio):
-        linear_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].rsquared
-        linear_adj_r_squared = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].rsquared_adj
-        linear_gradient = self.data_processing_dialog.model.drift_coefficient_by_ratio[ratio]
-        linear_gradient_st_error = self.data_processing_dialog.model.statsmodel_result_by_ratio[ratio].bse[1]
+        linear_r_squared = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].statsmodel_result.rsquared
+        linear_adj_r_squared = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].statsmodel_result.rsquared_adj
+        linear_gradient = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient
+        linear_gradient_st_error = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].statsmodel_result.bse[1]
 
         self.r_squared_text.setText("R<sup>2</sup>:\n" + format(linear_r_squared, ".3f"))
         self.adj_r_squared_text.setText("Adjusted R<sup>2</sup>:\n" + format(linear_adj_r_squared, ".3f"))
@@ -327,8 +319,8 @@ class DriftCorrectionWidget(QWidget):
                                          markeredgecolor=sample.colour,
                                          markerfacecolor="none")
 
-        drift_coefficient = self.drift_coefficient[ratio]
-        drift_intercept = self.drift_intercept[ratio]
+        drift_coefficient = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient
+        drift_intercept = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_y_intercept
         if drift_coefficient:
             y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
 

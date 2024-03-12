@@ -122,4 +122,7 @@ class SampleTreeWidget(QWidget):
         # TODO if this is a sample what happens? causes attribute error if you go from a flagged spot to a sample name in the tree.
         self.current_spot().is_flagged = self.exclude_spot_checkbox.isChecked()
         self.highlight_spot(self.current_spot().is_flagged)
-        self.data_processing_dialog.model.signals.recalculateNewSpotData.emit()
+        primary_rm = self.data_processing_dialog.model.get_primary_reference_material()
+        method = self.data_processing_dialog.model.method
+        drift_correction_type_by_ratio = self.data_processing_dialog.model.drift_correction_type_by_ratio
+        self.data_processing_dialog.model.calculate_data_from_drift_correction_onwards(primary_rm, method, drift_correction_type_by_ratio)

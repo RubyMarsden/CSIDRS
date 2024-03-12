@@ -15,7 +15,6 @@ class Signals(QObject):
     cycleTreeItemChanged = pyqtSignal(int, int)
     cycleFlagged = pyqtSignal(int, bool)
     recalculateNewCycleData = pyqtSignal()
-    recalculateNewSpotData = pyqtSignal()
     dataRecalculated = pyqtSignal()
     dataCleared = pyqtSignal()
     multipleLinearRegressionFactorsInput = pyqtSignal(list, Ratio)

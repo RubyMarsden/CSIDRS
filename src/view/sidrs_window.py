@@ -69,17 +69,9 @@ class SidrsWindow(QMainWindow):
         return None
 
     def on_reference_material_selected(self):
-        self.model.process_data()
-        self.model.drift_correction_process()
-        self.model.SIMS_correction_process()
-        for isotope in self.model.isotopes:
-            if isotope.isotope_name == "36S":
-                self.model.calculate_cap_values_S36()
-            elif isotope.isotope_name == "33S":
-                self.model.calculate_cap_values_S33()
-
+        self.model.calculate_results()
         dialog = DataProcessingDialog(self.model)
-        result = dialog.exec()
+        dialog.exec()
 
     def clear_data_button_clicked(self):
         self.model.clear_all_data_and_methods()

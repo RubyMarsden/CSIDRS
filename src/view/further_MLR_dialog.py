@@ -28,9 +28,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
 
         self.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
 
-        for sample in self.data_processing_dialog.model.get_samples():
-            if sample.is_primary_reference_material:
-                self.primary_reference_material_sample = sample
+        self.primary_reference_material_sample = self.data_processing_dialog.model.primary_reference_material
 
         self.calculate_mlr_using_selected_factors_button = QPushButton("Calculate MLR")
         self.calculate_mlr_using_selected_factors_button.clicked.connect(self.on_calculate_mlr_button_clicked)

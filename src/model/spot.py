@@ -2,21 +2,14 @@ import math
 import re
 from datetime import datetime
 
-from model.elements import Element
-from model.settings.delta_constants import DeltaReferenceMaterial
-from model.mass_peak import MassPeak, correct_cps_data_for_detector_parameters, outlier_resistant_mean_and_st_error
-from model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev, \
-    calculate_delta_from_ratio, calculate_number_of_outliers_to_remove
-from model.settings.asc_file_settings_general import *
 from model.get_data_from_import import get_data_from_asc, get_primary_beam_current_data_asc, \
     get_dtfa_x_and_y_from_asc
-from model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, \
-    carbon_isotope_reference, chlorine_isotope_reference
-from model.settings.statistics_values import PROBABILITY_CUTOFF, PROBABILITY_OF_SINGLE_OUTLIER
+from model.mass_peak import MassPeak, correct_cps_data_for_detector_parameters, outlier_resistant_mean_and_st_error
+from model.maths import vector_length_from_origin, calculate_outlier_resistant_mean_and_st_dev
+from model.settings.asc_file_settings_general import *
 from utils.convert_date_format_from_new_asci import standardise_date_format
 from utils.convert_twelve_to_twenty_four_hour_time import convert_to_twenty_four_hour_time_pm, \
     convert_to_twenty_four_hour_time_am
-
 from utils.general_utils import split_cameca_data_filename
 
 
@@ -82,76 +75,6 @@ class Spot:
                             "data file")
         self.number_of_count_measurements = [mass_peak for mass_peak in self.mass_peaks.values()][
             0].number_of_measurements
-
-
-# TODO write a test for this function
-def calculate_relative_secondary_ion_yield(spot):
-    total_cps = 0
-    for mass_peak_name, mass_peak in spot.mass_peaks.items():
-        if mass_peak_name.usage_in_secondary_ion_calculations:
-            total_cps += mass_peak.mean_cps
-    secondary_ion_yield = total_cps / (spot.primary_beam_current * (10 ** 18))
-
-    return secondary_ion_yield
-
-
-def calculate_raw_isotope_ratios(mass_peaks, method):
-    raw_isotope_ratios = {}
-    for ratio in method.ratios:
-        numerator = ratio.numerator
-        denominator = ratio.denominator
-
-        ratios = [i / j for i, j in zip(mass_peaks[numerator].detector_corrected_cps_data,
-                                        mass_peaks[denominator].detector_corrected_cps_data)]
-
-        raw_isotope_ratios[ratio] = ratios
-
-    return raw_isotope_ratios
-
-
-def calculate_mean_st_error_for_isotope_ratios(number_of_count_measurements, raw_isotope_ratios):
-    number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(number_of_count_measurements,
-                                                                          PROBABILITY_CUTOFF,
-                                                                          PROBABILITY_OF_SINGLE_OUTLIER)
-    mean_two_st_error_isotope_ratios = {}
-    outliers_removed_from_raw_data = {}
-    outlier_bounds_by_ratio = {}
-    cycle_flagging_information = {}
-    for ratio, raw_ratio_list in raw_isotope_ratios.items():
-        mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
-                                                                                                    number_of_outliers_to_remove)
-        two_st_error = 2 * st_dev / math.sqrt(n)
-        mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
-        outliers_removed_from_raw_data[ratio] = removed_data
-        outlier_bounds_by_ratio[ratio] = outlier_bounds
-
-        cycle_exclude_list = [value in outliers_removed_from_raw_data[ratio] for value in raw_ratio_list]
-        cycle_flagging_information[ratio] = cycle_exclude_list
-
-    return mean_two_st_error_isotope_ratios, outliers_removed_from_raw_data, outlier_bounds_by_ratio, cycle_flagging_information
-
-
-def calculate_raw_delta_for_isotope_ratio(spot, element):
-    # TODO this is not quite right yet
-    if element == Element.OXY:
-        standard_ratios = oxygen_isotope_reference[DeltaReferenceMaterial.VSMOW]
-    elif element == Element.SUL:
-        standard_ratios = sulphur_isotope_reference[DeltaReferenceMaterial.VCDT]
-    elif element == Element.CAR:
-        standard_ratios = carbon_isotope_reference[DeltaReferenceMaterial.VPDB]
-    elif element == Element.CHL:
-        standard_ratios = chlorine_isotope_reference[DeltaReferenceMaterial.SMOC]
-    else:
-        raise Exception
-
-    not_corrected_deltas = {}
-    for ratio, [mean, two_st_error] in spot.mean_two_st_error_isotope_ratios.items():
-        if ratio.has_delta:
-            standard_ratio_value, uncertainty = standard_ratios[ratio]
-            delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio_value)
-            not_corrected_deltas[ratio] = (delta, delta_uncertainty)
-
-    return not_corrected_deltas
 
 
 def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(spot):
