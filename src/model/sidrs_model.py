@@ -299,13 +299,17 @@ class SidrsModel:
                         "methods view the HACKING.md file.")
 
     def recalculate_data_with_cycles_changed(self):
-        for sample in self.get_samples():
+        primary_rm = self.get_primary_reference_material()
+        samples = self.get_samples()
+        for sample in samples:
             for spot in sample.spots:
                 spot.mean_two_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
                     spot)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, self.element)
 
-        self.calculate_data_from_drift_correction_onwards()
+        self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
+                                                                              self.drift_correction_type_by_ratio,
+                                                                              self.element, self.material)
 
     def remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
         spot.cycle_flagging_information = exclude_cycle_information_update(spot, cycle_number, is_flagged, ratio)
@@ -317,6 +321,7 @@ class SidrsModel:
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
                                                                               self.element, self.material)
+        self.signals.dataRecalculated.emit()
 
     def clear_all_data_and_methods(self):
         self.data.clear()

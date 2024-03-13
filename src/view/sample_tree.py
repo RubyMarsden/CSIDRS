@@ -119,10 +119,22 @@ class SampleTreeWidget(QWidget):
         current_tree_item.setBackground(0, colour)
 
     def on_exclude_spot_checkbox_state_changed(self):
-        # TODO if this is a sample what happens? causes attribute error if you go from a flagged spot to a sample name in the tree.
+        # TODO if this is a sample what happens? causes attribute error if you go from a flagged spot to a sample
+        #  name in the tree.
         self.current_spot().is_flagged = self.exclude_spot_checkbox.isChecked()
         self.highlight_spot(self.current_spot().is_flagged)
         primary_rm = self.data_processing_dialog.model.get_primary_reference_material()
         method = self.data_processing_dialog.model.method
+        samples = self.data_processing_dialog.model.get_samples()
         drift_correction_type_by_ratio = self.data_processing_dialog.model.drift_correction_type_by_ratio
-        self.data_processing_dialog.model.calculate_data_from_drift_correction_onwards(primary_rm, method, drift_correction_type_by_ratio)
+        element = self.data_processing_dialog.model.element
+        material = self.data_processing_dialog.model.material
+        self.data_processing_dialog.model.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm,
+                                                                                                           method,
+                                                                                                           samples,
+                                                                                                           drift_correction_type_by_ratio,
+                                                                                                           element,
+                                                                                                           material)
+        self.data_processing_dialog.model.signals.dataRecalculated.emit()
+
+
