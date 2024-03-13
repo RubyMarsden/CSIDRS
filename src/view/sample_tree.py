@@ -1,6 +1,8 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox
 
+from controllers.signals import signals
+
 
 class SampleTreeWidget(QWidget):
     def __init__(self, data_processing_dialog):
@@ -135,6 +137,6 @@ class SampleTreeWidget(QWidget):
                                                                                                            drift_correction_type_by_ratio,
                                                                                                            element,
                                                                                                            material)
-        self.data_processing_dialog.model.signals.dataRecalculated.emit()
+        signals.dataRecalculated.emit()
 
 

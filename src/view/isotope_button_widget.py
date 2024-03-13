@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
 
+from controllers.signals import signals
 from model.elements import Element
 from view.method_selection_dialog import MethodSelectionDialog
 
@@ -34,5 +35,5 @@ class IsotopeButtonWidget(QWidget):
 
     def emit_methods_signal(self, dialog):
         if dialog.isotopes and dialog.material is not None:
-            self.model.signals.isotopesInput.emit(dialog.isotopes, self.element)
-            self.model.signals.materialInput.emit(dialog.material)
+            signals.isotopesInput.emit(dialog.isotopes, self.element)
+            signals.materialInput.emit(dialog.material)

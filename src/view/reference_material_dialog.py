@@ -10,7 +10,6 @@ class ReferenceMaterialSelectionDialog(QDialog):
         self.model = model
         self.element = model.element
         self.material = model.material
-        self.signals = model.signals
         self.primary_reference_material_selection = None
         self.secondary_reference_material_selection = None
         self.primary_radiobuttons = []

@@ -18,9 +18,9 @@ def set_except_hook(window):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    signals = Signals()
 
-    model = SidrsModel(signals)
+
+    model = SidrsModel()
     window = SidrsWindow(model)
 
     set_except_hook(window)

@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QTreeWidget, QTreeWidgetItem, \
     QVBoxLayout
 
+from controllers.signals import signals
 from view.change_sample_names_dialog import ChangeSampleNamesDialog
 
 
@@ -45,9 +46,9 @@ class FileEntryWidget(QWidget):
 
         layout.addLayout(rhs_layout)
 
-        self.model.signals.dataCleared.connect(self.on_data_cleared)
-        self.model.signals.importedFilesUpdated.connect(self.on_imported_files_updated)
-        self.model.signals.sampleNamesUpdated.connect(self.on_samples_names_updated)
+        signals.dataCleared.connect(self.on_data_cleared)
+        signals.importedFilesUpdated.connect(self.on_imported_files_updated)
+        signals.sampleNamesUpdated.connect(self.on_samples_names_updated)
 
         #############
         ## Actions ##

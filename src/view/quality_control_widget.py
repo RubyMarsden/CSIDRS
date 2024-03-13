@@ -4,6 +4,7 @@ import numpy as np
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 from matplotlib.patches import Circle
 
+from controllers.signals import signals
 from utils import gui_utils
 
 matplotlib.use('QT5Agg')
@@ -19,7 +20,7 @@ class QualityControlWidget(QWidget):
 
         self.data_processing_dialog.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
-        self.data_processing_dialog.model.signals.dataRecalculated.connect(self.on_data_recalculated)
+        signals.dataRecalculated.connect(self.on_data_recalculated)
 
         layout = QVBoxLayout()
 

@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTableWidget, QTableWidgetItem, QFileDialog
 
+from controllers.signals import signals
 from model.settings.default_filenames import corrected_data_default_filename, analytical_conditions_default_filename
 from utils.csv_utils import write_csv_output, request_output_csv_filename_from_user, export_csv, \
     csv_exported_successfully_popup
@@ -18,7 +19,7 @@ class CorrectedDataWidget(QWidget):
 
         self.corrected_data_table = self._create_corrected_data_table()
 
-        self.data_processing_dialog.model.signals.dataRecalculated.connect(self.update_basic_table)
+        signals.dataRecalculated.connect(self.update_basic_table)
 
         layout = QHBoxLayout()
 

@@ -6,6 +6,7 @@ import numpy as np
 import statsmodels.api as sm
 from PyQt5.QtGui import QColor
 
+from controllers.signals import signals
 from model.calculation import CalculationResults
 from model.drift_correction_type import DriftCorrectionType
 from model.get_data_from_import import get_analytical_conditions_data_from_asc_file
@@ -20,11 +21,10 @@ from utils.general_utils import find_longest_common_prefix_index, split_cameca_d
 
 
 class SidrsModel:
-    def __init__(self, signals):
+    def __init__(self):
         self.data = {}
         self.analytical_condition_data = None
         self.samples = []
-        self.signals = signals
         self.imported_files = []
         self.number_of_count_measurements = None
         self.element = None
@@ -39,10 +39,10 @@ class SidrsModel:
 
         self.method = None
 
-        self.signals.isotopesInput.connect(self._isotopes_input)
-        self.signals.materialInput.connect(self._material_input)
-        self.signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
-        self.signals.multipleLinearRegressionFactorsInput.connect(self.characterise_multiple_linear_regression)
+        signals.isotopesInput.connect(self._isotopes_input)
+        signals.materialInput.connect(self._material_input)
+        signals.recalculateNewCycleData.connect(self.recalculate_data_with_cycles_changed)
+        signals.multipleLinearRegressionFactorsInput.connect(self.characterise_multiple_linear_regression)
 
     #################
     ### Importing ###
@@ -86,8 +86,8 @@ class SidrsModel:
         self.analytical_condition_data = self._parse_asc_file_into_analytical_conditions_data(
             filename_for_analytical_conditions)
 
-        self.signals.importedFilesUpdated.emit()
-        self.signals.sampleNamesUpdated.emit()
+        signals.importedFilesUpdated.emit()
+        signals.sampleNamesUpdated.emit()
 
     def _parse_asc_file_into_data(self, filename):
         with open(filename) as file:
@@ -160,7 +160,7 @@ class SidrsModel:
                                                                               self.drift_correction_type_by_ratio,
                                                                               self.element, self.material)
 
-        self.signals.dataRecalculated.emit()
+        signals.dataRecalculated.emit()
 
     def characterise_multiple_linear_regression(self, factors, ratio):
 
@@ -265,7 +265,7 @@ class SidrsModel:
         self._merge_samples(merge_operations)
 
         if len(rename_operations) > 0 or len(merge_operations) > 0:
-            self.signals.sampleNamesUpdated.emit()
+            signals.sampleNamesUpdated.emit()
 
     def set_reference_materials(self, primary_reference_material_name, secondary_reference_material_name):
         for sample in self.get_samples():
@@ -321,7 +321,7 @@ class SidrsModel:
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
                                                                               self.element, self.material)
-        self.signals.dataRecalculated.emit()
+        signals.dataRecalculated.emit()
 
     def clear_all_data_and_methods(self):
         self.data.clear()
@@ -339,7 +339,7 @@ class SidrsModel:
 
         self.method = None
 
-        self.signals.dataCleared.emit()
+        signals.dataCleared.emit()
 
     def export_cycle_data_csv(self, filename):
         method = self.method

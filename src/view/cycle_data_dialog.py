@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QLabel, QWidget, 
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
 
+from controllers.signals import signals
 from model.settings.default_filenames import cycle_data_default_filename
 from utils import gui_utils
 from utils.csv_utils import export_csv, request_output_csv_filename_from_user, csv_exported_successfully_popup
@@ -28,9 +29,9 @@ class CycleDataDialog(QDialog):
 
         self.ratio = self.data_processing_dialog.get_current_ratio()
 
-        self.data_processing_dialog.model.signals.cycleFlagged.connect(self.on_cycle_flagged)
+        signals.cycleFlagged.connect(self.on_cycle_flagged)
 
-        self.data_processing_dialog.model.signals.recalculateNewCycleData.connect(self.on_cycle_data_recalculated)
+        signals.recalculateNewCycleData.connect(self.on_cycle_data_recalculated)
 
         layout = QHBoxLayout()
         right_layout = self._create_right_widget()
@@ -40,7 +41,7 @@ class CycleDataDialog(QDialog):
 
         self.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_selection_changed)
 
-        self.data_processing_dialog.model.signals.cycleTreeItemChanged.connect(self.on_cycle_tree_item_changed)
+        signals.cycleTreeItemChanged.connect(self.on_cycle_tree_item_changed)
 
         self.setLayout(layout)
 
@@ -119,7 +120,7 @@ class CycleDataDialog(QDialog):
                                                                  cycle_number, is_flagged, self.ratio)
 
     def on_update_button_pushed(self):
-        self.data_processing_dialog.model.signals.recalculateNewCycleData.emit()
+        signals.recalculateNewCycleData.emit()
 
     def on_export_cycle_data_button_pushed(self):
         filename = request_output_csv_filename_from_user(cycle_data_default_filename)

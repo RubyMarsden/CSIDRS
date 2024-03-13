@@ -14,7 +14,7 @@ class IntegrationTests(unittest.TestCase):
     def setUp(self):
         self.signals = Signals()
     def test_integration1(self):
-        self.model = SidrsModel(signals=self.signals)
+        self.model = SidrsModel()
         self.element = Element.OXY
         self.model.method = two_isotopes_no_hydroxide_oxygen
         self.ratio = two_isotopes_no_hydroxide_oxygen.ratios[0]

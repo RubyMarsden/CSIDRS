@@ -1,6 +1,7 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox
 
+from controllers.signals import signals
 from view.stats_dialog import StatsWarningDialog
 
 
@@ -99,7 +100,7 @@ class CycleTreeWidget(QWidget):
                 previous_tree_item_integer = 1
             else:
                 previous_tree_item_integer = int(previous_tree_item.text(0))
-            self.model.signals.cycleTreeItemChanged.emit(current_tree_item_integer, previous_tree_item_integer)
+            signals.cycleTreeItemChanged.emit(current_tree_item_integer, previous_tree_item_integer)
 
             next_item = self.tree.itemBelow(current_tree_item)
             self.next_item_button.setDisabled(next_item is None)
@@ -126,5 +127,5 @@ class CycleTreeWidget(QWidget):
         self.tree.currentItem().is_flagged = self.exclude_cycle_checkbox.isChecked()
         self.highlight_cycle_tree_item(self.tree.currentItem())
         cycle_number = int(self.tree.currentItem().text(0)) - 1
-        self.data_processing_dialog.model.signals.cycleFlagged.emit(cycle_number, self.tree.currentItem().is_flagged)
+        signals.cycleFlagged.emit(cycle_number, self.tree.currentItem().is_flagged)
 

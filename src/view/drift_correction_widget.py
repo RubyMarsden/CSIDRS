@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QRadioBut
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
+from controllers.signals import signals
 from model.drift_correction_type import DriftCorrectionType
 from utils import gui_utils
 from view.further_MLR_dialog import FurtherMultipleLinearRegressionDialog
@@ -24,7 +25,7 @@ class DriftCorrectionWidget(QWidget):
         self.model = data_processing_dialog.model
 
         self.data_processing_dialog.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
-        self.data_processing_dialog.model.signals.dataRecalculated.connect(self.on_data_recalculated)
+        signals.dataRecalculated.connect(self.on_data_recalculated)
         self.data_processing_dialog.sample_tree.tree.currentItemChanged.connect(self.on_sample_tree_item_changed)
         self.layout = QHBoxLayout()
 

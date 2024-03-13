@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 import matplotlib.dates as mdates
 
+from controllers.signals import signals
 from utils import gui_utils
 from view.ratio_box_widget import RatioBoxWidget
 
@@ -18,7 +19,6 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         self.setMinimumWidth(450)
         self.data_processing_dialog = data_processing_dialog
         self.model = data_processing_dialog.model
-        self.signals = data_processing_dialog.model.signals
         self.ratio = self.data_processing_dialog.get_current_ratio()
         self.spot_attribute_box_list = []
         self.spot_attributes = []
@@ -121,7 +121,7 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
         for spot_attribute in self.spot_attributes:
             print(spot_attribute == SpotAttribute.TIME)
 
-        self.signals.multipleLinearRegressionFactorsInput.emit(self.spot_attributes, self.ratio)
+        signals.multipleLinearRegressionFactorsInput.emit(self.spot_attributes, self.ratio)
 
 
     ################
