@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QTab
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
+from controllers.signals import signals
 from model.settings.default_filenames import raw_data_default_filename
 from utils.csv_utils import export_csv, request_output_csv_filename_from_user, csv_exported_successfully_popup
 from utils.gui_utils import create_figure_widget
@@ -28,6 +29,8 @@ class BasicDataCheckWidget(QWidget):
         self.data_view.ratio_radiobox_widget.ratioChanged.connect(self.on_ratio_changed)
 
         self.graph_widget = self._create_graphs_to_check_data()
+
+        signals.dataRecalculated.connect(self.update_data)
 
         layout = QHBoxLayout()
 
@@ -90,6 +93,7 @@ class BasicDataCheckWidget(QWidget):
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         ratio = self.data_view.get_current_ratio()
+
         if current_item is None or current_item.is_sample:
             self.create_raw_delta_time_plot(ratio)
         else:
@@ -115,6 +119,10 @@ class BasicDataCheckWidget(QWidget):
                                                       color=sample.colour)
 
         self.canvas.draw()
+
+    def update_data(self):
+        self.update_table()
+        self.update_graphs()
 
     #############
     ### Table ###
@@ -201,6 +209,11 @@ class BasicDataCheckWidget(QWidget):
 
         self.basic_data_table.resizeColumnsToContents()
 
+    def update_table(self):
+        self.basic_data_table.clearContents()
+        self._populate_basic_table()
+
+
     ################
     ### Plotting ###
     ################
@@ -274,3 +287,12 @@ class BasicDataCheckWidget(QWidget):
         axis.set(xlim=(-9000, 9000), ylim=(-9000, 9000))
         axis.set_aspect('equal')
         self.fig.tight_layout()
+
+    def update_graphs(self):
+        print("basic update")
+        ratio = self.data_view.get_current_ratio()
+
+        self.raw_delta_time_axis.clear()
+        self.create_raw_delta_time_plot(ratio)
+
+        self.canvas.draw()

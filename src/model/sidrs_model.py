@@ -13,8 +13,7 @@ from model.get_data_from_import import get_analytical_conditions_data_from_asc_f
 from model.sample import Sample
 from model.settings.colours import colour_list, q_colour_list
 from model.settings.methods_from_isotopes import list_of_methods
-from model.spot import Spot, calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers, \
-    exclude_cycle_information_update
+from model.spot import Spot
 from model.spot import SpotAttribute
 from utils.csv_utils import write_csv_output
 from utils.general_utils import find_longest_common_prefix_index, split_cameca_data_filename
@@ -301,18 +300,15 @@ class SidrsModel:
     def recalculate_data_with_cycles_changed(self):
         primary_rm = self.get_primary_reference_material()
         samples = self.get_samples()
-        for sample in samples:
-            for spot in sample.spots:
-                spot.mean_two_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
-                    spot)
-                spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, self.element)
+        self.calculation_results.calculate_raw_delta_with_changed_cycle_data(samples, self.element)
 
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
                                                                               self.element, self.material)
+        signals.dataRecalculated.emit()
 
     def remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
-        spot.cycle_flagging_information = exclude_cycle_information_update(spot, cycle_number, is_flagged, ratio)
+        spot.cycle_flagging_information[ratio][cycle_number] = is_flagged
 
     def recalculate_data_with_drift_correction_changed(self, ratio, drift_correction_type):
         self.drift_correction_type_by_ratio[ratio] = drift_correction_type

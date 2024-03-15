@@ -210,7 +210,7 @@ class CycleDataDialog(QDialog):
         mean, two_st_error = spot.mean_two_st_error_isotope_ratios[self.ratio]
         self.ratio_axis.axhline(y=mean)
 
-        (outlier_minimum, outlier_maximum) = spot.outlier_bounds[self.ratio]
+        (outlier_minimum, outlier_maximum) = spot.outlier_bounds_by_ratio[self.ratio]
         outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
         outlier_rectangle.set_color("lightblue")
         self.ratio_axis.add_patch(outlier_rectangle)

@@ -5,6 +5,10 @@ import scipy
 
 
 def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed):
+    if len(data) == 0:
+        raise Exception("No cycle data input")
+    elif len(data) == 1:
+        return data, 0, len(data), [], ()
     medcouple = stattools.medcouple(data)
     Q1 = np.percentile(data, 25, interpolation='midpoint')
     Q3 = np.percentile(data, 75, interpolation='midpoint')

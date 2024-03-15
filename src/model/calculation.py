@@ -34,6 +34,13 @@ class CalculationResults:
                     spot.number_of_count_measurements, spot.raw_isotope_ratios)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element)
 
+    def calculate_raw_delta_with_changed_cycle_data(self, samples, element):
+        for sample in samples:
+            for spot in sample.spots:
+                spot.mean_two_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
+                    spot)
+                spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element)
+
     def calculate_data_from_drift_correction_onwards(self, primary_rm, method, samples, drift_correction_type_by_ratio,
                                                      element, material):
         self.drift_correction_process(primary_rm, method, samples, drift_correction_type_by_ratio)
@@ -307,6 +314,26 @@ def get_primary_reference_material_external_values_by_ratio(ratio, element, mate
     key = (element, material, primary_reference_material.name)
     return rm_settings.reference_material_dictionary[key][ratio]
 
+
+def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(spot):
+    mean_two_st_error_isotope_ratios = {}
+    for ratio in spot.raw_isotope_ratios.keys():
+        list_of_cycle_exclusion_information = spot.cycle_flagging_information[ratio]
+        raw_ratio_list = spot.raw_isotope_ratios[ratio]
+        raw_ratio_list_exclude = []
+        for i, boolean in enumerate(list_of_cycle_exclusion_information):
+            if not boolean:
+                raw_ratio_list_exclude.append(i)
+
+        raw_ratio_list = [raw_ratio_list[i] for i in raw_ratio_list_exclude]
+
+        mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
+                                                                                                    0)
+        two_st_error = 2 * st_dev / math.sqrt(n)
+
+        mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
+
+    return mean_two_st_error_isotope_ratios
 
 class RatioResults:
     def __init__(self):

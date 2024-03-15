@@ -77,30 +77,6 @@ class Spot:
             0].number_of_measurements
 
 
-def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(spot):
-    mean_two_st_error_isotope_ratios = {}
-    for ratio in spot.raw_isotope_ratios.keys():
-        list_of_cycle_exclusion_information = spot.cycle_flagging_information[ratio]
-        raw_ratio_list = spot.raw_isotope_ratios[ratio]
-        raw_ratio_list_exclude = []
-        for i, boolean in enumerate(list_of_cycle_exclusion_information):
-            if not boolean:
-                raw_ratio_list_exclude.append(i)
-
-        raw_ratio_list = [raw_ratio_list[i] for i in raw_ratio_list_exclude]
-
-        mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
-                                                                                                    0)
-        two_st_error = 2 * st_dev / math.sqrt(n)
-
-        mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
-
-    return mean_two_st_error_isotope_ratios
-
-
-def exclude_cycle_information_update(spot, cycle_number, is_flagged, ratio):
-    spot.cycle_flagging_information[ratio][cycle_number] = is_flagged
-
 
 from enum import Enum
 
