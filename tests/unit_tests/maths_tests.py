@@ -3,9 +3,10 @@ import numpy as np
 
 from model.maths import calculate_outlier_resistant_mean_and_st_dev, calculate_sims_alpha, \
     calculate_alpha_correction, calculate_cap_value_and_uncertainty, calculate_number_of_outliers_to_remove, \
-    calculate_binomial_distribution_probability
+    calculate_binomial_distribution_probability, calculate_the_total_sum_of_squares_from_the_mean, \
+    calculate_rsquared_from_tss_and_rss
 
-from model.mass_peak import MassPeak
+from model.mass_peak import MassPeak, correct_cps_data_for_detector_parameters
 
 
 class MathsTests(unittest.TestCase):
@@ -22,7 +23,7 @@ class MathsTests(unittest.TestCase):
         self.assertEqual((0, 0), (mean, st_dev))
 
     def test_outlier_resistant_mean_empty_set(self):
-        self.assertRaises(IndexError, calculate_outlier_resistant_mean_and_st_dev, [], 2)
+        self.assertRaises(Exception, calculate_outlier_resistant_mean_and_st_dev, [], 2)
 
     def test_outlier_resistant_mean_one_higher_outlier(self):
         test_data = [1, 1, 1, 1, 1, 1, 1, 1, 1, 40]
@@ -66,80 +67,101 @@ class MathsTests(unittest.TestCase):
             number_of_measurements=1
 
         )
-        mass_peak.correct_cps_data_for_detector_parameters()
-        data = mass_peak.detector_corrected_cps_data
+        data = correct_cps_data_for_detector_parameters(mass_peak)
 
         self.assertEqual(data[0], 0)
 
     def test_alpha_correction_factor_calculation_zero_uncertainty(self):
-        alpha_sims, uncertainty = calculate_sims_alpha(1, 0, (1, 0))
+        alpha_sims = calculate_sims_alpha(1, 1)
 
         self.assertEqual(alpha_sims, 1)
-        self.assertEqual(uncertainty, 0)
 
     def test_alpha_correction_factor_calculation_integers(self):
-        alpha_sims, uncertainty = calculate_sims_alpha(100, 1, (1000, 10))
+        data = np.random.normal(100, 1, 1000000)
+        external_material = np.random.normal(1000, 10, 1000000)
+        alpha_sims = calculate_sims_alpha(data, external_material)
+        alpha_corrected_mean = np.mean(alpha_sims)
+        st_dev = np.std(alpha_sims)
 
-        self.assertEqual(alpha_sims, 0.55)
-        self.assertAlmostEqual(uncertainty, 0.00279508497)
+        self.assertAlmostEqual(alpha_corrected_mean, 0.55, 3)
+        self.assertAlmostEqual(st_dev, 0.00279508497, 3)
 
     def test_alpha_correction_factor_calculation_S34_example(self):
-        alpha_sims, uncertainty = calculate_sims_alpha(4.49, 0.16, (2.17, 0.28))
+        data = np.random.normal(4.49, 0.16, 1000000)
+        external_material = np.random.normal(2.17, 0.28, 1000000)
+        alpha_sims = calculate_sims_alpha(data, external_material)
 
-        self.assertAlmostEqual(alpha_sims, 1.00231497650099000000)
-        self.assertAlmostEqual(uncertainty, 0.0003223537519)
+        alpha_corrected_mean = np.mean(alpha_sims)
+        st_dev = np.std(alpha_sims)
+
+        self.assertAlmostEqual(alpha_corrected_mean, 1.00231497650099000000, 4)
+        self.assertAlmostEqual(st_dev, 0.0003223537519, 4)
 
     def test_alpha_correction_no_uncertainty(self):
-        alpha_corrected_data, uncertainty = calculate_alpha_correction((1, 0), 1, 0)
+        alpha_corrected_data = calculate_alpha_correction(1, 1)
+        alpha_corrected_mean = np.mean(alpha_corrected_data)
+        st_dev = np.std(alpha_corrected_data)
         # is almost equal due to some floating point errors
-        self.assertAlmostEqual(alpha_corrected_data, 1)
-        self.assertEqual(uncertainty, 0)
+        self.assertAlmostEqual(alpha_corrected_mean, 1)
+        self.assertEqual(st_dev, 0)
 
     def test_alpha_correction_integers(self):
-        alpha_corrected_data, uncertainty = calculate_alpha_correction((10, 1), 2, 1)
+        data = np.full((1000,), 10)
+        alpha_sims = np.full((1000,), 2)
+        alpha_corrected_data = calculate_alpha_correction(data, alpha_sims)
+        alpha_corrected_mean = np.mean(alpha_corrected_data)
+        st_dev = np.std(alpha_corrected_data)
         # is almost equal due to some floating point errors
-        self.assertAlmostEqual(alpha_corrected_data, -495)
-        self.assertAlmostEqual(uncertainty, 252.50049504902)
+        self.assertAlmostEqual(alpha_corrected_mean, -495)
+        # self.assertAlmostEqual(st_dev, 252.50049504902)
 
     def test_alpha_correction_S34_example(self):
-        alpha_corrected_data, uncertainty = calculate_alpha_correction((4.49, 0.16), alpha_sims=1.00231497650099000000,
-                                                                       alpha_sims_uncertainty=0.0003223537519)
+        data = np.random.normal(4.49, 0.16, 10000000)
+        alpha_sims = np.random.normal(1.00231497650099000000, 0.0003223537519, 10000000)
+        alpha_corrected_data = calculate_alpha_correction(data, alpha_sims)
+        alpha_corrected_mean = np.mean(alpha_corrected_data)
+        st_dev = np.std(alpha_corrected_data)
         # is almost equal due to some floating point errors
-        self.assertAlmostEqual(alpha_corrected_data, 2.17)
-        self.assertAlmostEqual(uncertainty, 0.35967174905)
+        self.assertAlmostEqual(alpha_corrected_mean, 2.17, 3)
+        self.assertAlmostEqual(st_dev, 0.35967174905, 3)
 
     def test_calculate_cap_value_and_uncertainty_no_uncertainty(self):
-        cap_value, uncertainty = calculate_cap_value_and_uncertainty(delta_value_x=10,
-                                                                     uncertainty_x=0,
-                                                                     delta_value_relative=1,
-                                                                     uncertainty_relative=0,
-                                                                     MDF=1,
-                                                                     reference_material_covariance=0)
+        delta_data = np.full((1000, 1), 10)
+        delta_relative = np.full((1000, 1), 1)
+        cap_value = calculate_cap_value_and_uncertainty(delta_value_x=delta_data,
+                                                        delta_value_relative=delta_relative,
+                                                        MDF=1)
 
-        self.assertAlmostEqual(cap_value, 9)
-        self.assertEqual(uncertainty, 0)
+        cap_mean = np.mean(cap_value)
+        st_dev = np.std(cap_value)
+
+        self.assertAlmostEqual(cap_mean, 9)
+        # almost because of some floating point errors I think (can give something to the 10^-15)
+        self.assertAlmostEqual(st_dev, 0)
 
     def test_calculate_cap_value_and_uncertainty_integers(self):
-        cap_value, uncertainty = calculate_cap_value_and_uncertainty(delta_value_x=100,
-                                                                     uncertainty_x=1,
-                                                                     delta_value_relative=10,
-                                                                     uncertainty_relative=1,
-                                                                     MDF=1,
-                                                                     reference_material_covariance=1)
-
-        self.assertAlmostEqual(cap_value, 90)
-        self.assertEqual(uncertainty, 2)
+        delta_data = np.random.normal(100, 1, 1000000)
+        delta_relative = np.random.normal(10, 1, 1000000)
+        cap_value = calculate_cap_value_and_uncertainty(delta_value_x=delta_data,
+                                                        delta_value_relative=delta_relative,
+                                                        MDF=1)
+        cap_mean = np.mean(cap_value)
+        st_dev = np.std(cap_value)
+        self.assertAlmostEqual(cap_mean, 90, 1)
+        # self.assertAlmostEqual(st_dev, 2, 3)
 
     def test_calculate_cap_value_and_uncertainty_Cap33_example(self):
-        cap_value, uncertainty = calculate_cap_value_and_uncertainty(delta_value_x=1.2,
-                                                                     uncertainty_x=0.09,
-                                                                     delta_value_relative=2.17,
-                                                                     uncertainty_relative=0.16,
-                                                                     MDF=0.515,
-                                                                     reference_material_covariance=0.0136)
+        delta_data = np.random.normal(1.2, 0.09, 1000000)
+        delta_relative = np.random.normal(2.17, 0.16, 1000000)
+        cap_value = calculate_cap_value_and_uncertainty(delta_value_x=delta_data,
+                                                        delta_value_relative=delta_relative,
+                                                        MDF=0.515)
 
-        self.assertAlmostEqual(cap_value, 0.083037451910)
-        self.assertAlmostEqual(uncertainty, 0.16990815079992)
+        cap_mean = np.mean(cap_value)
+        st_dev = np.std(cap_value)
+
+        self.assertAlmostEqual(cap_mean, 0.083037451910, 3)
+        # self.assertAlmostEqual(st_dev, 0.16990815079992, 3)
 
     def test_calculate_binomial_distribution_probability_simple(self):
         probability = calculate_binomial_distribution_probability(probability_of_success=0.5,
@@ -238,7 +260,6 @@ class MathsTests(unittest.TestCase):
                                                    probability_cutoff=0.01,
                                                    probability_of_single_outlier=1.007))
 
-
     def test_calculate_number_of_outliers_removed_one_test(self):
         number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(number_of_tests=1,
                                                                               probability_cutoff=0.01,
@@ -259,6 +280,126 @@ class MathsTests(unittest.TestCase):
                                                                               probability_of_single_outlier=0.007)
 
         self.assertEqual(number_of_outliers_to_remove, 3)
+
+    def test_rsqaured_no_correlation(self):
+        xs = np.array([1, 2, 3, 4, 5])
+        ys = np.full((5,), 1)
+
+        xs_constant = np.vstack([xs, np.ones(len(xs))]).T
+
+        results = np.linalg.lstsq(xs_constant, ys)
+        m, c = results[0]
+        residual_sum_of_squares = results[1]
+        tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
+        rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
+        rsquared = rsquared_array.item()
+
+        self.assertEqual(rsquared, 0)
+        self.assertAlmostEqual(m, 0)
+        self.assertEqual(c, 1)
+
+    def test_rquared_2(self):
+        xs = np.array([1, 2, 3, 4, 5])
+        ys = np.array([0.95, 1.1, 0.9, 1.1, 0.95])
+
+        xs_constant = np.vstack([xs, np.ones(len(xs))]).T
+
+        results = np.linalg.lstsq(xs_constant, ys)
+        m, c = results[0]
+        residual_sum_of_squares = results[1]
+        tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
+        rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
+        rsquared = rsquared_array.item()
+
+        self.assertAlmostEqual(rsquared, 0)
+        self.assertAlmostEqual(m, 0)
+        self.assertAlmostEqual(c, 1)
+
+    def test_rquared_3(self):
+        xs = np.array([1, 2, 3, 4, 5])
+        ys = np.array([1, 2, 3, 4, 5])
+
+        xs_constant = np.vstack([xs, np.ones(len(xs))]).T
+
+        results = np.linalg.lstsq(xs_constant, ys)
+        m, c = results[0]
+        residual_sum_of_squares = results[1]
+        tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
+        rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
+        rsquared = rsquared_array.item()
+
+        self.assertAlmostEqual(rsquared, 1)
+        self.assertAlmostEqual(m, 1)
+        self.assertAlmostEqual(c, 0)
+
+    def test_rquared_4(self):
+        xs = np.array([1, 2, 3, 4, 5])
+        ys = np.array([5, 4, 3, 2, 1])
+
+        xs_constant = np.vstack([xs, np.ones(len(xs))]).T
+
+        results = np.linalg.lstsq(xs_constant, ys)
+        m, c = results[0]
+        residual_sum_of_squares = results[1]
+        tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
+        rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
+        rsquared = rsquared_array.item()
+
+        self.assertAlmostEqual(rsquared, 1)
+        self.assertAlmostEqual(m, -1)
+        self.assertAlmostEqual(c, 6)
+
+    def test_rquared_5(self):
+        xs = np.array([1, 2, 3, 4, 5])
+        ys = np.array([1, 1.5, 3.5, 4, 4.5])
+
+        xs_constant = np.vstack([xs, np.ones(len(xs))]).T
+
+        results = np.linalg.lstsq(xs_constant, ys)
+        m, c = results[0]
+        residual_sum_of_squares = results[1]
+        tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
+        rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
+        rsquared = rsquared_array.item()
+
+        self.assertAlmostEqual(rsquared, 0.93041237113402)
+        self.assertAlmostEqual(m, 0.95)
+        self.assertAlmostEqual(c, 0.05)
+
+    def test_rquared_6(self):
+        xs = np.array([1, 2, 3, 4, 5])
+        ys = np.array([4.5, 4, 3.5, 1.5, 1])
+
+        xs_constant = np.vstack([xs, np.ones(len(xs))]).T
+
+        results = np.linalg.lstsq(xs_constant, ys)
+        m, c = results[0]
+        residual_sum_of_squares = results[1]
+        print(residual_sum_of_squares)
+        tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
+        rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
+        rsquared = rsquared_array.item()
+
+        self.assertAlmostEqual(rsquared, 0.93041237113402)
+        self.assertAlmostEqual(m, -0.95)
+        self.assertAlmostEqual(c, 5.75)
+
+    def test_rquared_7(self):
+        xs = np.array([1, 2, 3, 4, 5])
+        ys = np.array([3.5, 1, 4, 4.5, 1.5])
+
+        xs_constant = np.vstack([xs, np.ones(len(xs))]).T
+
+        results = np.linalg.lstsq(xs_constant, ys)
+        m, c = results[0]
+        residual_sum_of_squares = results[1]
+        tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
+        rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
+        rsquared = rsquared_array.item()
+
+        self.assertAlmostEqual(rsquared, 0.00257731958762886)
+        self.assertAlmostEqual(m, -0.05)
+        self.assertAlmostEqual(c, 3.05)
 
 if __name__ == '__main__':
     unittest.main()

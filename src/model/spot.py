@@ -45,7 +45,7 @@ class Spot:
         self.secondary_ion_yield = None
         self.mass_peaks = {}
         self.raw_isotope_ratios = {}
-        self.mean_two_st_error_isotope_ratios = {}
+        self.mean_st_dev_isotope_ratios = {}
         self.outliers_removed_from_raw_data = {}
         self.outlier_bounds = {}
         self.cycle_flagging_information = {}

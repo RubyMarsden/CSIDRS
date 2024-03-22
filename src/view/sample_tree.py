@@ -131,12 +131,14 @@ class SampleTreeWidget(QWidget):
         drift_correction_type_by_ratio = self.data_processing_dialog.model.drift_correction_type_by_ratio
         element = self.data_processing_dialog.model.element
         material = self.data_processing_dialog.model.material
+        montecarlo_number = self.data_processing_dialog.model.montecarlo_number
         self.data_processing_dialog.model.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm,
                                                                                                            method,
                                                                                                            samples,
                                                                                                            drift_correction_type_by_ratio,
                                                                                                            element,
-                                                                                                           material)
+                                                                                                           material,
+                                                                                                           montecarlo_number)
         signals.dataRecalculated.emit()
 
 

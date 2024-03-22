@@ -110,7 +110,7 @@ class BasicDataCheckWidget(QWidget):
                     if ratio.has_delta:
                         y = spot.not_corrected_deltas[ratio][0]
                     else:
-                        y = spot.mean_two_st_error_isotope_ratios[ratio][0]
+                        y = spot.mean_st_dev_isotope_ratios[ratio][0]
                     if spot == current_spot:
                         self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4, color="yellow")
 
@@ -141,8 +141,9 @@ class BasicDataCheckWidget(QWidget):
                 column_headers.append(ratio.delta_name())
             else:
                 column_headers.append(ratio.name())
-            ratio_uncertainty_name = "uncertainty"
-            column_headers.append(ratio_uncertainty_name)
+            ratio_positive_uncertainty_name = "+ uncertainty"
+            ratio_negative_uncertainty_name = "- uncertainty"
+            column_headers.extend([ratio_positive_uncertainty_name, ratio_negative_uncertainty_name])
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Relative distance to centre"])
 
@@ -179,16 +180,23 @@ class BasicDataCheckWidget(QWidget):
 
                 for ratio in method.ratios:
                     if ratio.has_delta:
-                        value, uncertainty = spot.not_corrected_deltas[ratio]
+                        values = spot.not_corrected_deltas[ratio]
+                        value = np.mean(values)
+                        uncertainty = np.std(values)
+                        neg_uncertainty = value - np.quantile(values, 0.25)
+                        pos_uncertainty = np.quantile(values, 0.75) - value
                         value_format = ".3f"
                         uncertainty_format = ".4f"
                     else:
-                        value, uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
+                        value, uncertainty = spot.mean_st_dev_isotope_ratios[ratio]
+                        neg_uncertainty = uncertainty
+                        pos_uncertainty = uncertainty
                         value_format = ".5f"
                         uncertainty_format = ".6f"
 
                     row_items.append(format(value, value_format))
-                    row_items.append(format(uncertainty, uncertainty_format))
+                    row_items.append(format(pos_uncertainty, uncertainty_format))
+                    row_items.append(format(neg_uncertainty, uncertainty_format))
 
                 row_items.append(str(spot.dtfa_x))
                 row_items.append(str(spot.dtfa_y))
@@ -250,8 +258,8 @@ class BasicDataCheckWidget(QWidget):
 
                 else:
                     self.raw_delta_time_axis.set_title("Raw " + ratio.name() + " against time.")
-                    ys.append(spot.mean_two_st_error_isotope_ratios[ratio][0])
-                    dys.append(spot.mean_two_st_error_isotope_ratios[ratio][1])
+                    ys.append(spot.mean_st_dev_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_st_dev_isotope_ratios[ratio][1])
 
                     self.raw_delta_time_axis.set_ylabel(ratio.name())
                     self.raw_delta_time_axis.set_ylabel(ratio.name())

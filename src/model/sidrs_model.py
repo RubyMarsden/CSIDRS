@@ -21,6 +21,7 @@ from utils.general_utils import find_longest_common_prefix_index, split_cameca_d
 
 class SidrsModel:
     def __init__(self):
+        self.montecarlo_number = 1000000
         self.data = {}
         self.analytical_condition_data = None
         self.samples = []
@@ -154,10 +155,10 @@ class SidrsModel:
         samples = self.get_samples()
         primary_rm = self.get_primary_reference_material()
 
-        self.calculation_results.calculate_raw_delta_values(samples, self.method, self.element)
+        self.calculation_results.calculate_raw_delta_values(samples, self.method, self.element, self.montecarlo_number)
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
-                                                                              self.element, self.material)
+                                                                              self.element, self.material, self.montecarlo_number)
 
         signals.dataRecalculated.emit()
 
@@ -170,7 +171,7 @@ class SidrsModel:
             if ratio.has_delta:
                 [value, uncertainty] = spot.not_corrected_deltas[ratio]
             else:
-                [value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                [value, uncertainty] = spot.mean_st_dev_isotope_ratios[ratio]
             values.append(value)
             uncertainties.append(uncertainty)
 
@@ -304,7 +305,7 @@ class SidrsModel:
 
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
-                                                                              self.element, self.material)
+                                                                              self.element, self.material, self.montecarlo_number)
         signals.dataRecalculated.emit()
 
     def remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
@@ -316,7 +317,7 @@ class SidrsModel:
         samples = self.get_samples()
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
-                                                                              self.element, self.material)
+                                                                              self.element, self.material, self.montecarlo_number)
         signals.dataRecalculated.emit()
 
     def clear_all_data_and_methods(self):
@@ -396,11 +397,14 @@ class SidrsModel:
                 row = [str(sample.name + " " + spot.id)]
 
                 for ratio in method.ratios:
-                    ratio_value, ratio_uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
+                    ratio_value, ratio_uncertainty = spot.mean_st_dev_isotope_ratios[ratio]
                     row.append(ratio_value)
-                    row.append(ratio_uncertainty)
+                    ratio_uncertainty_2 = ratio_uncertainty * 2
+                    row.append(ratio_uncertainty_2)
                     if ratio.has_delta:
-                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio]
+                        delta_data = spot.not_corrected_deltas[ratio]
+                        delta = np.mean(delta_data)
+                        delta_uncertainty = (np.std(delta_data) * 2)
                         row.append(delta)
                         row.append(delta_uncertainty)
 
@@ -453,7 +457,7 @@ class SidrsModel:
                         row.append(corrected_ratio)
                         row.append(corrected_ratio_uncertainty)
 
-                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_st_dev_isotope_ratios[ratio]
                     row.append(uncorrected_ratio)
                     row.append(uncorrected_ratio_uncertainty)
 

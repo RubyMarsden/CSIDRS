@@ -78,7 +78,7 @@ class ResidualsDialog(QDialog):
 
         layout.addWidget(summary_explanation_text)
 
-        summary = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].statsmodel_result.summary()
+        summary = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].linear_regression_result.summary()
         summary_iterable = str(summary).splitlines()
         self.summary_line_labels = []
         for line in summary_iterable:
@@ -108,7 +108,7 @@ class ResidualsDialog(QDialog):
         self.residuals_axis.set_title("Residuals", loc="left")
         self.residuals_axis.spines['top'].set_visible(False)
         self.residuals_axis.spines['right'].set_visible(False)
-        predicted_values = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].statsmodel_result.predict()
+        predicted_values = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].linear_regression_result.predict()
         true_values = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].get_primary_rm_deltas()
         residuals = true_values - predicted_values
 
@@ -130,7 +130,7 @@ class ResidualsDialog(QDialog):
         self.reallocate_label_text()
 
     def reallocate_label_text(self):
-        summary = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].statsmodel_result.summary()
+        summary = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].linear_regression_result.summary()
         summary_iterable = str(summary).splitlines()
 
         for (q_widget, line) in zip(self.summary_line_labels, summary_iterable):

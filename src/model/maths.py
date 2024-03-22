@@ -2,6 +2,8 @@ import math
 import numpy as np
 import statsmodels.stats.stattools as stattools
 import scipy
+import numpy.typing as npt
+from typing import Any
 
 
 def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed):
@@ -40,12 +42,9 @@ def calculate_outlier_resistant_mean_and_st_dev(data, number_of_outliers_allowed
     return np.mean(clean_data), np.std(clean_data), len(clean_data), removed_data, outlier_bounds
 
 
-def calculate_delta_from_ratio(mean, two_st_error, standard_ratio):
+def calculate_delta_from_ratio(mean: npt.ArrayLike, standard_ratio: npt.ArrayLike) -> npt.NDArray[Any]:
     delta = ((mean / standard_ratio) - 1) * 1000
-    # Currently the calculation of uncertainty propagation uses a 'fixed' standard ratio, i.e. it ignores the
-    # uncertainty in the standard ratio
-    delta_uncertainty = two_st_error * 1000 / standard_ratio
-    return delta, delta_uncertainty
+    return delta
 
 
 def vector_length_from_origin(x: int, y: int):
@@ -53,13 +52,14 @@ def vector_length_from_origin(x: int, y: int):
     return vector_length
 
 
-def drift_correction(x, y, dy, drift_coefficient, zero_time):
+def drift_correction(x: float, y: npt.NDArray[Any], drift_coefficient: npt.NDArray[Any], zero_time: float) -> \
+        npt.NDArray[Any]:
     """
     Drift correction is independent of the y-intercept of the linear drift equation
     """
     correction = (x - zero_time) * drift_coefficient
     y_corrected = y - correction
-    return y_corrected, dy
+    return y_corrected
 
 
 def calculate_error_weighted_mean_and_st_dev(values, errors):
@@ -83,28 +83,20 @@ def calculate_error_weighted_mean_and_st_dev(values, errors):
     return weighted_mean, weighted_st_dev
 
 
-def calculate_sims_alpha(primary_reference_material_mean_delta, primary_reference_material_st_dev,
-                         externally_measured_primary_reference_value_and_uncertainty):
-    externally_measured_rm_value, uncertainty = externally_measured_primary_reference_value_and_uncertainty
+def calculate_sims_alpha(primary_reference_material_mean_delta: npt.NDArray[Any],
+                         externally_measured_primary_reference_value: npt.NDArray[Any]) -> npt.NDArray[Any]:
     alpha_sims = (1 + (primary_reference_material_mean_delta / 1000)) / \
-                 (1 + (externally_measured_rm_value / 1000))
+                 (1 + (externally_measured_primary_reference_value / 1000))
 
-    alpha_sims_uncertainty = math.sqrt(((1 / (1000 + externally_measured_rm_value)) ** 2) * (
-            primary_reference_material_st_dev ** 2) + ((((-1000 - primary_reference_material_mean_delta) / (
-            (1000 + externally_measured_rm_value) ** 2)) ** 2) * (uncertainty ** 2)))
-
-    return alpha_sims, alpha_sims_uncertainty
+    return alpha_sims
 
 
-def calculate_alpha_correction(data, alpha_sims, alpha_sims_uncertainty):
-    data_point, uncertainty = data
+def calculate_alpha_correction(data: npt.NDArray[Any], alpha_sims: npt.NDArray[Any]) -> npt.NDArray[Any]:
     # from kita et al, 2009
-    alpha_corrected_data = (((1 + (data_point / 1000)) / alpha_sims) - 1) * 1000
+    alpha_corrected_data = (((1 + (data / 1000)) / alpha_sims) - 1) * 1000
 
-    alpha_corrected_uncertainty = math.sqrt(
-        (((-1000 - data_point) / (alpha_sims ** 2)) ** 2) * (alpha_sims_uncertainty ** 2) + ((1 / alpha_sims) ** 2) * (
-                uncertainty ** 2))
-    return alpha_corrected_data, alpha_corrected_uncertainty
+    return alpha_corrected_data
+
 
 def calculate_binomial_distribution_probability(probability_of_success, number_of_successes, number_of_tests):
     probability_of_k_successful_tests = scipy.stats.binom.pmf(k=number_of_successes, n=number_of_tests,
@@ -133,19 +125,25 @@ def calculate_number_of_outliers_to_remove(number_of_tests, probability_cutoff, 
     return number_of_outliers_to_automatically_remove
 
 
-def calculate_cap_value_and_uncertainty(delta_value_x, uncertainty_x, delta_value_relative, uncertainty_relative, MDF,
-                                        reference_material_covariance):
-    # from LaFlamme et al, 2016 where delta_value_x is the delta value of interest (either 33S or 36S) and
-    # delta_value_relative is 34S which 33S and 36S are compared to. However, the maths formula does not specify
-    # which delta values are of interest as it could be used for other isotope systems in future.
-
+def calculate_cap_value_and_uncertainty(delta_value_x: npt.NDArray[Any], delta_value_relative: npt.NDArray[Any],
+                                        MDF: float) -> npt.NDArray[Any]:
     cap = delta_value_x - 1000 * ((((delta_value_relative / 1000) + 1) ** MDF) - 1)
 
-    # This uncertainty calculation includes a covariance term as in LaFlamme et al, 2016, but otherwise is from
-    # Farquher et al, 2013.
-    cap_uncertainty = math.sqrt((uncertainty_x ** 2) + (
-            (uncertainty_relative ** 2) * ((MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF))) ** 2)) + (
-                                        2 * reference_material_covariance * (
-                                        MDF * ((1 + (delta_value_relative / 1000)) ** (-1 + MDF)))))
+    return cap
 
-    return cap, cap_uncertainty
+
+def calculate_the_total_sum_of_squares_from_the_mean(values: npt.NDArray[Any]) -> npt.NDArray[Any]:
+    # for each column take the mean and then for each value find the square difference and sum
+    means = np.mean(values, axis=0)
+    difference_matrix = (means - values)
+    square_difference_matrix = difference_matrix ** 2
+    # return a value for each column
+    total_sum_of_squares_from_the_mean = np.sum(square_difference_matrix, axis=0)
+    return total_sum_of_squares_from_the_mean
+
+
+def calculate_rsquared_from_tss_and_rss(tss: npt.NDArray[Any], rss: npt.NDArray[Any]) -> npt.NDArray[Any]:
+    r_sq = 1 - (rss / tss)
+    print(r_sq.shape)
+    rsquared = np.where(tss == 0, 0, r_sq)
+    return rsquared
