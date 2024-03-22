@@ -215,7 +215,10 @@ def calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number):
         mean_montecarlo = np.random.normal(mean, st_dev, montecarlo_number)
         if ratio.has_delta:
             standard_ratio_value, uncertainty = standard_ratios[ratio]
-            standard_ratio_value_montecarlo = np.random.normal(loc=standard_ratio_value, scale=uncertainty,
+            if uncertainty == 0:
+                standard_ratio_value_montecarlo = np.full((montecarlo_number,), standard_ratio_value)
+            else:
+                standard_ratio_value_montecarlo = np.random.normal(loc=standard_ratio_value, scale=uncertainty,
                                                                size=montecarlo_number)
             delta_montecarlo = calculate_delta_from_ratio(mean_montecarlo, standard_ratio_value_montecarlo)
             not_corrected_deltas[ratio] = delta_montecarlo

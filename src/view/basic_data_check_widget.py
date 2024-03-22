@@ -250,24 +250,28 @@ class BasicDataCheckWidget(QWidget):
             dys = []
             for spot in sample.spots:
                 if ratio.has_delta:
-                    self.raw_delta_time_axis.set_title("Raw " + ratio.delta_name() + " against time.")
-                    ys.append(spot.not_corrected_deltas[ratio][0])
-                    dys.append(spot.not_corrected_deltas[ratio][1])
+                    y = np.mean(spot.not_corrected_deltas[ratio])
+                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    ys.append(y)
+                    dys.append(dy)
 
-                    self.raw_delta_time_axis.set_ylabel(ratio.delta_name())
+                    axis_title = "Raw " + ratio.delta_name() + " against time."
+                    axis_name = ratio.delta_name()
 
                 else:
-                    self.raw_delta_time_axis.set_title("Raw " + ratio.name() + " against time.")
                     ys.append(spot.mean_st_dev_isotope_ratios[ratio][0])
                     dys.append(spot.mean_st_dev_isotope_ratios[ratio][1])
 
-                    self.raw_delta_time_axis.set_ylabel(ratio.name())
-                    self.raw_delta_time_axis.set_ylabel(ratio.name())
+                    axis_name = ratio.name()
+                    axis_title = "Raw " + ratio.name() + " against time."
 
             self.raw_delta_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", markersize=4, color=sample.colour)
 
+        self.raw_delta_time_axis.set_title(axis_title)
         self.raw_delta_time_axis.set_xlabel("Time")
         self.raw_delta_time_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+        self.raw_delta_time_axis.set_ylabel(axis_name)
 
         self.fig.tight_layout()
 

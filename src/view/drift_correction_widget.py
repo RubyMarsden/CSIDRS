@@ -85,13 +85,23 @@ class DriftCorrectionWidget(QWidget):
         self.r_squared_text.setWordWrap(True)
         self.r_squared_text.setFont(font)
 
+        self.r_squared_uncertainty_range = QLabel()
+        self.r_squared_uncertainty_range.setWordWrap(True)
+        self.r_squared_uncertainty_range.setFont(font)
+
         self.linear_gradient_value_text = QLabel()
         self.linear_gradient_value_text.setWordWrap(True)
         self.linear_gradient_value_text.setFont(font)
 
+        self.linear_gradient_uncertainty_text = QLabel()
+        self.linear_gradient_uncertainty_text.setWordWrap(True)
+        self.linear_gradient_uncertainty_text.setFont(font)
+
         info_layout.addWidget(section_title, alignment=Qt.AlignTop)
         info_layout.addWidget(self.r_squared_text, alignment=Qt.AlignTop)
+        info_layout.addWidget(self.r_squared_uncertainty_range, alignment=Qt.AlignTop)
         info_layout.addWidget(self.linear_gradient_value_text, alignment=Qt.AlignTop)
+        info_layout.addWidget(self.linear_gradient_uncertainty_text, alignment=Qt.AlignTop)
 
         widget.setLayout(info_layout)
         return widget
@@ -168,11 +178,18 @@ class DriftCorrectionWidget(QWidget):
         linear_gradient_mc = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient
 
         linear_r_squared = np.mean(linear_r_squared_mc)
+        linear_r_squared_median = np.median(linear_r_squared_mc)
+        print(linear_r_squared_median)
+        linear_r_squared_st_dev = np.std(linear_r_squared_mc)
         linear_gradient = np.mean(linear_gradient_mc)
+        linear_gradient_st_dev = np.std(linear_gradient_mc)
 
         self.r_squared_text.setText("R<sup>2</sup>:\n" + format(linear_r_squared, ".3f"))
+        self.r_squared_uncertainty_range.setText("R<sup>2</sup> standard deviation:\n" + format(linear_r_squared_st_dev, ".3f"))
         self.linear_gradient_value_text.setText(
             "Gradient of calculated\nlinear drift:\n" + "{:.3e}".format(linear_gradient))
+        self.linear_gradient_uncertainty_text.setText(
+            "Gradient of calculated\nlinear drift standard deviation:\n" + "{:.3e}".format(linear_gradient_st_dev))
 
     def on_residual_button_pushed(self):
         dialog = ResidualsDialog(self.data_processing_dialog)
@@ -271,17 +288,20 @@ class DriftCorrectionWidget(QWidget):
             if ratio.has_delta:
                 if not spot.is_flagged:
                     xs.append(spot.datetime)
-                    ys.append(spot.not_corrected_deltas[ratio][0])
-                    yerrors.append(spot.not_corrected_deltas[ratio][1])
-
+                    y = np.mean(spot.not_corrected_deltas[ratio])
+                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    ys.append(y)
+                    yerrors.append(dy)
 
                 else:
                     xs_removed.append(spot.datetime)
-                    ys_removed.append(spot.not_corrected_deltas[ratio][0])
-                    yerrors_removed.append(spot.not_corrected_deltas[ratio][1])
+                    y = np.mean(spot.not_corrected_deltas[ratio])
+                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    ys_removed.append(y)
+                    yerrors_removed.append(dy)
 
+                axis_label = ratio.delta_name()
 
-                self.primary_drift_axis.set_ylabel(ratio.delta_name())
             else:
                 if not spot.is_flagged:
                     xs.append(spot.datetime)
@@ -293,7 +313,9 @@ class DriftCorrectionWidget(QWidget):
                     ys_removed.append(spot.mean_st_dev_isotope_ratios[ratio][0])
                     yerrors_removed.append(spot.mean_st_dev_isotope_ratios[ratio][1])
 
-                self.primary_drift_axis.set_ylabel(ratio.name())
+                axis_label = ratio.name()
+
+        self.primary_drift_axis.set_ylabel(axis_label)
 
         y_mean = np.mean(ys)
         y_stdev = np.std(ys)
@@ -334,13 +356,17 @@ class DriftCorrectionWidget(QWidget):
         for spot in sample.spots:
             if not spot.is_flagged:
                 dc_xs.append(spot.datetime)
-                dc_ys.append(spot.drift_corrected_data[ratio][0])
-                dc_yerrors.append(spot.drift_corrected_data[ratio][1])
+                y = np.mean(spot.drift_corrected_data[ratio])
+                dy = np.std(spot.drift_corrected_data[ratio])
+                dc_ys.append(y)
+                dc_yerrors.append(dy)
 
             else:
                 dc_xs_removed.append(spot.datetime)
-                dc_ys_removed.append(spot.drift_corrected_data[ratio][0])
-                dc_yerrors_removed.append(spot.drift_corrected_data[ratio][1])
+                y = np.mean(spot.drift_corrected_data[ratio])
+                dy = np.std(spot.drift_corrected_data[ratio])
+                dc_ys_removed.append(y)
+                dc_yerrors_removed.append(dy)
 
         dc_y_mean = np.mean(dc_ys)
         dc_y_stdev = np.std(dc_ys)
@@ -379,12 +405,17 @@ class DriftCorrectionWidget(QWidget):
                 if ratio.has_delta:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
-                        ys.append(spot.drift_corrected_data[ratio][0])
-                        yerrors.append(spot.drift_corrected_data[ratio][1])
+
+                        y = np.mean(spot.drift_corrected_data[ratio])
+                        dy = np.std(spot.drift_corrected_data[ratio])
+                        ys.append(y)
+                        yerrors.append(dy)
                     else:
                         xs_removed.append(spot.datetime)
-                        ys_removed.append(spot.drift_corrected_data[ratio][0])
-                        yerrors_removed.append(spot.drift_corrected_data[ratio][1])
+                        y = np.mean(spot.drift_corrected_data[ratio])
+                        dy = np.std(spot.drift_corrected_data[ratio])
+                        ys_removed.append(y)
+                        yerrors_removed.append(dy)
                 else:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
@@ -395,6 +426,7 @@ class DriftCorrectionWidget(QWidget):
                         ys_removed.append(spot.mean_st_dev_isotope_ratios[ratio][0])
                         yerrors_removed.append(spot.mean_st_dev_isotope_ratios[ratio][1])
 
+            print(xs)
             y_mean = np.mean(ys)
             y_stdev = np.std(ys)
             label = "Mean: " + format(y_mean, ".3f") + ", St Dev: " + format(y_stdev, ".3f")
