@@ -207,7 +207,7 @@ class CycleDataDialog(QDialog):
             else:
                 self.ratio_axis.plot(x, y, ls="", marker="o", color="navy")
 
-        mean, two_st_error = spot.mean_two_st_error_isotope_ratios[self.ratio]
+        mean, two_st_error = spot.mean_st_error_isotope_ratios[self.ratio]
         self.ratio_axis.axhline(y=mean)
 
         (outlier_minimum, outlier_maximum) = spot.outlier_bounds_by_ratio[self.ratio]

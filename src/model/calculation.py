@@ -30,14 +30,14 @@ class CalculationResults:
             for spot in sample.spots:
                 spot.secondary_ion_yield = calculate_relative_secondary_ion_yield(spot)
                 spot.raw_isotope_ratios = calculate_raw_isotope_ratios(spot.mass_peaks, method)
-                spot.mean_two_st_error_isotope_ratios, spot.outliers_removed_from_raw_data, spot.outlier_bounds_by_ratio, spot.cycle_flagging_information = calculate_mean_st_error_for_isotope_ratios(
+                spot.mean_st_error_isotope_ratios, spot.outliers_removed_from_raw_data, spot.outlier_bounds_by_ratio, spot.cycle_flagging_information = calculate_mean_st_error_for_isotope_ratios(
                     spot.number_of_count_measurements, spot.raw_isotope_ratios)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element)
 
     def calculate_raw_delta_with_changed_cycle_data(self, samples, element):
         for sample in samples:
             for spot in sample.spots:
-                spot.mean_two_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
+                spot.mean_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
                     spot)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element)
 
@@ -62,6 +62,7 @@ class CalculationResults:
             ratio_results.statsmodel_result = characterise_linear_drift(ratio, primary_rm.spots)
 
             ratio_results.drift_y_intercept, ratio_results.drift_coefficient = ratio_results.statsmodel_result.params
+
             if ratio == S36_S32:
                 ratio_results.statsmodel_curvilinear_result = characterise_curvilinear_drift(ratio, primary_rm.spots)
 
@@ -72,7 +73,7 @@ class CalculationResults:
                         if ratio.has_delta:
                             spot.drift_corrected_data[ratio] = spot.not_corrected_deltas[ratio]
                         else:
-                            spot.drift_corrected_data[ratio] = spot.mean_two_st_error_isotope_ratios[ratio]
+                            spot.drift_corrected_data[ratio] = spot.mean_st_error_isotope_ratios[ratio]
 
                     elif drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
                         drift_correction_coef = float(ratio_results.drift_coefficient)
@@ -209,22 +210,22 @@ def calculate_mean_st_error_for_isotope_ratios(number_of_count_measurements, raw
     number_of_outliers_to_remove = calculate_number_of_outliers_to_remove(number_of_count_measurements,
                                                                           PROBABILITY_CUTOFF,
                                                                           PROBABILITY_OF_SINGLE_OUTLIER)
-    mean_two_st_error_isotope_ratios = {}
+    mean_st_error_isotope_ratios = {}
     outliers_removed_from_raw_data = {}
     outlier_bounds_by_ratio = {}
     cycle_flagging_information = {}
     for ratio, raw_ratio_list in raw_isotope_ratios.items():
         mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
                                                                                                     number_of_outliers_to_remove)
-        two_st_error = 2 * st_dev / math.sqrt(n)
-        mean_two_st_error_isotope_ratios[ratio] = [mean, two_st_error]
+        st_error = 2 * st_dev / math.sqrt(n)
+        mean_st_error_isotope_ratios[ratio] = [mean, st_error]
         outliers_removed_from_raw_data[ratio] = removed_data
         outlier_bounds_by_ratio[ratio] = outlier_bounds
 
         cycle_exclude_list = [value in outliers_removed_from_raw_data[ratio] for value in raw_ratio_list]
         cycle_flagging_information[ratio] = cycle_exclude_list
 
-    return mean_two_st_error_isotope_ratios, outliers_removed_from_raw_data, outlier_bounds_by_ratio, cycle_flagging_information
+    return mean_st_error_isotope_ratios, outliers_removed_from_raw_data, outlier_bounds_by_ratio, cycle_flagging_information
 
 
 def calculate_raw_delta_for_isotope_ratio(spot, element):
@@ -241,7 +242,7 @@ def calculate_raw_delta_for_isotope_ratio(spot, element):
         raise Exception
 
     not_corrected_deltas = {}
-    for ratio, [mean, two_st_error] in spot.mean_two_st_error_isotope_ratios.items():
+    for ratio, [mean, two_st_error] in spot.mean_st_error_isotope_ratios.items():
         if ratio.has_delta:
             standard_ratio_value, uncertainty = standard_ratios[ratio]
             delta, delta_uncertainty = calculate_delta_from_ratio(mean, two_st_error, standard_ratio_value)
@@ -252,13 +253,10 @@ def calculate_raw_delta_for_isotope_ratio(spot, element):
 
 def characterise_linear_drift(ratio, spots):
     values, times = get_data_for_drift_characterisation_input(ratio, spots)
-
     Y = values
     # adding a column of '1s' for statsmodels to the array 'times'
     X = sm.add_constant(times)
-
     statsmodel_result = sm.OLS(Y, X).fit()
-
     return statsmodel_result
 
 
@@ -285,7 +283,7 @@ def get_data_for_drift_characterisation_input(ratio, spots):
         if ratio.has_delta:
             [value, _uncertainty] = spot.not_corrected_deltas[ratio]
         else:
-            [value, _uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+            [value, _uncertainty] = spot.mean_st_error_isotope_ratios[ratio]
 
         times.append(timestamp)
         values.append(value)
@@ -299,7 +297,7 @@ def correct_data_for_linear_drift(spot, ratio, drift_correction_coef, t_zero):
         [value, uncertainty] = spot.not_corrected_deltas[ratio]
 
     else:
-        [value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+        [value, uncertainty] = spot.mean_st_error_isotope_ratios[ratio]
 
     drift_corrected_data = drift_correction(
         x=timestamp,

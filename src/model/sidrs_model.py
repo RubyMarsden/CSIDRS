@@ -396,7 +396,7 @@ class SidrsModel:
                 row = [str(sample.name + " " + spot.id)]
 
                 for ratio in method.ratios:
-                    ratio_value, ratio_uncertainty = spot.mean_two_st_error_isotope_ratios[ratio]
+                    ratio_value, ratio_uncertainty = spot.mean_st_error_isotope_ratios[ratio]
                     row.append(ratio_value)
                     row.append(ratio_uncertainty)
                     if ratio.has_delta:
@@ -453,7 +453,7 @@ class SidrsModel:
                         row.append(corrected_ratio)
                         row.append(corrected_ratio_uncertainty)
 
-                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_st_error_isotope_ratios[ratio]
                     row.append(uncorrected_ratio)
                     row.append(uncorrected_ratio_uncertainty)
 
