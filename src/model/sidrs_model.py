@@ -404,7 +404,7 @@ class SidrsModel:
                     if ratio.has_delta:
                         delta_data = spot.not_corrected_deltas[ratio]
                         delta = np.mean(delta_data)
-                        delta_uncertainty = (np.std(delta_data) * 2)
+                        delta_uncertainty = (np.std(delta_data)) * 2
                         row.append(delta)
                         row.append(delta_uncertainty)
 
