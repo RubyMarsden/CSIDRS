@@ -110,7 +110,7 @@ class BasicDataCheckWidget(QWidget):
                     if ratio.has_delta:
                         y = spot.not_corrected_deltas[ratio][0]
                     else:
-                        y = spot.mean_st_dev_isotope_ratios[ratio][0]
+                        y = spot.mean_st_error_isotope_ratios[ratio][0]
                     if spot == current_spot:
                         self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4, color="yellow")
 
@@ -188,7 +188,7 @@ class BasicDataCheckWidget(QWidget):
                         value_format = ".3f"
                         uncertainty_format = ".4f"
                     else:
-                        value, uncertainty = spot.mean_st_dev_isotope_ratios[ratio]
+                        value, uncertainty = spot.mean_st_error_isotope_ratios[ratio]
                         neg_uncertainty = uncertainty
                         pos_uncertainty = uncertainty
                         value_format = ".5f"
@@ -259,8 +259,8 @@ class BasicDataCheckWidget(QWidget):
                     axis_name = ratio.delta_name()
 
                 else:
-                    ys.append(spot.mean_st_dev_isotope_ratios[ratio][0])
-                    dys.append(spot.mean_st_dev_isotope_ratios[ratio][1])
+                    ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
+                    dys.append(spot.mean_st_error_isotope_ratios[ratio][1])
 
                     axis_name = ratio.name()
                     axis_title = "Raw " + ratio.name() + " against time."

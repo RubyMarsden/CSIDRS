@@ -140,8 +140,8 @@ class FurtherMultipleLinearRegressionDialog(QDialog):
                 self.time_axis.set_ylabel(self.ratio.delta_name())
             else:
                 if not spot.is_flagged:
-                    self.ys.append(spot.mean_st_dev_isotope_ratios[self.ratio][0])
-                    self.yerrors.append(spot.mean_st_dev_isotope_ratios[self.ratio][1])
+                    self.ys.append(spot.mean_st_error_isotope_ratios[self.ratio][0])
+                    self.yerrors.append(spot.mean_st_error_isotope_ratios[self.ratio][1])
 
                 self.time_axis.set_ylabel(self.ratio.name())
 

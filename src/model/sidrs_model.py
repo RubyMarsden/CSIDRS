@@ -397,7 +397,7 @@ class SidrsModel:
                 row = [str(sample.name + " " + spot.id)]
 
                 for ratio in method.ratios:
-                    ratio_value, ratio_uncertainty = spot.mean_st_dev_isotope_ratios[ratio]
+                    ratio_value, ratio_uncertainty = spot.mean_st_error_isotope_ratios[ratio]
                     row.append(ratio_value)
                     ratio_uncertainty_2 = ratio_uncertainty * 2
                     row.append(ratio_uncertainty_2)
@@ -445,19 +445,18 @@ class SidrsModel:
 
                 for ratio in method.ratios:
                     if ratio.has_delta:
-                        [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio]
-                        [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio]
+                        delta, delta_uncertainty = np.mean(spot.alpha_corrected_data[ratio]), np.std(spot.alpha_corrected_data[ratio])
+                        uncorrected_delta, uncorrected_delta_uncertainty = np.mean(spot.not_corrected_deltas[ratio]), np.std(spot.not_corrected_deltas[ratio])
                         row.append(delta)
                         row.append(delta_uncertainty)
                         row.append(uncorrected_delta)
                         row.append(uncorrected_delta_uncertainty)
                     else:
-                        [corrected_ratio, corrected_ratio_uncertainty] = spot.alpha_corrected_data[
-                            ratio]
+                        corrected_ratio, corrected_ratio_uncertainty = np.mean(spot.alpha_corrected_data[ratio]), np.std(spot.alpha_corrected_data[ratio])
                         row.append(corrected_ratio)
                         row.append(corrected_ratio_uncertainty)
 
-                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_st_dev_isotope_ratios[ratio]
+                    [uncorrected_ratio, uncorrected_ratio_uncertainty] = spot.mean_st_error_isotope_ratios[ratio]
                     row.append(uncorrected_ratio)
                     row.append(uncorrected_ratio_uncertainty)
 
