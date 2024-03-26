@@ -399,12 +399,12 @@ class SidrsModel:
                 for ratio in method.ratios:
                     ratio_value, ratio_uncertainty = spot.mean_st_error_isotope_ratios[ratio]
                     row.append(ratio_value)
-                    ratio_uncertainty_2 = ratio_uncertainty * 2
+                    ratio_uncertainty_2 = ratio_uncertainty
                     row.append(ratio_uncertainty_2)
                     if ratio.has_delta:
                         delta_data = spot.not_corrected_deltas[ratio]
                         delta = np.mean(delta_data)
-                        delta_uncertainty = (np.std(delta_data)) * 2
+                        delta_uncertainty = (np.std(delta_data))
                         row.append(delta)
                         row.append(delta_uncertainty)
 
