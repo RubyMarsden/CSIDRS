@@ -217,7 +217,7 @@ def calculate_mean_st_error_for_isotope_ratios(number_of_count_measurements, raw
     for ratio, raw_ratio_list in raw_isotope_ratios.items():
         mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
                                                                                                     number_of_outliers_to_remove)
-        st_error = 2 * st_dev / math.sqrt(n)
+        st_error = st_dev / math.sqrt(n)
         mean_st_error_isotope_ratios[ratio] = [mean, st_error]
         outliers_removed_from_raw_data[ratio] = removed_data
         outlier_bounds_by_ratio[ratio] = outlier_bounds
