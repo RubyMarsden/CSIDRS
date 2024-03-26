@@ -48,13 +48,13 @@ class IntegrationTests(unittest.TestCase):
         self.model.recalculate_data_with_drift_correction_changed(self.ratio, drift_correction_type=DriftCorrectionType.LIN)
 
         self.model.export_cycle_data_csv('itest1_cycle_data.csv')
-        self.compare_csvs('itest1_cycle_data.csv', "fixtures/cycle_data.csv")
+        self.compare_csvs('itest1_cycle_data.csv', "fixtures/2O_lindrift_cycle_data.csv")
         self.model.export_raw_data_csv('itest1_raw_data.csv')
-        self.compare_csvs('itest1_raw_data.csv', "fixtures/raw_data.csv")
+        self.compare_csvs('itest1_raw_data.csv', "fixtures/2O_lindrift_raw_data.csv")
         self.model.export_corrected_data_csv('itest1_corrected_data.csv')
-        self.compare_csvs('itest1_corrected_data.csv', "fixtures/corrected_data.csv")
+        self.compare_csvs('itest1_corrected_data.csv', "fixtures/2O_lindrift_corrected_data.csv")
         self.model.export_analytical_conditions_csv('itest1_analytical_conditions.csv')
-        self.compare_csvs('itest1_analytical_conditions.csv', "fixtures/analytical_data.csv")
+        self.compare_csvs('itest1_analytical_conditions.csv', "fixtures/2O_lindrift_analytical_data.csv")
 
 
 
