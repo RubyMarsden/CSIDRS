@@ -108,24 +108,25 @@ class CalculationResults:
         # TODO How does the ratio process work? Can you have different corrections for each one?
 
         for ratio in method.ratios:
-            primary_rm_spot_data = [spot.drift_corrected_data[ratio][0] for spot in primary_rm.spots if
-                                    not spot.is_flagged and ratio.has_delta]
+            if ratio.has_delta:
+                primary_rm_spot_data = [spot.drift_corrected_data[ratio][0] for spot in primary_rm.spots if
+                                        not spot.is_flagged and ratio.has_delta]
 
-            if not primary_rm_spot_data:
-                raise Exception("There is not primary reference material data available")
-            primary_rm_mean = np.mean(primary_rm_spot_data)
-            primary_uncertainty = np.std(primary_rm_spot_data)
+                if not primary_rm_spot_data:
+                    raise Exception("There is not primary reference material data available")
+                primary_rm_mean = np.mean(primary_rm_spot_data)
+                primary_uncertainty = np.std(primary_rm_spot_data)
 
-            primary_rm_external_value_uncertainty = get_primary_reference_material_external_values_by_ratio(ratio,
-                                                                                                            element,
-                                                                                                            material,
-                                                                                                            primary_rm)
+                primary_rm_external_value_uncertainty = get_primary_reference_material_external_values_by_ratio(ratio,
+                                                                                                                element,
+                                                                                                                material,
+                                                                                                                primary_rm)
 
-            alpha_sims, alpha_sims_uncertainty = calculate_sims_alpha(
-                primary_reference_material_mean_delta=primary_rm_mean,
-                primary_reference_material_st_dev=primary_uncertainty,
-                externally_measured_primary_reference_value_and_uncertainty=
-                primary_rm_external_value_uncertainty)
+                alpha_sims, alpha_sims_uncertainty = calculate_sims_alpha(
+                    primary_reference_material_mean_delta=primary_rm_mean,
+                    primary_reference_material_st_dev=primary_uncertainty,
+                    externally_measured_primary_reference_value_and_uncertainty=
+                    primary_rm_external_value_uncertainty)
 
             for sample in samples:
                 for spot in sample.spots:
