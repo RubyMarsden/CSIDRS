@@ -60,11 +60,13 @@ class CalculationResults:
         for ratio in method.ratios:
             ratio_results = RatioResults()
             ratio_results.assign_primary_rm_deltas_by_ratio(primary_rm, ratio, montecarlo_number)
-            ratio_results.linear_regression_result = characterise_linear_drift(ratio, primary_rm.spots, montecarlo_number)
+            ratio_results.linear_regression_result = characterise_linear_drift(ratio, primary_rm.spots,
+                                                                               montecarlo_number)
 
             ratio_results.drift_coefficient, ratio_results.drift_y_intercept = ratio_results.linear_regression_result[1]
             if ratio == S36_S32:
-                ratio_results.statsmodel_curvilinear_regression_result = characterise_curvilinear_drift(ratio, primary_rm.spots,
+                ratio_results.statsmodel_curvilinear_regression_result = characterise_curvilinear_drift(ratio,
+                                                                                                        primary_rm.spots,
                                                                                                         montecarlo_number)
 
             for sample in samples:
@@ -109,20 +111,21 @@ class CalculationResults:
         # TODO How does the ratio process work? Can you have different corrections for each one?
 
         for ratio in method.ratios:
-            primary_rm_spot_data = [spot.drift_corrected_data[ratio] for spot in primary_rm.spots if
-                                    not spot.is_flagged and ratio.has_delta]
+            if ratio.has_delta:
+                primary_rm_spot_data = [spot.drift_corrected_data[ratio] for spot in primary_rm.spots if
+                                        not spot.is_flagged and ratio.has_delta]
 
-            if not primary_rm_spot_data:
-                raise Exception("There is not primary reference material data available")
-            primary_rm_mean = np.mean(primary_rm_spot_data, axis=0)
+                if not primary_rm_spot_data:
+                    raise Exception("There is not primary reference material data available")
+                primary_rm_mean = np.mean(primary_rm_spot_data, axis=0)
 
-            external_mean, external_st_dev = get_primary_reference_material_external_values_by_ratio(ratio, element,
-                                                                                                     material,
-                                                                                                     primary_rm)
-            external_rm_montecarlo = np.random.normal(external_mean, external_st_dev, montecarlo_number)
-            alpha_sims = calculate_sims_alpha(
-                primary_reference_material_mean_delta=primary_rm_mean,
-                externally_measured_primary_reference_value=external_rm_montecarlo)
+                external_mean, external_st_dev = get_primary_reference_material_external_values_by_ratio(ratio, element,
+                                                                                                         material,
+                                                                                                         primary_rm)
+                external_rm_montecarlo = np.random.normal(external_mean, external_st_dev, montecarlo_number)
+                alpha_sims = calculate_sims_alpha(
+                    primary_reference_material_mean_delta=primary_rm_mean,
+                    externally_measured_primary_reference_value=external_rm_montecarlo)
 
             for sample in samples:
                 for spot in sample.spots:
@@ -219,7 +222,7 @@ def calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number):
                 standard_ratio_value_montecarlo = np.full((montecarlo_number,), standard_ratio_value)
             else:
                 standard_ratio_value_montecarlo = np.random.normal(loc=standard_ratio_value, scale=uncertainty,
-                                                               size=montecarlo_number)
+                                                                   size=montecarlo_number)
             delta_montecarlo = calculate_delta_from_ratio(mean_montecarlo, standard_ratio_value_montecarlo)
             not_corrected_deltas[ratio] = delta_montecarlo
 
@@ -276,7 +279,8 @@ def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number):
         if ratio.has_delta:
             value_montecarlo = spot.not_corrected_deltas[ratio]
         else:
-            value_montecarlo = spot.mean_st_error_isotope_ratios[ratio]
+            value_montecarlo = np.random.normal(spot.mean_st_error_isotope_ratios[ratio][0],
+                                                spot.mean_st_error_isotope_ratios[ratio][1], montecarlo_number)
 
         times.append(timestamp)
         values[i] = value_montecarlo
@@ -327,7 +331,8 @@ def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(spot):
 
 class RatioResults:
     def __init__(self):
-        self._primary_rm_deltas = {}
+        self._primary_rm_times = None
+        self._primary_rm_deltas = None
 
         self.linear_regression_result = {}
         self.statsmodel_curvilinear_regression_result = {}
@@ -340,6 +345,10 @@ class RatioResults:
     def assign_primary_rm_deltas_by_ratio(self, primary_rm, ratio, montecarlo_number):
         values, times = get_data_for_drift_characterisation_input(ratio, primary_rm.spots, montecarlo_number)
         self._primary_rm_deltas = values
+        self._primary_rm_times = times
 
     def get_primary_rm_deltas(self):
         return self._primary_rm_deltas
+
+    def get_primary_rm_times(self):
+        return self._primary_rm_times

@@ -11,9 +11,11 @@ class DeltaReferenceMaterial(Enum):
 
 
 oxygen_isotope_reference = {
-    DeltaReferenceMaterial.VSMOW: {O18_O16: (0.0020052, 0.00000045), O17_O16: (0.0003799, 0.0000008)}
+    DeltaReferenceMaterial.VSMOW: {O18_O16: (0.0020052, 0.000000), O17_O16: (0.0003799, 0.000000)}
 }
 # "Reference Sheet for International Measurement Standards" (PDF). International Atomic Energy Agency. December 2006.
+# Reported uncertainty on VSMOW is O18_O16: (0.0020052, 0.00000045), O17_O16: (0.0003799, 0.0000008)
+# However, as this is an arbitrary scale should there be uncertainty propagated through at all?
 
 
 sulphur_isotope_reference = {
