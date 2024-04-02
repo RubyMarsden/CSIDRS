@@ -44,7 +44,7 @@ class CalculationResults:
 
     def calculate_data_from_drift_correction_onwards(self, primary_rm, method, samples, drift_correction_type_by_ratio,
                                                      element, material, montecarlo_number):
-        self.drift_correction_process(primary_rm, method, samples, drift_correction_type_by_ratio, montecarlo_number)
+        self.all_ratio_results = self.drift_correction_process(primary_rm, method, samples, drift_correction_type_by_ratio, montecarlo_number)
         self.SIMS_correction_process(primary_rm, method, samples, element, material, montecarlo_number)
         if Isotope.S33 in method.isotopes:
             self.calculate_cap_values_S33(samples)
@@ -52,14 +52,14 @@ class CalculationResults:
             self.calculate_cap_values_S36(samples)
 
     def drift_correction_process(self, primary_rm, method, samples, drift_correction_type_by_ratio, montecarlo_number):
-
+        all_ratio_results = {}
         # Currently t_zero is not used anywhere else, however I feel it might be required in the future
         self.calculate_t_zero(primary_rm.spots)
         t_zero = self.get_t_zero()
 
         for ratio in method.ratios:
             ratio_results = RatioResults()
-            ratio_results.assign_primary_rm_data_for_drift_corr_by_ratio(primary_rm, ratio, montecarlo_number)
+            ratio_results.assign_primary_rm_data_for_drift_corr_by_ratio(primary_rm, ratio, montecarlo_number, t_zero)
             data = ratio_results.get_primary_rm_data_for_drift_corr()
             times = ratio_results.get_primary_rm_times()
             ratio_results.linear_regression_result = characterise_linear_drift(data, times)
@@ -68,7 +68,8 @@ class CalculationResults:
             if ratio == S36_S32:
                 ratio_results.statsmodel_curvilinear_regression_result = characterise_curvilinear_drift(ratio,
                                                                                                         primary_rm.spots,
-                                                                                                        montecarlo_number)
+                                                                                                        montecarlo_number,
+                                                                                                        t_zero)
 
             for sample in samples:
                 for spot in sample.spots:
@@ -92,7 +93,9 @@ class CalculationResults:
                     else:
                         raise Exception("There is not a valid input drift type.")
 
-            self.all_ratio_results[ratio] = ratio_results
+            all_ratio_results[ratio] = ratio_results
+
+        return all_ratio_results
 
     def calculate_t_zero(self, spots):
         times = []
@@ -245,8 +248,8 @@ def characterise_linear_drift(data, times):
     return [r_squared, (m, c)]
 
 
-def characterise_curvilinear_drift(ratio, spots, montecarlo_number):
-    values, times = get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number)
+def characterise_curvilinear_drift(ratio, spots, montecarlo_number, t_zero):
+    values, times = get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number, t_zero)
     Y = values
     x1 = times
     x2 = [t ** 2 for t in times]
@@ -258,7 +261,7 @@ def characterise_curvilinear_drift(ratio, spots, montecarlo_number):
     return statsmodel_result
 
 
-def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number):
+def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number, t_zero):
     times = []
     spots_to_use = [spot for spot in spots if not spot.is_flagged]
     if len(spots_to_use) < 2:
@@ -269,13 +272,14 @@ def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number):
         if spot.is_flagged:
             continue
         timestamp = time.mktime(spot.datetime.timetuple())
+        relative_time = timestamp - t_zero
         if ratio.has_delta:
             value_montecarlo = spot.not_corrected_deltas[ratio]
         else:
             value_montecarlo = np.random.normal(spot.mean_st_error_isotope_ratios[ratio][0],
                                                 spot.mean_st_error_isotope_ratios[ratio][1], montecarlo_number)
 
-        times.append(timestamp)
+        times.append(relative_time)
         values[i] = value_montecarlo
 
     print(ratio, values.shape)
@@ -285,6 +289,7 @@ def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number):
 
 def correct_data_for_linear_drift(spot, ratio, drift_correction_coef, t_zero):
     timestamp = time.mktime(spot.datetime.timetuple())
+    relative_time = timestamp - t_zero
     if ratio.has_delta:
         montecarlo_value = spot.not_corrected_deltas[ratio]
 
@@ -292,7 +297,7 @@ def correct_data_for_linear_drift(spot, ratio, drift_correction_coef, t_zero):
         montecarlo_value = spot.mean_st_error_isotope_ratios[ratio]
 
     drift_corrected_data = drift_correction(
-        x=timestamp,
+        x=relative_time,
         y=montecarlo_value,
         drift_coefficient=drift_correction_coef,
         zero_time=t_zero)
@@ -326,7 +331,7 @@ def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(spot):
 
 class RatioResults:
     def __init__(self):
-        self._primary_rm_times = None
+        self._primary_rm_times_relative_to_t_zero = None
         self._primary_rm_data_for_drift_corr = None
 
         self.linear_regression_result = {}
@@ -337,13 +342,13 @@ class RatioResults:
         self.drift_y_intercept = None
         self.drift_correction_type = None
 
-    def assign_primary_rm_data_for_drift_corr_by_ratio(self, primary_rm, ratio, montecarlo_number):
-        values, times = get_data_for_drift_characterisation_input(ratio, primary_rm.spots, montecarlo_number)
+    def assign_primary_rm_data_for_drift_corr_by_ratio(self, primary_rm, ratio, montecarlo_number, t_zero):
+        values, times = get_data_for_drift_characterisation_input(ratio, primary_rm.spots, montecarlo_number, t_zero)
         self._primary_rm_data_for_drift_corr = values
-        self._primary_rm_times = times
+        self._primary_rm_times_relative_to_t_zero = times
 
     def get_primary_rm_data_for_drift_corr(self):
         return self._primary_rm_data_for_drift_corr
 
     def get_primary_rm_times(self):
-        return self._primary_rm_times
+        return self._primary_rm_times_relative_to_t_zero

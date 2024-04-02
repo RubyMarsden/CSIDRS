@@ -21,7 +21,7 @@ from utils.general_utils import find_longest_common_prefix_index, split_cameca_d
 
 class SidrsModel:
     def __init__(self):
-        self.montecarlo_number = 10000
+        self.montecarlo_number = 1000000
         self.data = {}
         self.analytical_condition_data = None
         self.samples = []
@@ -301,6 +301,7 @@ class SidrsModel:
     def recalculate_data_with_cycles_changed(self):
         primary_rm = self.get_primary_reference_material()
         samples = self.get_samples()
+        self.calculation_results = CalculationResults()
         self.calculation_results.calculate_raw_delta_with_changed_cycle_data(samples, self.element)
 
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
@@ -478,3 +479,5 @@ class SidrsModel:
     def get_primary_reference_material(self):
         return self.primary_reference_material
 
+    def get_secondary_reference_material(self):
+        return self.secondary_reference_material

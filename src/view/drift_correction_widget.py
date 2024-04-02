@@ -284,17 +284,20 @@ class DriftCorrectionWidget(QWidget):
         ys_removed = []
         yerrors_removed = []
 
+        t_zero = self.data_processing_dialog.model.calculation_results.get_t_zero()
+
         for spot in sample.spots:
+            relative_time = time.mktime(spot.datetime.timetuple()) - t_zero
             if ratio.has_delta:
                 if not spot.is_flagged:
-                    xs.append(spot.datetime)
+                    xs.append(relative_time)
                     y = np.mean(spot.not_corrected_deltas[ratio])
                     dy = np.std(spot.not_corrected_deltas[ratio])
                     ys.append(y)
                     yerrors.append(dy)
 
                 else:
-                    xs_removed.append(spot.datetime)
+                    xs_removed.append(relative_time)
                     y = np.mean(spot.not_corrected_deltas[ratio])
                     dy = np.std(spot.not_corrected_deltas[ratio])
                     ys_removed.append(y)
@@ -304,12 +307,12 @@ class DriftCorrectionWidget(QWidget):
 
             else:
                 if not spot.is_flagged:
-                    xs.append(spot.datetime)
+                    xs.append(relative_time)
                     ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
                     yerrors.append(spot.mean_st_error_isotope_ratios[ratio][1])
 
                 else:
-                    xs_removed.append(spot.datetime)
+                    xs_removed.append(relative_time)
                     ys_removed.append(spot.mean_st_error_isotope_ratios[ratio][0])
                     yerrors_removed.append(spot.mean_st_error_isotope_ratios[ratio][1])
 
@@ -328,7 +331,7 @@ class DriftCorrectionWidget(QWidget):
         drift_coefficient = np.mean(self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient)
         drift_intercept = np.mean(self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_y_intercept)
         if drift_coefficient:
-            y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
+            y_line = [(drift_intercept + (drift_coefficient * x)) for x in xs]
 
             self.primary_drift_axis.plot(xs, y_line, marker="", color=sample.colour)
 
@@ -346,23 +349,21 @@ class DriftCorrectionWidget(QWidget):
         if self.no_drift_radio_button.isChecked():
             return
 
-        dc_xs = []
+        dc_xs = xs
         dc_ys = []
         dc_yerrors = []
-        dc_xs_removed = []
+        dc_xs_removed = xs_removed
         dc_ys_removed = []
         dc_yerrors_removed = []
 
         for spot in sample.spots:
             if not spot.is_flagged:
-                dc_xs.append(spot.datetime)
                 y = np.mean(spot.drift_corrected_data[ratio])
                 dy = np.std(spot.drift_corrected_data[ratio])
                 dc_ys.append(y)
                 dc_yerrors.append(dy)
 
             else:
-                dc_xs_removed.append(spot.datetime)
                 y = np.mean(spot.drift_corrected_data[ratio])
                 dy = np.std(spot.drift_corrected_data[ratio])
                 dc_ys_removed.append(y)

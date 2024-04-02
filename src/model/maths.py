@@ -57,7 +57,7 @@ def drift_correction(x: float, y: npt.NDArray[Any], drift_coefficient: npt.NDArr
     """
     Drift correction is independent of the y-intercept of the linear drift equation
     """
-    correction = (x - zero_time) * drift_coefficient
+    correction = x * drift_coefficient
     y_corrected = y - correction
     return y_corrected
 

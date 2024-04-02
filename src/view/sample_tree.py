@@ -9,17 +9,19 @@ class SampleTreeWidget(QWidget):
         super().__init__()
         self.data_processing_dialog = data_processing_dialog
         self.tree = QTreeWidget()
-        self.exclude_spot_checkbox = QCheckBox("Exclude spot from calculations")
+        self.tree.setColumnCount(2)
+        text = 'Exclude spot'
+        self.exclude_include_spot_button = QPushButton(text)
 
-        self.exclude_spot_checkbox.stateChanged.connect(self.on_exclude_spot_checkbox_state_changed)
+        self.exclude_include_spot_button.clicked.connect(self.on_exclude_include_button_pushed)
 
         self.tree.currentItemChanged.connect(self._on_selected_sample_change)
-        self.tree.setHeaderLabel("Samples")
+        self.tree.setHeaderLabels(["Samples", "Excluded?"])
 
         self.buttons = self._create_next_and_back_buttons()
 
         layout = QVBoxLayout()
-        layout.addWidget(self.exclude_spot_checkbox)
+        layout.addWidget(self.exclude_include_spot_button)
         layout.addWidget(self.tree)
         layout.addWidget(self.buttons)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -36,6 +38,11 @@ class SampleTreeWidget(QWidget):
             sample_tree_item.setBackground(0, colour)
             for spot in sample.spots:
                 spot_tree_item = QTreeWidgetItem(sample_tree_item, [spot.id])
+                if spot.is_flagged:
+                    text = 'x'
+                else:
+                    text = ''
+                spot_tree_item.setText(1, text)
                 spot_tree_item.spot = spot
                 spot_tree_item.is_sample = False
                 spot_tree_item.cycles = []
@@ -106,11 +113,16 @@ class SampleTreeWidget(QWidget):
         self.back_item_button.setDisabled(previous_item is None)
 
         if current_tree_item.is_sample:
-            self.exclude_spot_checkbox.setChecked(False)
-            self.exclude_spot_checkbox.setEnabled(False)
+            text = 'Exclude spot'
+            self.exclude_include_spot_button.setText(text)
+            self.exclude_include_spot_button.setEnabled(False)
         else:
-            self.exclude_spot_checkbox.setEnabled(True)
-            self.exclude_spot_checkbox.setChecked(current_tree_item.spot.is_flagged)
+            if self.current_spot().is_flagged:
+                text = 'Include spot'
+            else:
+                text = 'Exclude spot'
+            self.exclude_include_spot_button.setText(text)
+            self.exclude_include_spot_button.setEnabled(True)
 
     def highlight_spot(self, is_flagged):
         current_tree_item = self.tree.currentItem()
@@ -120,25 +132,36 @@ class SampleTreeWidget(QWidget):
         colour = QColor(255, 0, 0, 50) if is_flagged else QColor(0, 0, 0, 0)
         current_tree_item.setBackground(0, colour)
 
-    def on_exclude_spot_checkbox_state_changed(self):
-        # TODO if this is a sample what happens? causes attribute error if you go from a flagged spot to a sample
-        #  name in the tree.
-        self.current_spot().is_flagged = self.exclude_spot_checkbox.isChecked()
-        self.highlight_spot(self.current_spot().is_flagged)
-        primary_rm = self.data_processing_dialog.model.get_primary_reference_material()
-        method = self.data_processing_dialog.model.method
-        samples = self.data_processing_dialog.model.get_samples()
-        drift_correction_type_by_ratio = self.data_processing_dialog.model.drift_correction_type_by_ratio
-        element = self.data_processing_dialog.model.element
-        material = self.data_processing_dialog.model.material
-        montecarlo_number = self.data_processing_dialog.model.montecarlo_number
-        self.data_processing_dialog.model.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm,
-                                                                                                           method,
-                                                                                                           samples,
-                                                                                                           drift_correction_type_by_ratio,
-                                                                                                           element,
-                                                                                                           material,
-                                                                                                           montecarlo_number)
-        signals.dataRecalculated.emit()
+    def on_exclude_include_button_pushed(self):
+        spot = self.current_spot()
+        current_item = self.tree.currentItem()
+        if spot.is_flagged:
+            spot.is_flagged = False
+            current_item.setText(1, '')
+            self.exclude_include_spot_button.setText('Exclude spot')
+        else:
+            spot.is_flagged = True
+            current_item.setText(1, 'x')
+            self.exclude_include_spot_button.setText('Include spot')
+
+        self.highlight_spot(spot.is_flagged)
+
+        if spot.sample_name == self.data_processing_dialog.model.get_primary_reference_material().name:
+            primary_rm = self.data_processing_dialog.model.get_primary_reference_material()
+            method = self.data_processing_dialog.model.method
+            samples = self.data_processing_dialog.model.get_samples()
+            drift_correction_type_by_ratio = self.data_processing_dialog.model.drift_correction_type_by_ratio
+            element = self.data_processing_dialog.model.element
+            material = self.data_processing_dialog.model.material
+            montecarlo_number = self.data_processing_dialog.model.montecarlo_number
+            self.data_processing_dialog.model.calculation_results.calculate_data_from_drift_correction_onwards(
+                primary_rm,
+                method,
+                samples,
+                drift_correction_type_by_ratio,
+                element,
+                material,
+                montecarlo_number)
+            signals.dataRecalculated.emit()
 
 
