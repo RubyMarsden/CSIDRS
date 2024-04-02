@@ -95,30 +95,35 @@ class ResidualsDialog(QDialog):
         predicted_values = (drift_coef * times) + y_int
         predicted_values = np.transpose(predicted_values)
 
-        true_values = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].get_primary_rm_deltas()
+        true_values = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].get_primary_rm_data_for_drift_corr()
         residuals = true_values - predicted_values
 
         number_data_points = len(residuals[0])
 
         predicted_means = list(np.mean(predicted_values, axis=1))
 
-        histogram_range = (np.min(residuals), np.max(residuals))
-        histogram_data = [np.histogram(residuals[i], 'fd')[0] for i in range(residuals.shape[0])]
-        maximum_binned_data = max([max(binned_data) for binned_data in histogram_data])
-        print(maximum_binned_data)
-        sensible_factor = min(np.diff(predicted_means, axis=0)) / maximum_binned_data
-        print(sensible_factor)
+        residuals_means = list(np.mean(residuals, axis=1))
 
-        for predicted_mean, binned_data in zip(predicted_means, histogram_data):
-            binned_data = binned_data * sensible_factor # / (5000 * number_data_points / len(binned_data))
+        histogram_range = np.vstack((np.min(residuals, axis=1), np.max(residuals, axis=1)))
+        histogram_range = np.transpose(histogram_range)
+        print(histogram_range.shape)
+        histogram_data = [np.histogram(residuals[i], 'fd')[0] for i in range(residuals.shape[0])]
+
+        maximum_binned_data = max([max(binned_data) for binned_data in histogram_data])
+
+        sensible_factor = min(np.diff(predicted_means)) / maximum_binned_data
+
+        for predicted_mean, binned_data, h_range in zip(predicted_means, histogram_data, histogram_range):
+            binned_data = binned_data * sensible_factor
             lefts = predicted_mean - 0.5 * binned_data
             number_of_bin_edges = len(binned_data) + 1
-            bin_edges = np.linspace(histogram_range[0], histogram_range[1], number_of_bin_edges)
+            bin_edges = np.linspace(h_range[0], h_range[1], number_of_bin_edges)
+            heights = np.diff(bin_edges)
+            centres = bin_edges[:-1] + heights / 2
 
-            height = np.diff(bin_edges, axis=0)
-            centres = bin_edges[:-1] + height / 2
+            self.residuals_axis.barh(centres, binned_data, height=heights, left=lefts, alpha=0.5)
 
-            self.residuals_axis.barh(centres, binned_data, height=height, left=lefts, alpha=0.5)
+        self.residuals_axis.scatter(predicted_means, residuals_means)
 
         self.residuals_axis.set_xlabel("Fitted values")
         self.residuals_axis.set_ylabel("Residuals")

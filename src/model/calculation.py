@@ -59,9 +59,10 @@ class CalculationResults:
 
         for ratio in method.ratios:
             ratio_results = RatioResults()
-            ratio_results.assign_primary_rm_deltas_by_ratio(primary_rm, ratio, montecarlo_number)
-            ratio_results.linear_regression_result = characterise_linear_drift(ratio, primary_rm.spots,
-                                                                               montecarlo_number)
+            ratio_results.assign_primary_rm_data_for_drift_corr_by_ratio(primary_rm, ratio, montecarlo_number)
+            data = ratio_results.get_primary_rm_data_for_drift_corr()
+            times = ratio_results.get_primary_rm_times()
+            ratio_results.linear_regression_result = characterise_linear_drift(data, times)
 
             ratio_results.drift_coefficient, ratio_results.drift_y_intercept = ratio_results.linear_regression_result[1]
             if ratio == S36_S32:
@@ -229,27 +230,17 @@ def calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number):
     return not_corrected_deltas
 
 
-def characterise_linear_drift(ratio, spots, montecarlo_number):
-    values, times = get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number)
-    # Values are a np array which has montecarlo_number columns and the number of spots is the number of rows
-
-    Y = values
+def characterise_linear_drift(data, times):
     # adding a column of '1s' for linear regression modelling to the array 'times'
     times_constant = np.vstack([times, np.ones(len(times))]).T
 
-    results = np.linalg.lstsq(times_constant, values)
+    results = np.linalg.lstsq(times_constant, data)
     m, c = results[0]
     residual_sum_of_squares = results[1]
 
-    total_sum_of_squares_from_mean = calculate_the_total_sum_of_squares_from_the_mean(values)
+    total_sum_of_squares_from_mean = calculate_the_total_sum_of_squares_from_the_mean(data)
 
     r_squared = calculate_rsquared_from_tss_and_rss(total_sum_of_squares_from_mean, residual_sum_of_squares)
-
-    print(len(r_squared))
-    print(np.mean(r_squared))
-
-    print(len(m))
-    print(np.mean(m))
 
     return [r_squared, (m, c)]
 
@@ -269,10 +260,12 @@ def characterise_curvilinear_drift(ratio, spots, montecarlo_number):
 
 def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number):
     times = []
-    n = len(spots)
+    spots_to_use = [spot for spot in spots if not spot.is_flagged]
+    if len(spots_to_use) < 2:
+        raise Exception("The number of spots which are not excluded is not sufficient to characterise drift.")
     k = montecarlo_number
-    values = np.empty((n, k))
-    for i, spot in enumerate(spots):
+    values = np.empty((len(spots_to_use), k))
+    for i, spot in enumerate(spots_to_use):
         if spot.is_flagged:
             continue
         timestamp = time.mktime(spot.datetime.timetuple())
@@ -284,6 +277,8 @@ def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number):
 
         times.append(timestamp)
         values[i] = value_montecarlo
+
+    print(ratio, values.shape)
 
     return values, times
 
@@ -332,7 +327,7 @@ def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(spot):
 class RatioResults:
     def __init__(self):
         self._primary_rm_times = None
-        self._primary_rm_deltas = None
+        self._primary_rm_data_for_drift_corr = None
 
         self.linear_regression_result = {}
         self.statsmodel_curvilinear_regression_result = {}
@@ -342,13 +337,13 @@ class RatioResults:
         self.drift_y_intercept = None
         self.drift_correction_type = None
 
-    def assign_primary_rm_deltas_by_ratio(self, primary_rm, ratio, montecarlo_number):
+    def assign_primary_rm_data_for_drift_corr_by_ratio(self, primary_rm, ratio, montecarlo_number):
         values, times = get_data_for_drift_characterisation_input(ratio, primary_rm.spots, montecarlo_number)
-        self._primary_rm_deltas = values
+        self._primary_rm_data_for_drift_corr = values
         self._primary_rm_times = times
 
-    def get_primary_rm_deltas(self):
-        return self._primary_rm_deltas
+    def get_primary_rm_data_for_drift_corr(self):
+        return self._primary_rm_data_for_drift_corr
 
     def get_primary_rm_times(self):
         return self._primary_rm_times
