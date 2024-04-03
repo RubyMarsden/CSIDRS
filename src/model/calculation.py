@@ -35,12 +35,12 @@ class CalculationResults:
                     spot.number_of_count_measurements, spot.raw_isotope_ratios)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number)
 
-    def calculate_raw_delta_with_changed_cycle_data(self, samples, element):
+    def calculate_raw_delta_with_changed_cycle_data(self, samples, element, montecarlo_number):
         for sample in samples:
             for spot in sample.spots:
                 spot.mean_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
                     spot)
-                spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element)
+                spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number)
 
     def calculate_data_from_drift_correction_onwards(self, primary_rm, method, samples, drift_correction_type_by_ratio,
                                                      element, material, montecarlo_number):
