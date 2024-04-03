@@ -375,7 +375,6 @@ class MathsTests(unittest.TestCase):
         results = np.linalg.lstsq(xs_constant, ys)
         m, c = results[0]
         residual_sum_of_squares = results[1]
-        print(residual_sum_of_squares)
         tss = calculate_the_total_sum_of_squares_from_the_mean(ys)
         rsquared_array = calculate_rsquared_from_tss_and_rss(tss, residual_sum_of_squares)
         rsquared = rsquared_array.item()

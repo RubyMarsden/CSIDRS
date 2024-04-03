@@ -21,7 +21,7 @@ from utils.general_utils import find_longest_common_prefix_index, split_cameca_d
 
 class SidrsModel:
     def __init__(self):
-        self.montecarlo_number = 1000000
+        self.montecarlo_number = None
         self.data = {}
         self.analytical_condition_data = None
         self.samples = []
@@ -481,3 +481,7 @@ class SidrsModel:
 
     def get_secondary_reference_material(self):
         return self.secondary_reference_material
+
+
+    def set_montecarlo_number(self, montecarlo_number):
+        self.montecarlo_number = montecarlo_number

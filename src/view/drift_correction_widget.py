@@ -179,7 +179,6 @@ class DriftCorrectionWidget(QWidget):
 
         linear_r_squared = np.mean(linear_r_squared_mc)
         linear_r_squared_median = np.median(linear_r_squared_mc)
-        print(linear_r_squared_median)
         linear_r_squared_st_dev = np.std(linear_r_squared_mc)
         linear_gradient = np.mean(linear_gradient_mc)
         linear_gradient_st_dev = np.std(linear_gradient_mc)
@@ -427,7 +426,6 @@ class DriftCorrectionWidget(QWidget):
                         ys_removed.append(spot.mean_st_error_isotope_ratios[ratio][0])
                         yerrors_removed.append(spot.mean_st_error_isotope_ratios[ratio][1])
 
-            print(xs)
             y_mean = np.mean(ys)
             y_stdev = np.std(ys)
             label = "Mean: " + format(y_mean, ".3f") + ", St Dev: " + format(y_stdev, ".3f")

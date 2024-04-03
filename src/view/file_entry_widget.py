@@ -84,9 +84,6 @@ class FileEntryWidget(QWidget):
             self.model.rename_and_merge_samples(rename_operations, merge_operations)
         return sample_names
 
-    def on_remove_single_file_button_clicked(self):
-        print("remove file")
-
     def on_data_cleared(self):
         self.filename_tree_widget.clear()
         self.sample_name_tree_widget.clear()

@@ -282,8 +282,6 @@ def get_data_for_drift_characterisation_input(ratio, spots, montecarlo_number, t
         times.append(relative_time)
         values[i] = value_montecarlo
 
-    print(ratio, values.shape)
-
     return values, times
 
 

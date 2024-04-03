@@ -144,6 +144,5 @@ def calculate_the_total_sum_of_squares_from_the_mean(values: npt.NDArray[Any]) -
 
 def calculate_rsquared_from_tss_and_rss(tss: npt.NDArray[Any], rss: npt.NDArray[Any]) -> npt.NDArray[Any]:
     r_sq = 1 - (rss / tss)
-    print(r_sq.shape)
     rsquared = np.where(tss == 0, 0, r_sq)
     return rsquared

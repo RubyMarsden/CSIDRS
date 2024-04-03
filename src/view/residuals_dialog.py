@@ -106,7 +106,6 @@ class ResidualsDialog(QDialog):
 
         histogram_range = np.vstack((np.min(residuals, axis=1), np.max(residuals, axis=1)))
         histogram_range = np.transpose(histogram_range)
-        print(histogram_range.shape)
         histogram_data = [np.histogram(residuals[i], 'fd')[0] for i in range(residuals.shape[0])]
 
         maximum_binned_data = max([max(binned_data) for binned_data in histogram_data])
