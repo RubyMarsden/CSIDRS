@@ -174,8 +174,10 @@ class DriftCorrectionWidget(QWidget):
         self.update_graphs(ratio)
 
     def update_stats_text(self, ratio):
-        linear_r_squared_mc = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].linear_regression_result[0]
-        linear_gradient_mc = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient
+        linear_r_squared_mc = \
+        self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].linear_regression_result[0]
+        linear_gradient_mc = self.data_processing_dialog.model.calculation_results.all_ratio_results[
+            ratio].drift_coefficient
 
         linear_r_squared = np.mean(linear_r_squared_mc)
         linear_r_squared_median = np.median(linear_r_squared_mc)
@@ -184,7 +186,8 @@ class DriftCorrectionWidget(QWidget):
         linear_gradient_st_dev = np.std(linear_gradient_mc)
 
         self.r_squared_text.setText("R<sup>2</sup>:\n" + format(linear_r_squared, ".3f"))
-        self.r_squared_uncertainty_range.setText("R<sup>2</sup> standard deviation:\n" + format(linear_r_squared_st_dev, ".3f"))
+        self.r_squared_uncertainty_range.setText(
+            "R<sup>2</sup> standard deviation:\n" + format(linear_r_squared_st_dev, ".3f"))
         self.linear_gradient_value_text.setText(
             "Gradient of calculated\nlinear drift:\n" + "{:.3e}".format(linear_gradient))
         self.linear_gradient_uncertainty_text.setText(
@@ -205,6 +208,7 @@ class DriftCorrectionWidget(QWidget):
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         ratio = self.data_processing_dialog.get_current_ratio()
+        t_zero = self.data_processing_dialog.model.calculation_results.get_t_zero()
         if current_item is None or current_item.is_sample:
             self.primary_drift_axis.clear()
             self.update_graphs(ratio)
@@ -216,50 +220,52 @@ class DriftCorrectionWidget(QWidget):
                 previous_spot = None
             else:
                 previous_spot = previous_tree_item.spot
-            primary_xs = []
+            primary_spots = []
             primary_ys = []
             for spot in self.primary_sample.spots:
                 if ratio.has_delta:
-                    primary_ys.append(spot.not_corrected_deltas[ratio][0])
+                    primary_ys.append(np.mean(spot.not_corrected_deltas[ratio]))
                 else:
                     primary_ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                primary_xs.append(spot)
+                primary_spots.append(spot)
 
             if self.secondary_sample:
-                secondary_xs = []
+                secondary_spots = []
                 secondary_ys = []
                 for spot in self.secondary_sample.spots:
                     if ratio.has_delta:
-                        secondary_ys.append(spot.not_corrected_deltas[ratio][0])
+                        secondary_ys.append(np.mean(spot.not_corrected_deltas[ratio]))
                     else:
                         secondary_ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                    secondary_xs.append(spot)
+                    secondary_spots.append(spot)
 
-                for secondary_x, secondary_y in zip(secondary_xs, secondary_ys):
+                for secondary_x, secondary_y in zip(secondary_spots, secondary_ys):
                     if secondary_x == current_spot:
+                        x = secondary_x.datetime
                         if current_spot.is_flagged:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                markerfacecolor=None, markeredgecolor="yellow")
                         else:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                color="yellow")
 
                     if secondary_x == previous_spot:
+                        x = secondary_x.datetime
                         if current_spot.is_flagged:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                markerfacecolor=None,
                                                                markeredgecolor=self.secondary_sample.colour)
                         else:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                color=self.secondary_sample.colour)
 
-
-            for primary_x, primary_y in zip(primary_xs, primary_ys):
+            for primary_x, primary_y in zip(primary_spots, primary_ys):
+                x = time.mktime(primary_x.datetime.timetuple()) - t_zero
                 if primary_x == current_spot:
-                    self.primary_drift_axis.errorbar(primary_x.datetime, primary_y, ls="", marker="o", color="yellow")
+                    self.primary_drift_axis.errorbar(x, primary_y, ls="", marker="o", color="yellow")
 
                 if primary_x == previous_spot:
-                    self.primary_drift_axis.errorbar(primary_x.datetime, primary_y, ls="", marker="o",
+                    self.primary_drift_axis.errorbar(x, primary_y, ls="", marker="o",
                                                      color=self.primary_sample.colour)
 
         self.primary_drift_canvas.draw()
@@ -327,8 +333,10 @@ class DriftCorrectionWidget(QWidget):
                                          markeredgecolor=sample.colour,
                                          markerfacecolor="none")
 
-        drift_coefficient = np.mean(self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient)
-        drift_intercept = np.mean(self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_y_intercept)
+        drift_coefficient = np.mean(
+            self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient)
+        drift_intercept = np.mean(
+            self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_y_intercept)
         if drift_coefficient:
             y_line = [(drift_intercept + (drift_coefficient * x)) for x in xs]
 
@@ -370,7 +378,8 @@ class DriftCorrectionWidget(QWidget):
 
         dc_y_mean = np.mean(dc_ys)
         dc_y_stdev = np.std(dc_ys)
-        dc_label = "Drift corrected data: \n Mean: " + format(dc_y_mean, ".3f") + ", St Dev: " + format(dc_y_stdev, ".3f")
+        dc_label = "Drift corrected data: \n Mean: " + format(dc_y_mean, ".3f") + ", St Dev: " + format(dc_y_stdev,
+                                                                                                        ".3f")
 
         self.primary_drift_axis.errorbar(dc_xs, dc_ys, yerr=dc_yerrors, ls="", marker="s", color='r', label=dc_label)
         self.primary_drift_axis.errorbar(dc_xs_removed, dc_ys_removed, yerr=dc_yerrors_removed, ls="", marker="s",

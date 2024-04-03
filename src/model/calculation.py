@@ -26,7 +26,6 @@ class CalculationResults:
         self.all_ratio_results = defaultdict(RatioResults)
 
     def calculate_raw_delta_values(self, samples, method, element, montecarlo_number):
-        print("Processing...")
         for sample in samples:
             for spot in sample.spots:
                 spot.secondary_ion_yield = calculate_relative_secondary_ion_yield(spot)

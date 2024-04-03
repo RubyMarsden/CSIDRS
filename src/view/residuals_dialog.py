@@ -26,10 +26,12 @@ class ResidualsDialog(QDialog):
         layout.addWidget(self.ratio_selection_widget)
 
         lower_layout = QHBoxLayout()
-        lower_layout.addWidget(self._create_graph_widget(), 8)
+        lower_layout.addWidget(self._create_graph_widget(), 4)
+        lower_layout.addWidget(self._create_r_squared_graph_widget(), 4)
         lower_layout.addWidget(self._create_regression_results_summary_widget(), 2)
 
         self._create_residuals_graph()
+        self._create_r_squared_histogram()
 
         layout.addLayout(lower_layout)
         self.setLayout(layout)
@@ -49,6 +51,14 @@ class ResidualsDialog(QDialog):
 
         return graph_widget
 
+    def _create_r_squared_graph_widget(self):
+        self.r_sq_fig = plt.figure()
+        self.r_squared_axis = self.r_sq_fig.add_subplot()
+
+        graph_widget, self.r_squared_canvas = gui_utils.create_figure_widget(self.r_sq_fig, self)
+
+        return graph_widget
+
     def _create_regression_results_summary_widget(self):
         regression_results_widget = QWidget()
         layout = QVBoxLayout()
@@ -63,12 +73,6 @@ class ResidualsDialog(QDialog):
         residual_explanation_text.setFont(font)
 
         layout.addWidget(residual_explanation_text)
-
-        h_line = QFrame()
-        h_line.setFrameShape(QFrame.HLine)
-        h_line.setLineWidth(1)
-
-        layout.addWidget(h_line)
 
         regression_results_widget.setLayout(layout)
 
@@ -129,6 +133,19 @@ class ResidualsDialog(QDialog):
 
         self.fig.tight_layout()
 
+
+    def _create_r_squared_histogram(self):
+        self.r_squared_axis.clear()
+        self.r_squared_axis.set_title("R squared", loc="right")
+        r_squared_montecarlo_distribution = self.data_processing_dialog.model.calculation_results.all_ratio_results[self.ratio].linear_regression_result[0]
+
+        self.r_squared_axis.hist(r_squared_montecarlo_distribution, 'fd', color='Black')
+
+        self.r_squared_axis.set_xlabel("R squared")
+        self.r_squared_axis.set_ylabel("Number of trials")
+
+        self.r_sq_fig.tight_layout()
+
     ###############
     ### Actions ###
     ###############
@@ -136,5 +153,7 @@ class ResidualsDialog(QDialog):
     def on_ratio_changed(self, ratio):
         self.ratio = ratio
         self._create_residuals_graph()
+        self._create_r_squared_histogram()
         self.canvas.draw()
+        self.r_squared_canvas.draw()
 

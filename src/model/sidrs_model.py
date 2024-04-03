@@ -49,7 +49,6 @@ class SidrsModel:
     #################
 
     def import_all_files(self, filenames):
-        print("import all files")
         duplicate_files = set(filenames).intersection(set(self.imported_files))
         if len(duplicate_files) != 0:
             raise Exception("The files: " + str(duplicate_files) + " have already been imported.")

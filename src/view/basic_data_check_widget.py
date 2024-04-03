@@ -90,32 +90,36 @@ class BasicDataCheckWidget(QWidget):
 
         csv_exported_successfully_popup(self, filename)
 
-
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         ratio = self.data_view.get_current_ratio()
 
         if current_item is None or current_item.is_sample:
-            self.create_raw_delta_time_plot(ratio)
+            self.update_graphs()
         else:
             current_spot = current_item.spot
             if previous_tree_item is None or previous_tree_item.is_sample:
-                self.create_raw_delta_time_plot(ratio)
+                self.update_graphs()
                 previous_spot = None
             else:
                 previous_spot = previous_tree_item.spot
+            spots = self.data_view.model.get_all_spots()
+            ys = []
 
-            for sample in self.data_view.model.get_samples():
-                for spot in sample.spots:
-                    x = spot.datetime
-                    if ratio.has_delta:
-                        y = spot.not_corrected_deltas[ratio][0]
-                    else:
-                        y = spot.mean_st_error_isotope_ratios[ratio][0]
-                    if spot == current_spot:
-                        self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4, color="yellow")
+            for spot in spots:
+                if ratio.has_delta:
+                    ys.append(np.mean(spot.not_corrected_deltas[ratio]))
+                else:
+                    ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
 
-                    if spot == previous_spot:
-                        self.raw_delta_time_axis.plot(x, y, ls="", marker="o", markersize=4,
+            for spot, y in zip(spots, ys):
+                x = spot.datetime
+                if spot == current_spot:
+                    self.raw_delta_time_axis.errorbar(x, y, ls="", marker="o", markersize=4, color="yellow")
+
+                if spot == previous_spot:
+                    samples_by_name = self.data_view.model.get_samples_by_name()
+                    sample = samples_by_name[spot.sample_name]
+                    self.raw_delta_time_axis.errorbar(x, y, ls="", markersize=4, marker="o",
                                                       color=sample.colour)
 
         self.canvas.draw()
@@ -221,7 +225,6 @@ class BasicDataCheckWidget(QWidget):
         self.basic_data_table.clearContents()
         self._populate_basic_table()
 
-
     ################
     ### Plotting ###
     ################
@@ -301,7 +304,6 @@ class BasicDataCheckWidget(QWidget):
         self.fig.tight_layout()
 
     def update_graphs(self):
-        print("basic update")
         ratio = self.data_view.get_current_ratio()
 
         self.raw_delta_time_axis.clear()
