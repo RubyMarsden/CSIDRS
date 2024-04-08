@@ -6,7 +6,7 @@ The CSIDRS software is designed to have a degree of flexibility - this means tha
 
 - src/model/elements.py
 - src/model/isotopes.py
-- src/model/spot.py
+- src/model/calculation.py
 
 - src/model/settings/delta_constants.py
 - src/model/settings/isotope_reference_materials.py
@@ -115,7 +115,7 @@ e.g.:
        MAT = "Material"
    ```
 
-8. Add the delta reference material to the Spot class in `src/model/spot.py` and additionally import the reference required.
+8. Add the delta reference material to the Calculation class in `src/model/calculation.py` and additionally import the reference required.
    ```python
    from model.settings.delta_constants import oxygen_isotope_reference, sulphur_isotope_reference, new_element_isotope_reference
    ```

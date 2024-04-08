@@ -347,7 +347,7 @@ class DriftCorrectionWidget(QWidget):
             x_tick_label.set_rotation(10)
             x_tick_label.set_horizontalalignment('right')
 
-        self.primary_drift_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+        # self.primary_drift_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         self.primary_drift_fig.tight_layout()
 

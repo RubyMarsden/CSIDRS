@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 from matplotlib import pyplot as plt
 
@@ -98,13 +99,13 @@ class SulphurCAPWidget(QWidget):
         list_for_finding_minimum_and_maximum_y_values = [0]
 
         for sample in self.model.get_samples():
-            delta_y_value = [spot.alpha_corrected_data[ratio_y][0] for spot in
+            delta_y_value = [np.mean(spot.alpha_corrected_data[ratio_y]) for spot in
                              sample.spots]
-            delta_y_errors = [spot.alpha_corrected_data[ratio_y][1] for spot in
+            delta_y_errors = [np.std(spot.alpha_corrected_data[ratio_y]) for spot in
                               sample.spots]
-            delta_x_value = [spot.alpha_corrected_data[ratio_x][0] for spot in
+            delta_x_value = [np.mean(spot.alpha_corrected_data[ratio_x]) for spot in
                              sample.spots]
-            delta_x_errors = [spot.alpha_corrected_data[ratio_x][1] for spot in
+            delta_x_errors = [np.std(spot.alpha_corrected_data[ratio_x]) for spot in
                               sample.spots]
             list_for_finding_minimum_and_maximum_y_values.extend(delta_y_value)
             list_for_finding_minimum_and_maximum_x_values.extend(delta_x_value)
@@ -134,10 +135,10 @@ class SulphurCAPWidget(QWidget):
         axis.set_xlabel("delta S34")
         axis.set_ylabel("Cap S33")
         for sample in self.model.get_samples():
-            xs = [spot.alpha_corrected_data[S34_S32][0] for spot in sample.spots]
-            x_errors = [spot.alpha_corrected_data[S34_S32][1] for spot in sample.spots]
-            ys = [spot.cap_data_S33[0] for spot in sample.spots]
-            y_errors = [spot.cap_data_S33[1] for spot in sample.spots]
+            xs = [np.mean(spot.alpha_corrected_data[S34_S32]) for spot in sample.spots]
+            x_errors = [np.std(spot.alpha_corrected_data[S34_S32]) for spot in sample.spots]
+            ys = [np.mean(spot.cap_data_S33) for spot in sample.spots]
+            y_errors = [np.std(spot.cap_data_S33) for spot in sample.spots]
 
             axis.errorbar(x=xs, xerr=x_errors, y=ys, yerr=y_errors, ls="", marker="o", color=sample.colour,
                           label=sample.name)
@@ -153,10 +154,10 @@ class SulphurCAPWidget(QWidget):
         axis.set_ylabel("Cap S36")
 
         for sample in self.model.get_samples():
-            xs = [spot.cap_data_S33[0] for spot in sample.spots]
-            x_errors = [spot.cap_data_S33[1] for spot in sample.spots]
-            ys = [spot.cap_data_S36[0] for spot in sample.spots]
-            y_errors = [spot.cap_data_S36[1] for spot in sample.spots]
+            xs = [np.mean(spot.cap_data_S33) for spot in sample.spots]
+            x_errors = [np.std(spot.cap_data_S33) for spot in sample.spots]
+            ys = [np.mean(spot.cap_data_S36) for spot in sample.spots]
+            y_errors = [np.std(spot.cap_data_S36) for spot in sample.spots]
 
             axis.errorbar(x=xs, xerr=x_errors, y=ys, yerr=y_errors, ls="", marker="o", color=sample.colour,
                           label=sample.name)

@@ -243,6 +243,8 @@ class SidrsModel:
     def _rename_samples(self, rename_operations):
         samples_by_name = self.get_samples_by_name()
         for (old_name, new_name) in rename_operations:
+            for spot in samples_by_name[old_name].spots:
+                spot.sample_name = new_name
             samples_by_name[old_name].name = new_name
 
     def _merge_samples(self, merge_operations):
@@ -255,6 +257,8 @@ class SidrsModel:
 
             for old_name in old_names:
                 old_sample = samples_by_name[old_name]
+                for spot in old_sample.spots:
+                    spot.sample_name = new_name
                 new_sample.spots.extend(old_sample.spots)
                 self.samples.remove(old_sample)
 
