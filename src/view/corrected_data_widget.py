@@ -1,3 +1,4 @@
+import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
@@ -129,7 +130,9 @@ class CorrectedDataWidget(QWidget):
                 row_items.append(str(sample.name + " " + spot.id))
 
                 for ratio in method.ratios:
-                    value, uncertainty = spot.alpha_corrected_data[ratio]
+                    values = spot.alpha_corrected_data[ratio]
+                    value = np.mean(values)
+                    uncertainty = np.std(values)
                     if ratio.has_delta:
                         value_format = ".3f"
                         uncertainty_format = ".4f"

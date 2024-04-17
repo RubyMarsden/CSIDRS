@@ -85,28 +85,23 @@ class DriftCorrectionWidget(QWidget):
         self.r_squared_text.setWordWrap(True)
         self.r_squared_text.setFont(font)
 
-        self.adj_r_squared_text = QLabel()
-        self.adj_r_squared_text.setWordWrap(True)
-        self.adj_r_squared_text.setFont(font)
-        self.adj_r_squared_text.setToolTip("Adjusted R<sup>2</sup> takes into account the number of terms in "
-                                           "the model - adding more terms to multiple linear regression "
-                                           "analysis always increases the R<sup>2</sup> value. Frost, J., "
-                                           "2019. Regression analysis: An intuitive guide for using and "
-                                           "interpreting linear models. Statisics By Jim Publishing.")
+        self.r_squared_uncertainty_range = QLabel()
+        self.r_squared_uncertainty_range.setWordWrap(True)
+        self.r_squared_uncertainty_range.setFont(font)
 
         self.linear_gradient_value_text = QLabel()
         self.linear_gradient_value_text.setWordWrap(True)
         self.linear_gradient_value_text.setFont(font)
 
-        self.linear_gradient_standard_error_text = QLabel()
-        self.linear_gradient_standard_error_text.setWordWrap(True)
-        self.linear_gradient_standard_error_text.setFont(font)
+        self.linear_gradient_uncertainty_text = QLabel()
+        self.linear_gradient_uncertainty_text.setWordWrap(True)
+        self.linear_gradient_uncertainty_text.setFont(font)
 
         info_layout.addWidget(section_title, alignment=Qt.AlignTop)
         info_layout.addWidget(self.r_squared_text, alignment=Qt.AlignTop)
-        info_layout.addWidget(self.adj_r_squared_text, alignment=Qt.AlignTop)
+        info_layout.addWidget(self.r_squared_uncertainty_range, alignment=Qt.AlignTop)
         info_layout.addWidget(self.linear_gradient_value_text, alignment=Qt.AlignTop)
-        info_layout.addWidget(self.linear_gradient_standard_error_text, alignment=Qt.AlignTop)
+        info_layout.addWidget(self.linear_gradient_uncertainty_text, alignment=Qt.AlignTop)
 
         widget.setLayout(info_layout)
         return widget
@@ -179,17 +174,24 @@ class DriftCorrectionWidget(QWidget):
         self.update_graphs(ratio)
 
     def update_stats_text(self, ratio):
-        linear_r_squared = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].statsmodel_result.rsquared
-        linear_adj_r_squared = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].statsmodel_result.rsquared_adj
-        linear_gradient = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient
-        linear_gradient_st_error = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].statsmodel_result.bse[1]
+        linear_r_squared_mc = \
+        self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].linear_regression_result[0]
+        linear_gradient_mc = self.data_processing_dialog.model.calculation_results.all_ratio_results[
+            ratio].drift_coefficient
+
+        linear_r_squared = np.mean(linear_r_squared_mc)
+        linear_r_squared_median = np.median(linear_r_squared_mc)
+        linear_r_squared_st_dev = np.std(linear_r_squared_mc)
+        linear_gradient = np.mean(linear_gradient_mc)
+        linear_gradient_st_dev = np.std(linear_gradient_mc)
 
         self.r_squared_text.setText("R<sup>2</sup>:\n" + format(linear_r_squared, ".3f"))
-        self.adj_r_squared_text.setText("Adjusted R<sup>2</sup>:\n" + format(linear_adj_r_squared, ".3f"))
+        self.r_squared_uncertainty_range.setText(
+            "R<sup>2</sup> standard deviation:\n" + format(linear_r_squared_st_dev, ".3f"))
         self.linear_gradient_value_text.setText(
             "Gradient of calculated\nlinear drift:\n" + "{:.3e}".format(linear_gradient))
-        self.linear_gradient_standard_error_text.setText(
-            "Standard error on\nthe gradient:\n" + "{:.3e}".format(linear_gradient_st_error))
+        self.linear_gradient_uncertainty_text.setText(
+            "Gradient of calculated\nlinear drift standard deviation:\n" + "{:.3e}".format(linear_gradient_st_dev))
 
     def on_residual_button_pushed(self):
         dialog = ResidualsDialog(self.data_processing_dialog)
@@ -206,6 +208,7 @@ class DriftCorrectionWidget(QWidget):
 
     def highlight_selected_ratio_data_point(self, current_item, previous_tree_item):
         ratio = self.data_processing_dialog.get_current_ratio()
+        t_zero = self.data_processing_dialog.model.calculation_results.get_t_zero()
         if current_item is None or current_item.is_sample:
             self.primary_drift_axis.clear()
             self.update_graphs(ratio)
@@ -217,50 +220,54 @@ class DriftCorrectionWidget(QWidget):
                 previous_spot = None
             else:
                 previous_spot = previous_tree_item.spot
-            primary_xs = []
+            primary_spots = []
             primary_ys = []
             for spot in self.primary_sample.spots:
                 if ratio.has_delta:
-                    primary_ys.append(spot.not_corrected_deltas[ratio][0])
+                    primary_ys.append(np.mean(spot.not_corrected_deltas[ratio]))
                 else:
                     primary_ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                primary_xs.append(spot)
+
+                primary_spots.append(spot)
 
             if self.secondary_sample:
-                secondary_xs = []
+                secondary_spots = []
                 secondary_ys = []
                 for spot in self.secondary_sample.spots:
                     if ratio.has_delta:
-                        secondary_ys.append(spot.not_corrected_deltas[ratio][0])
+                        secondary_ys.append(np.mean(spot.not_corrected_deltas[ratio]))
                     else:
                         secondary_ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                    secondary_xs.append(spot)
 
-                for secondary_x, secondary_y in zip(secondary_xs, secondary_ys):
+                    secondary_spots.append(spot)
+
+                for secondary_x, secondary_y in zip(secondary_spots, secondary_ys):
                     if secondary_x == current_spot:
+                        x = secondary_x.datetime
                         if current_spot.is_flagged:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                markerfacecolor=None, markeredgecolor="yellow")
                         else:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                color="yellow")
 
                     if secondary_x == previous_spot:
+                        x = secondary_x.datetime
                         if current_spot.is_flagged:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                markerfacecolor=None,
                                                                markeredgecolor=self.secondary_sample.colour)
                         else:
-                            self.secondary_check_axis.errorbar(secondary_x.datetime, secondary_y, ls="", marker="o",
+                            self.secondary_check_axis.errorbar(x, secondary_y, ls="", marker="o",
                                                                color=self.secondary_sample.colour)
 
-
-            for primary_x, primary_y in zip(primary_xs, primary_ys):
+            for primary_x, primary_y in zip(primary_spots, primary_ys):
+                x = time.mktime(primary_x.datetime.timetuple()) - t_zero
                 if primary_x == current_spot:
-                    self.primary_drift_axis.errorbar(primary_x.datetime, primary_y, ls="", marker="o", color="yellow")
+                    self.primary_drift_axis.errorbar(x, primary_y, ls="", marker="o", color="yellow")
 
                 if primary_x == previous_spot:
-                    self.primary_drift_axis.errorbar(primary_x.datetime, primary_y, ls="", marker="o",
+                    self.primary_drift_axis.errorbar(x, primary_y, ls="", marker="o",
                                                      color=self.primary_sample.colour)
 
         self.primary_drift_canvas.draw()
@@ -284,33 +291,41 @@ class DriftCorrectionWidget(QWidget):
         ys_removed = []
         yerrors_removed = []
 
+        t_zero = self.data_processing_dialog.model.calculation_results.get_t_zero()
+
         for spot in sample.spots:
+            relative_time = time.mktime(spot.datetime.timetuple()) - t_zero
             if ratio.has_delta:
                 if not spot.is_flagged:
-                    xs.append(spot.datetime)
-                    ys.append(spot.not_corrected_deltas[ratio][0])
-                    yerrors.append(spot.not_corrected_deltas[ratio][1])
-
+                    xs.append(relative_time)
+                    y = np.mean(spot.not_corrected_deltas[ratio])
+                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    ys.append(y)
+                    yerrors.append(dy)
 
                 else:
-                    xs_removed.append(spot.datetime)
-                    ys_removed.append(spot.not_corrected_deltas[ratio][0])
-                    yerrors_removed.append(spot.not_corrected_deltas[ratio][1])
+                    xs_removed.append(relative_time)
+                    y = np.mean(spot.not_corrected_deltas[ratio])
+                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    ys_removed.append(y)
+                    yerrors_removed.append(dy)
 
+                axis_label = ratio.delta_name()
 
-                self.primary_drift_axis.set_ylabel(ratio.delta_name())
             else:
                 if not spot.is_flagged:
-                    xs.append(spot.datetime)
+                    xs.append(relative_time)
                     ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
                     yerrors.append(spot.mean_st_error_isotope_ratios[ratio][1])
 
                 else:
-                    xs_removed.append(spot.datetime)
+                    xs_removed.append(relative_time)
                     ys_removed.append(spot.mean_st_error_isotope_ratios[ratio][0])
                     yerrors_removed.append(spot.mean_st_error_isotope_ratios[ratio][1])
 
-                self.primary_drift_axis.set_ylabel(ratio.name())
+                axis_label = ratio.name()
+
+        self.primary_drift_axis.set_ylabel(axis_label)
 
         y_mean = np.mean(ys)
         y_stdev = np.std(ys)
@@ -320,10 +335,12 @@ class DriftCorrectionWidget(QWidget):
                                          markeredgecolor=sample.colour,
                                          markerfacecolor="none")
 
-        drift_coefficient = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient
-        drift_intercept = self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_y_intercept
+        drift_coefficient = np.mean(
+            self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_coefficient)
+        drift_intercept = np.mean(
+            self.data_processing_dialog.model.calculation_results.all_ratio_results[ratio].drift_y_intercept)
         if drift_coefficient:
-            y_line = [(drift_intercept + (drift_coefficient * time.mktime(x.timetuple()))) for x in xs]
+            y_line = [(drift_intercept + (drift_coefficient * x)) for x in xs]
 
             self.primary_drift_axis.plot(xs, y_line, marker="", color=sample.colour)
 
@@ -332,7 +349,7 @@ class DriftCorrectionWidget(QWidget):
             x_tick_label.set_rotation(10)
             x_tick_label.set_horizontalalignment('right')
 
-        self.primary_drift_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+        # self.primary_drift_axis.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
         self.primary_drift_fig.tight_layout()
 
@@ -341,27 +358,30 @@ class DriftCorrectionWidget(QWidget):
         if self.no_drift_radio_button.isChecked():
             return
 
-        dc_xs = []
+        dc_xs = xs
         dc_ys = []
         dc_yerrors = []
-        dc_xs_removed = []
+        dc_xs_removed = xs_removed
         dc_ys_removed = []
         dc_yerrors_removed = []
 
         for spot in sample.spots:
             if not spot.is_flagged:
-                dc_xs.append(spot.datetime)
-                dc_ys.append(spot.drift_corrected_data[ratio][0])
-                dc_yerrors.append(spot.drift_corrected_data[ratio][1])
+                y = np.mean(spot.drift_corrected_data[ratio])
+                dy = np.std(spot.drift_corrected_data[ratio])
+                dc_ys.append(y)
+                dc_yerrors.append(dy)
 
             else:
-                dc_xs_removed.append(spot.datetime)
-                dc_ys_removed.append(spot.drift_corrected_data[ratio][0])
-                dc_yerrors_removed.append(spot.drift_corrected_data[ratio][1])
+                y = np.mean(spot.drift_corrected_data[ratio])
+                dy = np.std(spot.drift_corrected_data[ratio])
+                dc_ys_removed.append(y)
+                dc_yerrors_removed.append(dy)
 
         dc_y_mean = np.mean(dc_ys)
         dc_y_stdev = np.std(dc_ys)
-        dc_label = "Drift corrected data: \n Mean: " + format(dc_y_mean, ".3f") + ", St Dev: " + format(dc_y_stdev, ".3f")
+        dc_label = "Drift corrected data: \n Mean: " + format(dc_y_mean, ".3f") + ", St Dev: " + format(dc_y_stdev,
+                                                                                                        ".3f")
 
         self.primary_drift_axis.errorbar(dc_xs, dc_ys, yerr=dc_yerrors, ls="", marker="s", color='r', label=dc_label)
         self.primary_drift_axis.errorbar(dc_xs_removed, dc_ys_removed, yerr=dc_yerrors_removed, ls="", marker="s",
@@ -396,12 +416,17 @@ class DriftCorrectionWidget(QWidget):
                 if ratio.has_delta:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
-                        ys.append(spot.drift_corrected_data[ratio][0])
-                        yerrors.append(spot.drift_corrected_data[ratio][1])
+
+                        y = np.mean(spot.drift_corrected_data[ratio])
+                        dy = np.std(spot.drift_corrected_data[ratio])
+                        ys.append(y)
+                        yerrors.append(dy)
                     else:
                         xs_removed.append(spot.datetime)
-                        ys_removed.append(spot.drift_corrected_data[ratio][0])
-                        yerrors_removed.append(spot.drift_corrected_data[ratio][1])
+                        y = np.mean(spot.drift_corrected_data[ratio])
+                        dy = np.std(spot.drift_corrected_data[ratio])
+                        ys_removed.append(y)
+                        yerrors_removed.append(dy)
                 else:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)

@@ -46,7 +46,7 @@ class CycleTreeWidget(QWidget):
             self.back_item_button.setEnabled(any_samples)
             self.select_first_cycle()
 
-            self._on_selected_cycle_change(self.tree.currentItem(), None)
+            self._on_selected_cycle_change()
 
     def select_first_cycle(self):
         first_cycle = self.tree.topLevelItem(0)
@@ -93,8 +93,10 @@ class CycleTreeWidget(QWidget):
         previous_item = self.tree.itemAbove(current_item)
         self.tree.setCurrentItem(previous_item)
 
-    def _on_selected_cycle_change(self, current_tree_item, previous_tree_item):
-        if current_tree_item:
+    def _on_selected_cycle_change(self):
+        current_tree_item = self.tree.currentItem()
+        previous_tree_item = self.tree.itemAbove(current_tree_item)
+        if current_tree_item is not None:
             current_tree_item_integer = int(current_tree_item.text(0))
             if previous_tree_item is None:
                 previous_tree_item_integer = 1
@@ -109,8 +111,7 @@ class CycleTreeWidget(QWidget):
             self.back_item_button.setDisabled(previous_item is None)
 
             self.exclude_cycle_checkbox.setChecked(current_tree_item.is_flagged)
-        else:
-            print("no current tree item")
+
 
     def highlight_cycle_tree_item(self, tree_item):
         if tree_item is None:

@@ -1,5 +1,6 @@
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QHBoxLayout, QLineEdit, QSpinBox, \
+    QMessageBox
 
 from controllers.signals import signals
 from view.data_processing_dialog import DataProcessingDialog
@@ -32,6 +33,13 @@ class SidrsWindow(QMainWindow):
 
         self.clear_data_button = QPushButton("Clear all data and methods")
         self.clear_data_button.clicked.connect(self.clear_data_button_clicked)
+
+        self.montecarlo_number_input = QSpinBox()
+        self.montecarlo_number_input.setMinimum(1)
+        self.montecarlo_number_input.setMaximum(1000000000)
+        self.montecarlo_number_input.setValue(10000)
+        montecarlo_text = QLabel("Number of trials for Monte Carlo distributions:")
+
         main_layout = QVBoxLayout()
         main_widget.setLayout(main_layout)
 
@@ -41,14 +49,21 @@ class SidrsWindow(QMainWindow):
         self.next_button.setDisabled(True)
         self.clear_data_button.setDisabled(True)
 
+        self.montecarlo_number_input.setDisabled(True)
+
         signals.materialInput.connect(self.enable_widgets)
 
         button_layout.addWidget(self.clear_data_button, alignment=Qt.AlignLeft)
         button_layout.addWidget(self.next_button, alignment=Qt.AlignRight)
 
+        montecarlo_layout = QHBoxLayout()
+        montecarlo_layout.addWidget(montecarlo_text)
+        montecarlo_layout.addWidget(self.montecarlo_number_input)
+
         main_layout.addWidget(title)
         main_layout.addWidget(IsotopeButtonWidget(self.model))
         main_layout.addWidget(self.file_entry_widget)
+        main_layout.addLayout(montecarlo_layout)
         main_layout.addLayout(button_layout)
 
         return main_widget
@@ -57,8 +72,18 @@ class SidrsWindow(QMainWindow):
         self.file_entry_widget.setEnabled(True)
         self.next_button.setEnabled(True)
         self.clear_data_button.setEnabled(True)
+        self.montecarlo_number_input.setEnabled(True)
 
     def next_button_clicked(self):
+        popup = QMessageBox()
+
+        popup.setWindowTitle('Monte Carlo warning')
+        if self.montecarlo_number_input.value() < 1000:
+            popup.setText('Less than 1000 trials leads to high variance in the mean and standard deviation of results.')
+            popup.exec()
+        elif self.montecarlo_number_input.value() > 1000000:
+            popup.setText('More than 1000000 trials will cause significant memory usage and the program may crash.')
+            popup.exec()
         dialog = ReferenceMaterialSelectionDialog(self.model)
         result = dialog.exec()
         if result:
@@ -68,6 +93,8 @@ class SidrsWindow(QMainWindow):
         return None
 
     def on_reference_material_selected(self):
+        montecarlo_number = self.montecarlo_number_input.value()
+        self.model.set_montecarlo_number(montecarlo_number)
         self.model.calculate_results()
         dialog = DataProcessingDialog(self.model)
         dialog.exec()

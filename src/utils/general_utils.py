@@ -29,7 +29,7 @@ def split_cameca_data_filename(filename):
     parts = re.split('@|\\.|/', base_name)
 
     error_message = "Unexpected filename '" + base_name + "'. Expected format: x@y.asc where y is the spot " \
-                                                         "number and x is the mount and sample name."
+                                                          "number and x is the mount and sample name."
     if len(parts) != 3:
         raise Exception(error_message)
     full_sample_name = parts[0]

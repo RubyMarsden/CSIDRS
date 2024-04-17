@@ -109,8 +109,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                ys.append(spot.alpha_corrected_data[ratio][0])
-                dys.append(spot.alpha_corrected_data[ratio][1])
+                ys.append(np.mean(spot.alpha_corrected_data[ratio]))
+                dys.append(np.std(spot.alpha_corrected_data[ratio]))
 
             self.corrected_value_vs_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
@@ -160,8 +160,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                ys.append(spot.alpha_corrected_data[ratio][0])
-                dys.append(spot.alpha_corrected_data[ratio][1])
+                ys.append(np.mean(spot.alpha_corrected_data[ratio]))
+                dys.append(np.std(spot.alpha_corrected_data[ratio]))
 
 
             self.corrected_value_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o",
@@ -183,9 +183,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                ys.append(spot.alpha_corrected_data[ratio][0])
-                dys.append(spot.alpha_corrected_data[ratio][1])
-
+                ys.append(np.mean(spot.alpha_corrected_data[ratio]))
+                dys.append(np.std(spot.alpha_corrected_data[ratio]))
 
             self.corrected_value_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o",
                                                                              color=sample.colour)
@@ -206,8 +205,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                ys.append(spot.alpha_corrected_data[ratio][0])
-                dys.append(spot.alpha_corrected_data[ratio][1])
+                ys.append(np.mean(spot.alpha_corrected_data[ratio]))
+                dys.append(np.std(spot.alpha_corrected_data[ratio]))
 
             self.corrected_value_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.corrected_value_vs_dtfa_x_axis.set_xlabel("dtfa-x")
@@ -228,8 +227,8 @@ class QualityControlWidget(QWidget):
             ys = []
             dys = []
             for spot in sample.spots:
-                ys.append(spot.alpha_corrected_data[ratio][0])
-                dys.append(spot.alpha_corrected_data[ratio][1])
+                ys.append(np.mean(spot.alpha_corrected_data[ratio]))
+                dys.append(np.std(spot.alpha_corrected_data[ratio]))
 
             total_xs.extend(xs)
 

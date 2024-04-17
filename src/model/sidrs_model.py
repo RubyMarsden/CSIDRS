@@ -21,6 +21,7 @@ from utils.general_utils import find_longest_common_prefix_index, split_cameca_d
 
 class SidrsModel:
     def __init__(self):
+        self.montecarlo_number = None
         self.data = {}
         self.analytical_condition_data = None
         self.samples = []
@@ -48,7 +49,6 @@ class SidrsModel:
     #################
 
     def import_all_files(self, filenames):
-        print("import all files")
         duplicate_files = set(filenames).intersection(set(self.imported_files))
         if len(duplicate_files) != 0:
             raise Exception("The files: " + str(duplicate_files) + " have already been imported.")
@@ -154,10 +154,11 @@ class SidrsModel:
         samples = self.get_samples()
         primary_rm = self.get_primary_reference_material()
 
-        self.calculation_results.calculate_raw_delta_values(samples, self.method, self.element)
+        self.calculation_results.calculate_raw_delta_values(samples, self.method, self.element, self.montecarlo_number)
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
-                                                                              self.element, self.material)
+                                                                              self.element, self.material,
+                                                                              self.montecarlo_number)
 
         signals.dataRecalculated.emit()
 
@@ -170,7 +171,7 @@ class SidrsModel:
             if ratio.has_delta:
                 [value, uncertainty] = spot.not_corrected_deltas[ratio]
             else:
-                [value, uncertainty] = spot.mean_two_st_error_isotope_ratios[ratio]
+                [value, uncertainty] = spot.mean_st_dev_isotope_ratios[ratio]
             values.append(value)
             uncertainties.append(uncertainty)
 
@@ -242,6 +243,8 @@ class SidrsModel:
     def _rename_samples(self, rename_operations):
         samples_by_name = self.get_samples_by_name()
         for (old_name, new_name) in rename_operations:
+            for spot in samples_by_name[old_name].spots:
+                spot.sample_name = new_name
             samples_by_name[old_name].name = new_name
 
     def _merge_samples(self, merge_operations):
@@ -254,6 +257,8 @@ class SidrsModel:
 
             for old_name in old_names:
                 old_sample = samples_by_name[old_name]
+                for spot in old_sample.spots:
+                    spot.sample_name = new_name
                 new_sample.spots.extend(old_sample.spots)
                 self.samples.remove(old_sample)
 
@@ -300,11 +305,14 @@ class SidrsModel:
     def recalculate_data_with_cycles_changed(self):
         primary_rm = self.get_primary_reference_material()
         samples = self.get_samples()
-        self.calculation_results.calculate_raw_delta_with_changed_cycle_data(samples, self.element)
+        self.calculation_results = CalculationResults()
+        self.calculation_results.calculate_raw_delta_with_changed_cycle_data(samples, self.element,
+                                                                             self.montecarlo_number)
 
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
-                                                                              self.element, self.material)
+                                                                              self.element, self.material,
+                                                                              self.montecarlo_number)
         signals.dataRecalculated.emit()
 
     def remove_cycle_from_spot(self, spot, cycle_number, is_flagged, ratio):
@@ -316,7 +324,8 @@ class SidrsModel:
         samples = self.get_samples()
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
-                                                                              self.element, self.material)
+                                                                              self.element, self.material,
+                                                                              self.montecarlo_number)
         signals.dataRecalculated.emit()
 
     def clear_all_data_and_methods(self):
@@ -398,9 +407,12 @@ class SidrsModel:
                 for ratio in method.ratios:
                     ratio_value, ratio_uncertainty = spot.mean_st_error_isotope_ratios[ratio]
                     row.append(ratio_value)
-                    row.append(ratio_uncertainty)
+                    ratio_uncertainty_2 = ratio_uncertainty
+                    row.append(ratio_uncertainty_2)
                     if ratio.has_delta:
-                        delta, delta_uncertainty = spot.not_corrected_deltas[ratio]
+                        delta_data = spot.not_corrected_deltas[ratio]
+                        delta = np.mean(delta_data)
+                        delta_uncertainty = (np.std(delta_data))
                         row.append(delta)
                         row.append(delta_uncertainty)
 
@@ -441,15 +453,17 @@ class SidrsModel:
 
                 for ratio in method.ratios:
                     if ratio.has_delta:
-                        [delta, delta_uncertainty] = spot.alpha_corrected_data[ratio]
-                        [uncorrected_delta, uncorrected_delta_uncertainty] = spot.not_corrected_deltas[ratio]
+                        delta, delta_uncertainty = np.mean(spot.alpha_corrected_data[ratio]), np.std(
+                            spot.alpha_corrected_data[ratio])
+                        uncorrected_delta, uncorrected_delta_uncertainty = np.mean(
+                            spot.not_corrected_deltas[ratio]), np.std(spot.not_corrected_deltas[ratio])
                         row.append(delta)
                         row.append(delta_uncertainty)
                         row.append(uncorrected_delta)
                         row.append(uncorrected_delta_uncertainty)
                     else:
-                        [corrected_ratio, corrected_ratio_uncertainty] = spot.alpha_corrected_data[
-                            ratio]
+                        corrected_ratio, corrected_ratio_uncertainty = np.mean(
+                            spot.alpha_corrected_data[ratio]), np.std(spot.alpha_corrected_data[ratio])
                         row.append(corrected_ratio)
                         row.append(corrected_ratio_uncertainty)
 
@@ -475,3 +489,8 @@ class SidrsModel:
     def get_primary_reference_material(self):
         return self.primary_reference_material
 
+    def get_secondary_reference_material(self):
+        return self.secondary_reference_material
+
+    def set_montecarlo_number(self, montecarlo_number):
+        self.montecarlo_number = montecarlo_number

@@ -26,15 +26,11 @@ class FileEntryWidget(QWidget):
         self.sample_name_tree_widget = QTreeWidget()
         self.sample_name_tree_widget.setHeaderLabel("Sample names")
 
-        self.remove_single_file_button = QPushButton("Remove file")
-        self.remove_single_file_button.clicked.connect(self.on_remove_single_file_button_clicked)
-
         self.manual_sample_names_button = QPushButton("Change sample names")
         self.manual_sample_names_button.clicked.connect(self.on_change_sample_names_button_clicked)
 
         lhs_layout = QVBoxLayout()
         lhs_layout.addWidget(self.filename_tree_widget)
-        # lhs_layout.addWidget(self.remove_single_file_button)
 
         layout.addLayout(lhs_layout)
 
@@ -83,9 +79,6 @@ class FileEntryWidget(QWidget):
             rename_operations = dialog.simple_renames
             self.model.rename_and_merge_samples(rename_operations, merge_operations)
         return sample_names
-
-    def on_remove_single_file_button_clicked(self):
-        print("remove file")
 
     def on_data_cleared(self):
         self.filename_tree_widget.clear()
