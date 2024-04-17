@@ -208,18 +208,23 @@ class CycleDataDialog(QDialog):
                 self.ratio_axis.plot(x, y, ls="", marker="o", color="navy")
 
         mean, two_st_error = spot.mean_st_error_isotope_ratios[self.ratio]
-        self.ratio_axis.axhline(y=mean)
+        line = self.ratio_axis.axhline(y=mean)
+        line.set_label('Mean')
 
         (outlier_minimum, outlier_maximum) = spot.outlier_bounds_by_ratio[self.ratio]
         outlier_rectangle = Rectangle((0, outlier_minimum), len(xs) + 1, outlier_maximum - outlier_minimum)
         outlier_rectangle.set_color("lightblue")
+        outlier_rectangle.set_label('Outlier bounds')
         self.ratio_axis.add_patch(outlier_rectangle)
 
         st_error_rectangle = Rectangle((0, mean - two_st_error), len(xs) + 1, 2 * two_st_error)
         st_error_rectangle.set_color("cornflowerblue")
+        st_error_rectangle.set_label('Two standard error on the mean')
         self.ratio_axis.add_patch(st_error_rectangle)
 
-        self.ratio_axis.set_xticks(xs)
+        self.ratio_axis.legend( loc="best", borderaxespad=0, framealpha=0.6)
+        xs_labels = [x for x in xs if x % 2 == 0]
+        self.ratio_axis.set_xticks(xs_labels)
         self.fig.tight_layout()
 
     def highlight_selected_ratio_data_point(self, spot, cycle_number, previous_cycle_number):

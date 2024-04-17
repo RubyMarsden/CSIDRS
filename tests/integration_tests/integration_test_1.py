@@ -18,6 +18,7 @@ class IntegrationTests(unittest.TestCase):
         self.model = SidrsModel()
         self.element = Element.OXY
         self.model.method = two_isotopes_no_hydroxide_oxygen
+        self.model.montecarlo_number = 10000
         self.ratio = two_isotopes_no_hydroxide_oxygen.ratios[0]
         isotopes = [Isotope.O16, Isotope.O18]
         material = Material.ZIR
@@ -50,13 +51,13 @@ class IntegrationTests(unittest.TestCase):
                                                                   drift_correction_type=DriftCorrectionType.LIN)
 
         self.model.export_cycle_data_csv('itest1_cycle_data.csv')
-        self.compare_csvs("fixtures/2O_lindrift_cycle_data.csv", 'itest1_cycle_data.csv')
+        self.compare_csvs("fixtures/2O_lindrift_cycle_data", 'itest1_cycle_data.csv')
         self.model.export_raw_data_csv('itest1_raw_data.csv')
-        self.compare_csvs("fixtures/2O_lindrift_raw_data.csv", 'itest1_raw_data.csv')
+        self.compare_csvs("fixtures/2O_lindrift_raw_data", 'itest1_raw_data.csv')
         self.model.export_corrected_data_csv('itest1_corrected_data.csv')
-        # self.compare_csvs("fixtures/2O_lindrift_corrected_data.csv", 'itest1_corrected_data.csv')
+        # self.compare_csvs("fixtures/2O_lindrift_corrected_data", 'itest1_corrected_data.csv')
         self.model.export_analytical_conditions_csv('itest1_analytical_conditions.csv')
-        self.compare_csvs("fixtures/2O_lindrift_analytical_data.csv", 'itest1_analytical_conditions.csv')
+        self.compare_csvs("fixtures/2O_lindrift_analytical_data", 'itest1_analytical_conditions.csv')
 
     def test_integration2(self):
         self.model = SidrsModel()
@@ -86,13 +87,13 @@ class IntegrationTests(unittest.TestCase):
         #                                                          drift_correction_type=DriftCorrectionType.LIN)
 
         self.model.export_cycle_data_csv('itest2_cycle_data.csv')
-        self.compare_csvs('fixtures/4S_cycle_data.csv', 'itest2_cycle_data.csv')
+        self.compare_csvs('fixtures/4S_cycle_data', 'itest2_cycle_data.csv')
         self.model.export_raw_data_csv('itest2_raw_data.csv')
-        self.compare_csvs("fixtures/4S_raw_data.csv", 'itest2_raw_data.csv')
+        self.compare_csvs("fixtures/4S_raw_data", 'itest2_raw_data.csv')
         self.model.export_corrected_data_csv('itest2_corrected_data.csv')
-        self.compare_csvs("fixtures/4S_corrected_data.csv", 'itest2_corrected_data.csv')
+        self.compare_csvs("fixtures/4S_corrected_data", 'itest2_corrected_data.csv')
         self.model.export_analytical_conditions_csv('itest2_analytical_conditions.csv')
-        self.compare_csvs("fixtures/4S_analytical_conditions.csv", 'itest2_analytical_conditions.csv')
+        self.compare_csvs("fixtures/4S_analytical_conditions", 'itest2_analytical_conditions.csv')
 
     def check_sample_existence(self, name1, name2):
         sample_names = [sample.name for sample in self.model.get_samples()]

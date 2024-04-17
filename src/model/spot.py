@@ -47,7 +47,7 @@ class Spot:
         self.raw_isotope_ratios = {}
         self.mean_st_dev_isotope_ratios = {}
         self.outliers_removed_from_raw_data = {}
-        self.outlier_bounds = {}
+        self.outlier_bounds_by_ratio = {}
         self.cycle_flagging_information = {}
         self.standard_ratios = None
         self.drift_corrected_ratio_values_by_ratio = {}
