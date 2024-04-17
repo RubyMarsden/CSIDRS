@@ -93,7 +93,7 @@ class CorrectedDataWidget(QWidget):
                 column_headers.append("Corrected " + ratio.delta_name())
             else:
                 column_headers.append("Corrected " + ratio.name())
-            ratio_uncertainty_name = "uncertainty"
+            ratio_uncertainty_name = "uncertainty 1sig"
             column_headers.append(ratio_uncertainty_name)
 
         column_headers.extend(["dtfa-x", "dtfa-y", "Relative ion yield", "Distance to centre (um)"])

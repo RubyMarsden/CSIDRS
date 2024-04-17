@@ -100,7 +100,7 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_time_axis.clear()
 
         corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
-        self.corrected_value_vs_time_axis.set_title(corrected_value_name + " against time.")
+        self.corrected_value_vs_time_axis.set_title(corrected_value_name + " against time, 2sig uncertainty.")
 
         self.corrected_value_vs_time_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_time_axis.spines['right'].set_visible(False)
@@ -110,7 +110,7 @@ class QualityControlWidget(QWidget):
             dys = []
             for spot in sample.spots:
                 ys.append(np.mean(spot.alpha_corrected_data[ratio]))
-                dys.append(np.std(spot.alpha_corrected_data[ratio]))
+                dys.append((2 * np.std(spot.alpha_corrected_data[ratio])))
 
             self.corrected_value_vs_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
 
@@ -151,7 +151,7 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_secondary_ion_yield_axis.clear()
         corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
         self.corrected_value_vs_secondary_ion_yield_axis.set_title(
-            corrected_value_name + " against secondary ion yields.")
+            corrected_value_name + " against secondary ion yields, 2sig uncertainty.")
         self.corrected_value_vs_secondary_ion_yield_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_secondary_ion_yield_axis.spines['right'].set_visible(False)
 
@@ -161,7 +161,7 @@ class QualityControlWidget(QWidget):
             dys = []
             for spot in sample.spots:
                 ys.append(np.mean(spot.alpha_corrected_data[ratio]))
-                dys.append(np.std(spot.alpha_corrected_data[ratio]))
+                dys.append((2 * np.std(spot.alpha_corrected_data[ratio])))
 
 
             self.corrected_value_vs_secondary_ion_yield_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o",
@@ -174,7 +174,7 @@ class QualityControlWidget(QWidget):
         self.corrected_value_vs_distance_from_mount_centre_axis.clear()
         corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
         self.corrected_value_vs_distance_from_mount_centre_axis.set_title(
-            corrected_value_name + " against distance from mount centre.")
+            corrected_value_name + " against distance from mount centre, 2sig uncertainty.")
         self.corrected_value_vs_distance_from_mount_centre_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_distance_from_mount_centre_axis.spines['right'].set_visible(False)
 
@@ -184,7 +184,7 @@ class QualityControlWidget(QWidget):
             dys = []
             for spot in sample.spots:
                 ys.append(np.mean(spot.alpha_corrected_data[ratio]))
-                dys.append(np.std(spot.alpha_corrected_data[ratio]))
+                dys.append((2 * np.std(spot.alpha_corrected_data[ratio])))
 
             self.corrected_value_vs_distance_from_mount_centre_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o",
                                                                              color=sample.colour)
@@ -196,7 +196,7 @@ class QualityControlWidget(QWidget):
     def _create_corrected_value_vs_dtfa_x_graph(self, ratio):
         self.corrected_value_vs_dtfa_x_axis.clear()
         corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
-        self.corrected_value_vs_dtfa_x_axis.set_title(corrected_value_name + " against dtfa-x.")
+        self.corrected_value_vs_dtfa_x_axis.set_title(corrected_value_name + " against dtfa-x, 2sig uncertainty.")
         self.corrected_value_vs_dtfa_x_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_dtfa_x_axis.spines['right'].set_visible(False)
 
@@ -206,7 +206,7 @@ class QualityControlWidget(QWidget):
             dys = []
             for spot in sample.spots:
                 ys.append(np.mean(spot.alpha_corrected_data[ratio]))
-                dys.append(np.std(spot.alpha_corrected_data[ratio]))
+                dys.append((2 * np.std(spot.alpha_corrected_data[ratio])))
 
             self.corrected_value_vs_dtfa_x_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", color=sample.colour)
         self.corrected_value_vs_dtfa_x_axis.set_xlabel("dtfa-x")
@@ -217,7 +217,7 @@ class QualityControlWidget(QWidget):
     def _create_corrected_value_vs_dtfa_y_graph(self, ratio):
         self.corrected_value_vs_dtfa_y_axis.clear()
         corrected_value_name = ratio.delta_name() if ratio.has_delta else ratio.name()
-        self.corrected_value_vs_dtfa_y_axis.set_title(corrected_value_name + " against dtfa-y.")
+        self.corrected_value_vs_dtfa_y_axis.set_title(corrected_value_name + " against dtfa-y, 2sig uncertainty.")
         self.corrected_value_vs_dtfa_y_axis.spines['top'].set_visible(False)
         self.corrected_value_vs_dtfa_y_axis.spines['right'].set_visible(False)
 
@@ -228,7 +228,7 @@ class QualityControlWidget(QWidget):
             dys = []
             for spot in sample.spots:
                 ys.append(np.mean(spot.alpha_corrected_data[ratio]))
-                dys.append(np.std(spot.alpha_corrected_data[ratio]))
+                dys.append((2 * np.std(spot.alpha_corrected_data[ratio])))
 
             total_xs.extend(xs)
 

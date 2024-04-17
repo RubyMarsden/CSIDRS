@@ -253,11 +253,11 @@ class BasicDataCheckWidget(QWidget):
             for spot in sample.spots:
                 if ratio.has_delta:
                     y = np.mean(spot.not_corrected_deltas[ratio])
-                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    dy = 2 * np.std(spot.not_corrected_deltas[ratio])
                     ys.append(y)
                     dys.append(dy)
 
-                    axis_title = "Raw " + ratio.delta_name() + " against time."
+                    axis_title = "Raw " + ratio.delta_name() + " against time, 2sig uncertainty."
                     axis_name = ratio.delta_name()
 
                 else:
@@ -265,7 +265,8 @@ class BasicDataCheckWidget(QWidget):
                     dys.append(spot.mean_st_error_isotope_ratios[ratio][1])
 
                     axis_name = ratio.name()
-                    axis_title = "Raw " + ratio.name() + " against time."
+                    axis_title = "Raw " + ratio.name() + " against time, 2sig uncertainty."
+
 
             self.raw_delta_time_axis.errorbar(xs, ys, yerr=dys, ls="", marker="o", markersize=4, color=sample.colour)
 

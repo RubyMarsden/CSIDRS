@@ -391,7 +391,7 @@ class SidrsModel:
 
         column_headers = ["Sample name"]
         for ratio in method.ratios:
-            ratio_uncertainty_name = "uncertainty"
+            ratio_uncertainty_name = "uncertainty 1sig"
             column_headers.append(ratio.name())
             column_headers.append(ratio_uncertainty_name)
             if ratio.has_delta:
@@ -432,7 +432,7 @@ class SidrsModel:
 
         column_headers = ["Sample name", "Spot excluded"]
         for ratio in method.ratios:
-            ratio_uncertainty_name = "uncertainty"
+            ratio_uncertainty_name = "uncertainty 1sig"
             if ratio.has_delta:
                 column_headers.append("corrected " + ratio.delta_name())
                 column_headers.append(ratio_uncertainty_name)
@@ -510,4 +510,3 @@ class SidrsModel:
         minimum_factor = min(factors)
         factor = 10 ** (math.floor(math.log10(minimum_factor)))
         return factor
-    

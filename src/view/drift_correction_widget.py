@@ -280,7 +280,7 @@ class DriftCorrectionWidget(QWidget):
     # def _create_primary_drift_graph(self, sample, ratio):
 
     def _create_primary_drift_graph(self, sample, ratio):
-        self.primary_drift_axis.set_title("Primary ref. material: " + sample.name + "\nraw delta", loc="left")
+        self.primary_drift_axis.set_title("Primary ref. material: " + sample.name + "\nraw delta, 2sig uncertainty", loc="left")
         self.primary_drift_axis.spines['top'].set_visible(False)
         self.primary_drift_axis.spines['right'].set_visible(False)
 
@@ -299,14 +299,14 @@ class DriftCorrectionWidget(QWidget):
                 if not spot.is_flagged:
                     xs.append(relative_time)
                     y = np.mean(spot.not_corrected_deltas[ratio])
-                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    dy = 2 * np.std(spot.not_corrected_deltas[ratio])
                     ys.append(y)
                     yerrors.append(dy)
 
                 else:
                     xs_removed.append(relative_time)
                     y = np.mean(spot.not_corrected_deltas[ratio])
-                    dy = np.std(spot.not_corrected_deltas[ratio])
+                    dy = 2 * np.std(spot.not_corrected_deltas[ratio])
                     ys_removed.append(y)
                     yerrors_removed.append(dy)
 
@@ -316,12 +316,12 @@ class DriftCorrectionWidget(QWidget):
                 if not spot.is_flagged:
                     xs.append(relative_time)
                     ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                    yerrors.append(spot.mean_st_error_isotope_ratios[ratio][1])
+                    yerrors.append((2 * spot.mean_st_error_isotope_ratios[ratio][1]))
 
                 else:
                     xs_removed.append(relative_time)
                     ys_removed.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                    yerrors_removed.append(spot.mean_st_error_isotope_ratios[ratio][1])
+                    yerrors_removed.append((2 * spot.mean_st_error_isotope_ratios[ratio][1]))
 
                 axis_label = ratio.name()
 
@@ -368,13 +368,13 @@ class DriftCorrectionWidget(QWidget):
         for spot in sample.spots:
             if not spot.is_flagged:
                 y = np.mean(spot.drift_corrected_data[ratio])
-                dy = np.std(spot.drift_corrected_data[ratio])
+                dy = 2 * np.std(spot.drift_corrected_data[ratio])
                 dc_ys.append(y)
                 dc_yerrors.append(dy)
 
             else:
                 y = np.mean(spot.drift_corrected_data[ratio])
-                dy = np.std(spot.drift_corrected_data[ratio])
+                dy = 2 * np.std(spot.drift_corrected_data[ratio])
                 dc_ys_removed.append(y)
                 dc_yerrors_removed.append(dy)
 
@@ -418,24 +418,24 @@ class DriftCorrectionWidget(QWidget):
                         xs.append(spot.datetime)
 
                         y = np.mean(spot.drift_corrected_data[ratio])
-                        dy = np.std(spot.drift_corrected_data[ratio])
+                        dy = 2 * np.std(spot.drift_corrected_data[ratio])
                         ys.append(y)
                         yerrors.append(dy)
                     else:
                         xs_removed.append(spot.datetime)
                         y = np.mean(spot.drift_corrected_data[ratio])
-                        dy = np.std(spot.drift_corrected_data[ratio])
+                        dy = 2 * np.std(spot.drift_corrected_data[ratio])
                         ys_removed.append(y)
                         yerrors_removed.append(dy)
                 else:
                     if not spot.is_flagged:
                         xs.append(spot.datetime)
                         ys.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                        yerrors.append(spot.mean_st_error_isotope_ratios[ratio][1])
+                        yerrors.append((2 * spot.mean_st_error_isotope_ratios[ratio][1]))
                     else:
                         xs_removed.append(spot.datetime)
                         ys_removed.append(spot.mean_st_error_isotope_ratios[ratio][0])
-                        yerrors_removed.append(spot.mean_st_error_isotope_ratios[ratio][1])
+                        yerrors_removed.append((2 * spot.mean_st_error_isotope_ratios[ratio][1]))
 
             y_mean = np.mean(ys)
             y_stdev = np.std(ys)
