@@ -1,4 +1,5 @@
 import csv
+import math
 import time
 from typing import Iterable, Dict
 
@@ -153,8 +154,8 @@ class SidrsModel:
         self.calculation_results = CalculationResults()
         samples = self.get_samples()
         primary_rm = self.get_primary_reference_material()
-
-        self.calculation_results.calculate_raw_delta_values(samples, self.method, self.element, self.montecarlo_number)
+        factor = self.set_secondary_ion_yield_factor()
+        self.calculation_results.calculate_raw_delta_values(samples, self.method, self.element, self.montecarlo_number, factor)
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,
                                                                               self.element, self.material,
@@ -494,3 +495,19 @@ class SidrsModel:
 
     def set_montecarlo_number(self, montecarlo_number):
         self.montecarlo_number = montecarlo_number
+
+    def set_secondary_ion_yield_factor(self):
+        spots = self.get_all_spots()
+        factors = []
+        for spot in spots:
+            total_cps = 0
+            for mass_peak_name, mass_peak in spot.mass_peaks.items():
+                if mass_peak_name.usage_in_secondary_ion_calculations:
+                    total_cps += mass_peak.mean_cps
+
+            f = spot.primary_beam_current / total_cps
+            factors.append(f)
+        minimum_factor = min(factors)
+        factor = 10 ** (math.floor(math.log10(minimum_factor)))
+        return factor
+    

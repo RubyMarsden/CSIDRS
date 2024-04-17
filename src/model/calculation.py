@@ -25,10 +25,10 @@ class CalculationResults:
         self._t_zero = None
         self.all_ratio_results = defaultdict(RatioResults)
 
-    def calculate_raw_delta_values(self, samples, method, element, montecarlo_number):
+    def calculate_raw_delta_values(self, samples, method, element, montecarlo_number, factor):
         for sample in samples:
             for spot in sample.spots:
-                spot.secondary_ion_yield = calculate_relative_secondary_ion_yield(spot)
+                spot.secondary_ion_yield = calculate_relative_secondary_ion_yield(spot, factor)
                 spot.raw_isotope_ratios = calculate_raw_isotope_ratios(spot.mass_peaks, method)
                 spot.mean_st_error_isotope_ratios, spot.outliers_removed_from_raw_data, spot.outlier_bounds_by_ratio, spot.cycle_flagging_information = calculate_mean_st_error_for_isotope_ratios(
                     spot.number_of_count_measurements, spot.raw_isotope_ratios)
@@ -158,12 +158,13 @@ class CalculationResults:
 
 
 # TODO write a test for this function
-def calculate_relative_secondary_ion_yield(spot):
+def calculate_relative_secondary_ion_yield(spot, factor):
     total_cps = 0
     for mass_peak_name, mass_peak in spot.mass_peaks.items():
         if mass_peak_name.usage_in_secondary_ion_calculations:
             total_cps += mass_peak.mean_cps
-    secondary_ion_yield = total_cps / (spot.primary_beam_current * (10 ** 18))
+
+    secondary_ion_yield = factor * total_cps / (spot.primary_beam_current)
 
     return secondary_ion_yield
 
