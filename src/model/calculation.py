@@ -190,7 +190,6 @@ def calculate_mean_st_error_for_isotope_ratios(number_of_count_measurements, raw
     outlier_bounds_by_ratio = {}
     cycle_flagging_information = {}
     for ratio, raw_ratio_list in raw_isotope_ratios.items():
-        print(ratio.name())
         mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
                                                                                                     number_of_outliers_to_remove)
 

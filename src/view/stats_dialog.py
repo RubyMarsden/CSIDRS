@@ -9,8 +9,8 @@ class StatsWarningDialog(QDialog):
         self.setMinimumWidth(450)
         # TODO check this please
         text = "The number of outliers automatically decided by the program is calculated using the method outlined in"\
-               "the paper PAPER NAME HERE. If you remove additional outliers please be sure to check if the" \
-               "originally removed outliers should be incorporated into the data."
+               " the paper Marsden et al. (under review). If you remove additional outliers please be sure to check if"\
+               " the originally removed outliers should be incorporated into the data."
         text_widget = QLabel(text)
         text_widget.setWordWrap(True)
         layout = QHBoxLayout()
