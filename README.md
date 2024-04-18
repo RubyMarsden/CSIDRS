@@ -1,11 +1,11 @@
 # CSIDRS - A stable isotope data reduction software for data from the CAMECA 1280 secondary ion mass spectrometer
 
-This program accompanies the paper **"PAPER NAME HERE"**.
+This program accompanies the paper *CSIDRS – stable isotope data reduction software for the CAMECA LG SIMS* (Marsden et al, under review).
 
 ## Getting started
 ### Standalone executables
 Standalone executables are available for Ubuntu and Windows
-[here](https://github.com/RubyMarsden/CSIDRS/) **This link is not fully created**. These should be downloadable
+[here](https://github.com/RubyMarsden/CSIDRS/releases). These should be downloadable
 and runnable without any further action.
 
 * The executable may take up to 30 seconds to show the window the first time you run the program. Subsequent runs
