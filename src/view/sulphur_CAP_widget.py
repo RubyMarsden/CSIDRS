@@ -88,7 +88,7 @@ class SulphurCAPWidget(QWidget):
         ratio_y = self.method.ratios[ratio_y_index]
         ratio_x = self.method.ratios[ratio_x_index]
         axis.clear()
-        axis.set_title(ratio_y.delta_name() + " vs " + ratio_x.delta_name())
+        axis.set_title(ratio_y.delta_name() + " vs " + ratio_x.delta_name() + ", 2sig uncertainty")
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
 
@@ -101,11 +101,11 @@ class SulphurCAPWidget(QWidget):
         for sample in self.model.get_samples():
             delta_y_value = [np.mean(spot.alpha_corrected_data[ratio_y]) for spot in
                              sample.spots]
-            delta_y_errors = [np.std(spot.alpha_corrected_data[ratio_y]) for spot in
+            delta_y_errors = [2 * np.std(spot.alpha_corrected_data[ratio_y]) for spot in
                               sample.spots]
             delta_x_value = [np.mean(spot.alpha_corrected_data[ratio_x]) for spot in
                              sample.spots]
-            delta_x_errors = [np.std(spot.alpha_corrected_data[ratio_x]) for spot in
+            delta_x_errors = [2 * np.std(spot.alpha_corrected_data[ratio_x]) for spot in
                               sample.spots]
             list_for_finding_minimum_and_maximum_y_values.extend(delta_y_value)
             list_for_finding_minimum_and_maximum_x_values.extend(delta_x_value)
@@ -129,16 +129,16 @@ class SulphurCAPWidget(QWidget):
 
     def _create_cap_three_vs_delta_four_graph(self, axis):
         axis.clear()
-        axis.set_title("Cap S33 vs delta S34")
+        axis.set_title("Cap S33 vs delta S34, 2sig uncertainty")
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
         axis.set_xlabel("delta S34")
         axis.set_ylabel("Cap S33")
         for sample in self.model.get_samples():
             xs = [np.mean(spot.alpha_corrected_data[S34_S32]) for spot in sample.spots]
-            x_errors = [np.std(spot.alpha_corrected_data[S34_S32]) for spot in sample.spots]
+            x_errors = [2 * np.std(spot.alpha_corrected_data[S34_S32]) for spot in sample.spots]
             ys = [np.mean(spot.cap_data_S33) for spot in sample.spots]
-            y_errors = [np.std(spot.cap_data_S33) for spot in sample.spots]
+            y_errors = [2 * np.std(spot.cap_data_S33) for spot in sample.spots]
 
             axis.errorbar(x=xs, xerr=x_errors, y=ys, yerr=y_errors, ls="", marker="o", color=sample.colour,
                           label=sample.name)
@@ -147,7 +147,7 @@ class SulphurCAPWidget(QWidget):
 
     def _create_cap_three_vs_cap_six_graph(self, axis):
         axis.clear()
-        axis.set_title("Cap S33 vs Cap S36")
+        axis.set_title("Cap S33 vs Cap S36, 2sig uncertainty")
         axis.spines['top'].set_visible(False)
         axis.spines['right'].set_visible(False)
         axis.set_xlabel("Cap S33")
@@ -155,9 +155,9 @@ class SulphurCAPWidget(QWidget):
 
         for sample in self.model.get_samples():
             xs = [np.mean(spot.cap_data_S33) for spot in sample.spots]
-            x_errors = [np.std(spot.cap_data_S33) for spot in sample.spots]
+            x_errors = [2 * np.std(spot.cap_data_S33) for spot in sample.spots]
             ys = [np.mean(spot.cap_data_S36) for spot in sample.spots]
-            y_errors = [np.std(spot.cap_data_S36) for spot in sample.spots]
+            y_errors = [2 * np.std(spot.cap_data_S36) for spot in sample.spots]
 
             axis.errorbar(x=xs, xerr=x_errors, y=ys, yerr=y_errors, ls="", marker="o", color=sample.colour,
                           label=sample.name)
