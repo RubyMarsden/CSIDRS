@@ -1,6 +1,6 @@
 # CSIDRS - A stable isotope data reduction software for data from the CAMECA 1280 secondary ion mass spectrometer
 
-This program accompanies the paper *CSIDRS – stable isotope data reduction software for the CAMECA LG SIMS* (Marsden et al, under review).
+This program accompanies the paper *CSIDRS – stable isotope data reduction software for the CAMECA LG SIMS* (Marsden et al, 2024).
 
 ## Getting started
 ### Standalone executables
@@ -11,6 +11,8 @@ and runnable without any further action.
 * The executable may take up to 30 seconds to show the window the first time you run the program. Subsequent runs
 should be faster.
 ### Running the python code directly
+CSIDRS uses Python 3.8.
+
 You can clone the existing GitHub repository into a local directory on your computer following the instructions [here](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
 Alternatively the source code for each release is available
