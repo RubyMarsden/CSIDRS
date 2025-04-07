@@ -304,11 +304,13 @@ class SidrsModel:
                         "methods view the HACKING.md file.")
 
     def recalculate_data_with_cycles_changed(self):
+        self.calculation_results = None
         primary_rm = self.get_primary_reference_material()
         samples = self.get_samples()
+        factor = self.set_secondary_ion_yield_factor()
         self.calculation_results = CalculationResults()
-        self.calculation_results.calculate_raw_delta_with_changed_cycle_data(samples, self.element,
-                                                                             self.montecarlo_number)
+        self.calculation_results.calculate_raw_delta_with_changed_cycle_data(samples,self.method, self.element,
+                                                                             self.montecarlo_number, factor)
 
         self.calculation_results.calculate_data_from_drift_correction_onwards(primary_rm, self.method, samples,
                                                                               self.drift_correction_type_by_ratio,

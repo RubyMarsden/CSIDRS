@@ -34,9 +34,11 @@ class CalculationResults:
                     spot.number_of_count_measurements, spot.raw_isotope_ratios)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number)
 
-    def calculate_raw_delta_with_changed_cycle_data(self, samples, element, montecarlo_number):
+    def calculate_raw_delta_with_changed_cycle_data(self, samples, method, element, montecarlo_number, factor):
         for sample in samples:
             for spot in sample.spots:
+                spot.secondary_ion_yield = calculate_relative_secondary_ion_yield(spot, factor)
+                spot.raw_isotope_ratios = calculate_raw_isotope_ratios(spot.mass_peaks, method)
                 spot.mean_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
                     spot)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number)
@@ -324,8 +326,8 @@ def calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(spot):
 
         mean, st_dev, n, removed_data, outlier_bounds = calculate_outlier_resistant_mean_and_st_dev(raw_ratio_list,
                                                                                                     0)
-
-        mean_st_dev_isotope_ratios[ratio] = [mean, st_dev]
+        st_error = st_dev / math.sqrt(n)
+        mean_st_dev_isotope_ratios[ratio] = [mean, st_error]
 
     return mean_st_dev_isotope_ratios
 
