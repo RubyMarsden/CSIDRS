@@ -6,37 +6,8 @@ on:
       - 'v*'
 
 jobs:
-  create-release:
-    name: createrelease
-    runs-on: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
-
-      - name: create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: CSIDRS ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-      - name: Output Release URL File
-        run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
-
-      - name: Save Release URL File for publish
-        uses: actions/upload-artifact@v1
-        with:
-          name: release_url
-          path: release_url.txt
-
-
   build-and-upload:
     name: build and upload
-    needs: [create-release]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -58,26 +29,10 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Load release URL file from previous job
-        uses: actions/download-artifact@v1
-        with:
-          name: release_url
-
-      - name: Get upload URL
-        id: get_release_info
-        shell: bash
-        run: |
-          value=`cat release_url/release_url.txt`
-          echo ::set-output name=upload_url::$value
-      - name: Get the version
-        shell: bash
-        id: get_version
-        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.PYTHON_VERSION}}
 
@@ -86,20 +41,60 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller==5.2
+          pip install pyinstaller==6.10
 
       - name: Build with pyinstaller
         shell: bash
         run: |
-          pyinstaller --onefile --hidden-import='pkg_resources.py2_warn' --add-data '${{ matrix.RESOURCES }}' --icon=./resources/icon.ico src/main.py
+          pyinstaller --name=CSIDRS-${{ matrix.OS_NAME }}${{matrix.EXTENSION}} --onefile --hidden-import='pkg_resources.py2_warn' --add-data '${{ matrix.RESOURCES }}' --icon=./resources/icon.ico src/main.py
 
-      - name: Upload release asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1.0.1
+      - name: Upload artifact
+        id: upload-artifact
+        uses: actions/upload-artifact@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-          asset_path: ./dist/main${{matrix.EXTENSION}}
-          asset_name: CSIDRS-${{ steps.get_version.outputs.version }}-${{ matrix.OS_NAME }}${{matrix.EXTENSION}}
-          asset_content_type: application/zip
+          path: ./dist/CSIDRS-${{ matrix.OS_NAME }}${{matrix.EXTENSION}}
+          name: CSIDRS-${{ matrix.OS_NAME }}
+
+  create-release:
+    name: createrelease
+    needs: [build-and-upload]
+    runs-on: [ubuntu-latest]
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: create release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: CSIDRS ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: add version to name
+        run: |
+          ls
+          pwd
+          mv CSIDRS-windows.exe CSIDRS-${{ github.ref_name }}-windows.exe
+          mv CSIDRS-ubuntu CSIDRS-${{ github.ref_name }}-ubuntu
+
+      - name: upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            ./CSIDRS-${{ github.ref_name }}-windows.exe
+            ./CSIDRS-${{ github.ref_name }}-ubuntu
