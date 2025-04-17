@@ -16,7 +16,7 @@ class SidrsWindow(QMainWindow):
         self.model = model
 
         self.setMinimumSize(QSize(640, 480))
-        self.setWindowTitle("CSIDRS v-0.1.7")
+        self.setWindowTitle("CSIDRS v-1.1.0")
 
         self.file_entry_widget = FileEntryWidget(model)
 

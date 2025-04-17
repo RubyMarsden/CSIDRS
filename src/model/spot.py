@@ -52,6 +52,7 @@ class Spot:
         self.standard_ratios = None
         self.drift_corrected_ratio_values_by_ratio = {}
         self.not_corrected_deltas = {}
+        self.not_corrected_ratios = {}
         self.drift_corrected_data = {}
         self.alpha_corrected_data = {}
 

@@ -33,6 +33,7 @@ class CalculationResults:
                 spot.mean_st_error_isotope_ratios, spot.outliers_removed_from_raw_data, spot.outlier_bounds_by_ratio, spot.cycle_flagging_information = calculate_mean_st_error_for_isotope_ratios(
                     spot.number_of_count_measurements, spot.raw_isotope_ratios)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number)
+                spot.not_corrected_ratios = calculate_montecarlo_ratios(spot, element, montecarlo_number)
 
     def calculate_raw_delta_with_changed_cycle_data(self, samples, method, element, montecarlo_number, factor):
         for sample in samples:
@@ -42,6 +43,7 @@ class CalculationResults:
                 spot.mean_st_error_isotope_ratios = calculate_mean_and_st_dev_for_isotope_ratio_user_picked_outliers(
                     spot)
                 spot.not_corrected_deltas = calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number)
+                spot.not_corrected_ratios = calculate_montecarlo_ratios(spot, element, montecarlo_number)
 
     def calculate_data_from_drift_correction_onwards(self, primary_rm, method, samples, drift_correction_type_by_ratio,
                                                      element, material, montecarlo_number):
@@ -80,7 +82,7 @@ class CalculationResults:
                         if ratio.has_delta:
                             spot.drift_corrected_data[ratio] = spot.not_corrected_deltas[ratio]
                         else:
-                            spot.drift_corrected_data[ratio] = spot.mean_st_error_isotope_ratios[ratio]
+                            spot.drift_corrected_data[ratio] = spot.not_corrected_ratios[ratio]
 
                     elif drift_correction_type_by_ratio[ratio] == DriftCorrectionType.LIN:
                         drift_correction_coef = ratio_results.drift_coefficient
@@ -237,6 +239,15 @@ def calculate_raw_delta_for_isotope_ratio(spot, element, montecarlo_number):
 
     return not_corrected_deltas
 
+def calculate_montecarlo_ratios(spot, element, montecarlo_number):
+    not_corrected_ratios = {}
+    for ratio, [mean, st_dev] in spot.mean_st_error_isotope_ratios.items():
+        mean_montecarlo = np.random.normal(mean, st_dev, montecarlo_number)
+        if not ratio.has_delta:
+            not_corrected_ratios[ratio] = mean_montecarlo
+
+    return not_corrected_ratios
+
 def characterise_linear_drift(data, times):
     # adding a column of '1s' for linear regression modelling to the array 'times'
     times_constant = np.vstack([times, np.ones(len(times))]).T
@@ -296,7 +307,7 @@ def correct_data_for_linear_drift(spot, ratio, drift_correction_coef, t_zero):
         montecarlo_value = spot.not_corrected_deltas[ratio]
 
     else:
-        montecarlo_value = spot.mean_st_error_isotope_ratios[ratio]
+        montecarlo_value = spot.not_corrected_ratios[ratio]
 
 
     drift_corrected_data = drift_correction(
